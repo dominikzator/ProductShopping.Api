@@ -1,6 +1,6 @@
-@ProductShopping.Api_HostAddress = http://localhost:5239
+@ProductShopping.Api_HostAddress = https://localhost:7298
 
-GET {{ProductShopping.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+
+GET {{ProductShopping.Api_HostAddress}}/api/products
 
 ###

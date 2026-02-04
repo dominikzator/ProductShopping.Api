@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Api.Controllers;
+using ProductShopping.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +31,10 @@ builder.Services.AddDbContext<ProductShoppingDbContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
+builder.Services.AddAutoMapper(config => { }, typeof(ProductMappingProfile).Assembly);
+
+builder.Services.AddScoped<IProductsService, ProductsService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -45,6 +52,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 
