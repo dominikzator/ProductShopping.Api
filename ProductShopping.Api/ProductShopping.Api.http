@@ -2,9 +2,38 @@
 
 
 GET {{ProductShopping.Api_HostAddress}}/api/products?search=banana&pageSize=5&pageNumber=1&minRating=4
-
 ###
 
 GET {{ProductShopping.Api_HostAddress}}/api/products?categoryName=Electronics&minRating=4&maxPrice=30
+###
 
+
+GET {{ProductShopping.Api_HostAddress}}/api/products/3004
+###
+
+POST {{ProductShopping.Api_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+    "name" : "Testing Creating Product",
+    "categoryName" : "Food",
+    "price" : 4.99,
+    "rating" : 3.4
+}
+
+###
+
+PUT {{ProductShopping.Api_HostAddress}}/api/products/3004
+Content-Type: application/json
+
+{
+    "id" : 3004,
+    "name" : "Testing UPDATING2 Product",
+    "categoryName" : "Food",
+    "price" : 4.99,
+    "rating" : 4.7
+}
+
+###
+DELETE {{ProductShopping.Api_HostAddress}}/api/products/3004
 ###

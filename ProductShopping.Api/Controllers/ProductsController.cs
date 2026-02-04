@@ -15,36 +15,48 @@ namespace ProductShopping.Api.Controllers
     {
         // GET: api/<ProductsController>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<GetProductsDto>>> Get([FromQuery] PaginationParameters paginationParameters, [FromQuery] ProductFilterParameters productFilters)
+        public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] PaginationParameters paginationParameters, [FromQuery] ProductFilterParameters productFilters)
         {
-            var result = await productsService.GetCountriesAsync(paginationParameters, productFilters);
+            var result = await productsService.GetProductsAsync(paginationParameters, productFilters);
 
             return ToActionResult(result);
         }
 
         // GET api/<ProductsController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
-            return "value";
+            var result = await productsService.GetProductAsync(id);
+
+            return ToActionResult(result);
         }
 
         // POST api/<ProductsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<GetProductDto>> Post(CreateProductDto productDto)
         {
+            var result = await productsService.CreateProductAsync(productDto);
+            if (!result.IsSuccess) return MapErrorsToResponse(result.Errors);
+
+            return CreatedAtAction(nameof(GetProduct), new { id = result.Value!.Id }, result.Value);
         }
 
         // PUT api/<ProductsController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> Put(int id, UpdateProductDto updateDto)
         {
+            var result = await productsService.UpdateProductAsync(id, updateDto);
+
+            return ToActionResult(result);
         }
 
         // DELETE api/<ProductsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var result = await productsService.DeleteProductAsync(id);
+
+            return ToActionResult(result);
         }
     }
 }

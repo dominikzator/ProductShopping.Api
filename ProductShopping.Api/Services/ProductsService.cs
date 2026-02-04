@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs;
 using ProductShopping.Api.Extensions;
+using ProductShopping.Api.Models;
 using ProductShopping.Api.Models.Filtering;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
@@ -12,7 +14,7 @@ namespace ProductShopping.Api.Services;
 
 public class ProductsService(ProductShoppingDbContext context, IMapper mapper) : IProductsService
 {
-    public async Task<Result<PagedResult<GetProductsDto>>> GetCountriesAsync(PaginationParameters paginationParameters, ProductFilterParameters filters)
+    public async Task<Result<PagedResult<GetProductDto>>> GetProductsAsync(PaginationParameters paginationParameters, ProductFilterParameters filters)
     {
         var query = context.Products.AsQueryable();
 
@@ -56,9 +58,91 @@ public class ProductsService(ProductShoppingDbContext context, IMapper mapper) :
         var countries = await query
             .Include(q => q.Category)
             .AsNoTracking()
-            .ProjectTo<GetProductsDto>(mapper.ConfigurationProvider)
+            .ProjectTo<GetProductDto>(mapper.ConfigurationProvider)
             .ToPagedResultAsync(paginationParameters);
 
-        return Result<PagedResult<GetProductsDto>>.Success(countries);
+        return Result<PagedResult<GetProductDto>>.Success(countries);
+    }
+
+    public async Task<Result<GetProductDto>> GetProductAsync(int id)
+    {
+        var product = await context.Products
+            .Where(h => h.Id == id)
+            .ProjectTo<GetProductDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
+
+        if (product is null)
+        {
+            return Result<GetProductDto>.Failure(new Error(ErrorCodes.NotFound, $"Product '{id}' was not found."));
+        }
+
+        return Result<GetProductDto>.Success(product);
+    }
+
+    public async Task<Result<GetProductDto>> CreateProductAsync(CreateProductDto productDto)
+    {
+        var category = await context.ProductCategories.FirstOrDefaultAsync(p => p.Name == productDto.CategoryName);
+
+        if (category == null)
+        {
+            return Result<GetProductDto>.Failure(new Error(ErrorCodes.NotFound, $"Category '{productDto.CategoryName}' does not exist."));
+        }
+
+        var duplicate = await context.Products.AnyAsync(p => p.Name.ToLower().Trim() == productDto.Name.ToLower().Trim());
+
+        if(duplicate)
+        {
+            return Result<GetProductDto>.Failure(new Error(ErrorCodes.Conflict, $"A Product with name: '{productDto.Name}' already exists."));
+        }
+
+        var product = mapper.Map<Product>(productDto);
+        product.CategoryId = category.Id;
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+
+        var outputDto = mapper.Map<GetProductDto>(product);
+
+        return Result<GetProductDto>.Success(outputDto);
+    }
+
+    public async Task<Result> UpdateProductAsync(int id, UpdateProductDto productDto)
+    {
+        if (id != productDto.Id)
+        {
+            return Result.BadRequest(new Error(ErrorCodes.Validation, "Id route value does not match payload Id."));
+        }
+
+        var product = await context.Products.FindAsync(id);
+        if(product == null)
+        {
+            return Result.NotFound(new Error(ErrorCodes.NotFound, $"Product '{id}' was not found."));
+        }
+
+        var category = await context.ProductCategories.FirstOrDefaultAsync(p => p.Name == productDto.CategoryName);
+
+        if (category == null)
+        {
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"Category '{productDto.CategoryName}' does not exist."));
+        }
+
+        mapper.Map(productDto, product);
+        context.Products.Update(product);
+        await context.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> DeleteProductAsync(int id)
+    {
+        var affected = await context.Products
+            .Where(q => q.Id == id)
+            .ExecuteDeleteAsync();
+
+        if (affected == 0)
+        {
+            return Result.NotFound(new Error(ErrorCodes.NotFound, $"Product '{id}' was not found."));
+        }
+
+        return Result.Success();
     }
 }
