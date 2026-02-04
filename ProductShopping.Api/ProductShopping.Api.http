@@ -1,6 +1,10 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
 
 
-GET {{ProductShopping.Api_HostAddress}}/api/products
+GET {{ProductShopping.Api_HostAddress}}/api/products?search=banana&pageSize=5&pageNumber=1&minRating=4
+
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/products?categoryName=Electronics&minRating=4&maxPrice=30
 
 ###

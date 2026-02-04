@@ -6,5 +6,5 @@ public class GetProductsDto
     public string Name { get; set; }
     public string CategoryName { get; set; }
     public decimal Price { get; set; }
-    public decimal Rating { get; set; }
+    public double Rating { get; set; }
 }

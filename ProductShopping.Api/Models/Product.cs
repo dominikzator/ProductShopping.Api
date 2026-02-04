@@ -13,5 +13,5 @@ public class Product
     public ProductCategory Category { get; set;}
 
     public decimal Price { get; set; }
-    public decimal Rating { get; set; }
+    public double Rating { get; set; }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs;
+using ProductShopping.Api.Models.Filtering;
+using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,9 +15,9 @@ namespace ProductShopping.Api.Controllers
     {
         // GET: api/<ProductsController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GetProductsDto>>> Get()
+        public async Task<ActionResult<PagedResult<GetProductsDto>>> Get([FromQuery] PaginationParameters paginationParameters, [FromQuery] ProductFilterParameters productFilters)
         {
-            var result = await productsService.GetCountriesAsync();
+            var result = await productsService.GetCountriesAsync(paginationParameters, productFilters);
 
             return ToActionResult(result);
         }

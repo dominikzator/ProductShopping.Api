@@ -26,7 +26,6 @@ public class ProductShoppingDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(c => c.Name)
             .HasDatabaseName("IX_Countries_Name");
 
-
         builder.Entity<ProductCategory>().HasData(
             new ProductCategory { Id = 1, Name = "Food" },
             new ProductCategory { Id = 2, Name = "Garden" },
