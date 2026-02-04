@@ -3,7 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs;
+using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Extensions;
 using ProductShopping.Api.Models;
 using ProductShopping.Api.Models.Filtering;

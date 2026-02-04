@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.Api.DTOs;
+﻿namespace ProductShopping.Api.DTOs.Product;
 
 public class GetProductDto
 {

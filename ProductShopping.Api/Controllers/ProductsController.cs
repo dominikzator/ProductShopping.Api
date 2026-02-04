@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs;
+using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Models.Filtering;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
@@ -33,6 +35,7 @@ namespace ProductShopping.Api.Controllers
 
         // POST api/<ProductsController>
         [HttpPost]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult<GetProductDto>> Post(CreateProductDto productDto)
         {
             var result = await productsService.CreateProductAsync(productDto);
@@ -43,6 +46,7 @@ namespace ProductShopping.Api.Controllers
 
         // PUT api/<ProductsController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult> Put(int id, UpdateProductDto updateDto)
         {
             var result = await productsService.UpdateProductAsync(id, updateDto);
@@ -52,6 +56,7 @@ namespace ProductShopping.Api.Controllers
 
         // DELETE api/<ProductsController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult> Delete(int id)
         {
             var result = await productsService.DeleteProductAsync(id);

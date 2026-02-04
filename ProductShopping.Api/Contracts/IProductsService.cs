@@ -1,4 +1,4 @@
-﻿using ProductShopping.Api.DTOs;
+﻿using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Models.Filtering;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;

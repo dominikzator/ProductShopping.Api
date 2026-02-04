@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using ProductShopping.Api.DTOs;
+using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Models;
 
 public class ProductMappingProfile : Profile

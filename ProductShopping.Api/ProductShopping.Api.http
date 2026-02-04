@@ -1,5 +1,8 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MmZlNzRkZS0xNDE4LTQ2ZGItOTIwYS0zOTM2Y2I3ZDIyMmEiLCJlbWFpbCI6InphdGlhZG1pbkBsb2NhbGhvc3QuY29tIiwianRpIjoiMDEwYmQyMWItZTUzNS00NDEyLTkwNDUtYjVlYTQxZjY5ODZlIiwibmFtZSI6IkFkbWluLCBNYWluIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc3MDI0MDQ4MywiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.8P-_8uwptCgL5FEELCcVaP_aClNcnWmTORlgO86Ak2Y
 
+GET {{ProductShopping.Api_HostAddress}}/api/products?search=testing
+###
 
 GET {{ProductShopping.Api_HostAddress}}/api/products?search=banana&pageSize=5&pageNumber=1&minRating=4
 ###
@@ -8,17 +11,18 @@ GET {{ProductShopping.Api_HostAddress}}/api/products?categoryName=Electronics&mi
 ###
 
 
-GET {{ProductShopping.Api_HostAddress}}/api/products/3004
+GET {{ProductShopping.Api_HostAddress}}/api/products/2578
 ###
 
 POST {{ProductShopping.Api_HostAddress}}/api/products
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name" : "Testing Creating Product",
+    "name" : "Testing Creating Product 2",
     "categoryName" : "Food",
-    "price" : 4.99,
-    "rating" : 3.4
+    "price" : 7.99,
+    "rating" : 4.4
 }
 
 ###
@@ -35,5 +39,42 @@ Content-Type: application/json
 }
 
 ###
-DELETE {{ProductShopping.Api_HostAddress}}/api/products/3004
+DELETE {{ProductShopping.Api_HostAddress}}/api/products/3008
+Authorization: Bearer {{token}}
+
+###
+
+POST {{ProductShopping.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "zatiadmin@localhost.com",
+  "password": "P@ssword1",
+  "firstName":"Main",
+  "lastName": "Admin",
+  "role": "Administrator"
+}
+
+###
+
+POST {{ProductShopping.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "testinguser@localhost.com",
+  "password": "P@ssword1234",
+  "firstName":"John",
+  "lastName": "Doe"
+}
+
+###
+
+POST {{ProductShopping.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "zatiadmin@localhost.com",
+  "password": "P@ssword1"
+}
+
 ###
