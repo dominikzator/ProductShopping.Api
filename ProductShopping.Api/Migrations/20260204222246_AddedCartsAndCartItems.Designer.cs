@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductShopping.Api;
 
@@ -11,9 +12,11 @@ using ProductShopping.Api;
 namespace ProductShopping.Api.Migrations
 {
     [DbContext(typeof(ProductShoppingDbContext))]
-    partial class ProductShoppingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260204222246_AddedCartsAndCartItems")]
+    partial class AddedCartsAndCartItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,11 +250,11 @@ namespace ProductShopping.Api.Migrations
 
             modelBuilder.Entity("ProductShopping.Api.Models.Cart", b =>
                 {
-                    b.Property<int>("CartId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -263,7 +266,7 @@ namespace ProductShopping.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CartId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -282,9 +285,6 @@ namespace ProductShopping.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

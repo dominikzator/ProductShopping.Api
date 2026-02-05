@@ -26,7 +26,8 @@ public class UsersService(UserManager<ApplicationUser> userManager
             Email = registerUserDto.Email,
             FirstName = registerUserDto.FirstName,
             LastName = registerUserDto.LastName,
-            UserName = registerUserDto.Email
+            UserName = registerUserDto.Email,
+            CreatedDate = DateTime.UtcNow
         };
 
         var result = await userManager.CreateAsync(user, registerUserDto.Password);
@@ -48,6 +49,21 @@ public class UsersService(UserManager<ApplicationUser> userManager
             Id = user.Id,
             Role = registerUserDto.Role
         };
+
+        //Create Cart for a new User
+        if (!productShoppingDbContext.Carts.Any(cart => cart.UserId == registeredUser.Id))
+        {
+            var userCart = new Cart
+            {
+                UserId = registeredUser.Id,
+                User = user,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            productShoppingDbContext.Carts.Add(userCart);
+
+            await productShoppingDbContext.SaveChangesAsync();
+        }
 
         return Result<RegisteredUserDto>.Success(registeredUser);
     }

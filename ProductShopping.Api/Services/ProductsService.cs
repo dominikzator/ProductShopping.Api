@@ -55,13 +55,13 @@ public class ProductsService(ProductShoppingDbContext context, IMapper mapper) :
             _ => query.OrderBy(p => p.Name)
         };
 
-        var countries = await query
+        var products = await query
             .Include(q => q.Category)
             .AsNoTracking()
             .ProjectTo<GetProductDto>(mapper.ConfigurationProvider)
             .ToPagedResultAsync(paginationParameters);
 
-        return Result<PagedResult<GetProductDto>>.Success(countries);
+        return Result<PagedResult<GetProductDto>>.Success(products);
     }
 
     public async Task<Result<GetProductDto>> GetProductAsync(int id)

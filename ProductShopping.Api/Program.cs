@@ -10,8 +10,16 @@ using ProductShopping.Api.Services;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+/*Log.Information("Starting ProductShopping API");
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+    );*/
 
 // Add services to the container.
 
@@ -80,6 +88,7 @@ builder.Services.AddAutoMapper(config => { }, typeof(ProductMappingProfile).Asse
 
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<ICartItemsService, CartItemsService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

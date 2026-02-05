@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductShopping.Api;
 
@@ -11,9 +12,11 @@ using ProductShopping.Api;
 namespace ProductShopping.Api.Migrations
 {
     [DbContext(typeof(ProductShoppingDbContext))]
-    partial class ProductShoppingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260205145309_AddedDedicatedSeederToCategories")]
+    partial class AddedDedicatedSeederToCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -342,188 +345,6 @@ namespace ProductShopping.Api.Migrations
                         .HasDatabaseName("IX_Countries_Name");
 
                     b.ToTable("ProductCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Food"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Garden"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Automotive"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Health"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Kitchen"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Office"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Clothing"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Home"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "Outdoor"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "Fitness"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "Audio"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "Electronics"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Name = "Home Improvement"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Name = "Pets"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Name = "Travel"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            Name = "Toys"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            Name = "Wearable Tech"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Name = "Crafts"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Name = "Music"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Name = "Bicycles"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Name = "Furniture"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            Name = "Beauty"
-                        },
-                        new
-                        {
-                            Id = 23,
-                            Name = "Art Supplies"
-                        },
-                        new
-                        {
-                            Id = 24,
-                            Name = "Gaming"
-                        },
-                        new
-                        {
-                            Id = 25,
-                            Name = "Home Appliances"
-                        },
-                        new
-                        {
-                            Id = 26,
-                            Name = "Smart Home"
-                        },
-                        new
-                        {
-                            Id = 27,
-                            Name = "Books"
-                        },
-                        new
-                        {
-                            Id = 28,
-                            Name = "Photography"
-                        },
-                        new
-                        {
-                            Id = 29,
-                            Name = "Sports"
-                        },
-                        new
-                        {
-                            Id = 30,
-                            Name = "Baby"
-                        },
-                        new
-                        {
-                            Id = 31,
-                            Name = "Tools"
-                        },
-                        new
-                        {
-                            Id = 32,
-                            Name = "Computers"
-                        },
-                        new
-                        {
-                            Id = 33,
-                            Name = "Safety"
-                        },
-                        new
-                        {
-                            Id = 34,
-                            Name = "Storage"
-                        },
-                        new
-                        {
-                            Id = 35,
-                            Name = "Home Security"
-                        },
-                        new
-                        {
-                            Id = 36,
-                            Name = "Accessories"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

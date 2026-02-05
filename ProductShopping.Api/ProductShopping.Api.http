@@ -1,7 +1,7 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MmZlNzRkZS0xNDE4LTQ2ZGItOTIwYS0zOTM2Y2I3ZDIyMmEiLCJlbWFpbCI6InphdGlhZG1pbkBsb2NhbGhvc3QuY29tIiwianRpIjoiMDEwYmQyMWItZTUzNS00NDEyLTkwNDUtYjVlYTQxZjY5ODZlIiwibmFtZSI6IkFkbWluLCBNYWluIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc3MDI0MDQ4MywiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.8P-_8uwptCgL5FEELCcVaP_aClNcnWmTORlgO86Ak2Y
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YjI3YWFkNC1mMzAzLTQ3YWUtYWJmYS1lMTFkOTRmYTM2ODYiLCJlbWFpbCI6InRlc3Rpbmd1c2VyQGxvY2FsaG9zdC5jb20iLCJqdGkiOiIzYmIwODNhNi0zZmVlLTQ3YjQtOGEzOC0wZGEwNjc2M2U4OGEiLCJuYW1lIjoiRG9lLCBKb2huIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3MDMyMzE2MiwiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.4IdbOqxEJuKyZP2GNC24sP1rL_XXJRCg3tFT3RpDBuU
 
-GET {{ProductShopping.Api_HostAddress}}/api/products?search=testing
+GET {{ProductShopping.Api_HostAddress}}/api/products?search=pasta
 ###
 
 GET {{ProductShopping.Api_HostAddress}}/api/products?search=banana&pageSize=5&pageNumber=1&minRating=4
@@ -77,4 +77,46 @@ Content-Type: application/json
   "password": "P@ssword1"
 }
 
+###
+
+POST {{ProductShopping.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testinguser@localhost.com",
+  "password": "P@ssword1234"
+}
+
+###
+  
+
+POST {{ProductShopping.Api_HostAddress}}/api/cart
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId" : 3756,
+  "quantity" : 4
+}
+
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/cart
+Authorization: Bearer {{token}}
+
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/cart/25
+Authorization: Bearer {{token}}
+
+###
+
+DELETE {{ProductShopping.Api_HostAddress}}/api/cart
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "cartItemId" : 27,
+  "quantity" : 3
+}
 ###
