@@ -1,5 +1,5 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YjI3YWFkNC1mMzAzLTQ3YWUtYWJmYS1lMTFkOTRmYTM2ODYiLCJlbWFpbCI6InRlc3Rpbmd1c2VyQGxvY2FsaG9zdC5jb20iLCJqdGkiOiIzMTQxZTIwZS1lYWU5LTQ3YTAtOWQzOC03NmM3Yzk1OWY3YmIiLCJuYW1lIjoiRG9lLCBKb2huIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3MTI0MDA3NiwiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.YI7-zZ18FHa083Rm05Fq3VXySwmT5WIaeAIcxlpgxXQ
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MmZlNzRkZS0xNDE4LTQ2ZGItOTIwYS0zOTM2Y2I3ZDIyMmEiLCJlbWFpbCI6InphdGlhZG1pbkBsb2NhbGhvc3QuY29tIiwianRpIjoiMDE3MDVmYTItNzkxOC00MDA2LThkNDMtNDUzYjdkMWMwOTA5IiwibmFtZSI6IkFkbWluLCBNYWluIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc3MTI3MTM0MywiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.y_yzXyOZ-78G06uVSXmyjQAC2VvlIDf0_mw-hAY15JI
 
 
 GET {{ProductShopping.Api_HostAddress}}/api/products?search=pasta
@@ -97,7 +97,7 @@ Authorization: Bearer {{token}}
 
 {
   "productId" : 3387,
-  "quantity" : 9
+  "quantity" : 19
 }
 
 ###
@@ -122,6 +122,24 @@ Authorization: Bearer {{token}}
 }
 ###
 
+GET {{ProductShopping.Api_HostAddress}}/api/orders
+Authorization: Bearer {{token}}
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/orders/11
+Authorization: Bearer {{token}}
+
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/orders/12/orderItems
+Authorization: Bearer {{token}}
+
+###
+
+GET {{ProductShopping.Api_HostAddress}}/api/orders/orderItems/36
+Authorization: Bearer {{token}}
+
+###
 
 POST {{ProductShopping.Api_HostAddress}}/api/orders
 Content-Type: application/json
@@ -140,9 +158,22 @@ Authorization: Bearer {{token}}
     }
 }
 
+
+
 ###
 
-DELETE {{ProductShopping.Api_HostAddress}}/api/cart/api/cart/clear
+DELETE {{ProductShopping.Api_HostAddress}}/api/cart/clear
+Authorization: Bearer {{token}}
+
+###
+
+
+DELETE {{ProductShopping.Api_HostAddress}}/api/orders/11
+Authorization: Bearer {{token}}
+
+###
+
+DELETE {{ProductShopping.Api_HostAddress}}/api/orders/orderItems/36
 Authorization: Bearer {{token}}
 
 ###

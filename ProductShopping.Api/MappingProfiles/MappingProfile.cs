@@ -33,5 +33,10 @@ public class ProductMappingProfile : Profile
             dest.PhoneNumber = src.Address.PhoneNumber;
             dest.Status = src.OrderStatus.ToString();
         });
+
+        CreateMap<OrderItem, GetOrderItemDto>().AfterMap((src, dest) =>
+        {
+
+        });
     }
 }

@@ -52,7 +52,7 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
         return ToActionResult(result);
     }
 
-    [HttpDelete("api/[controller]/clear")]
+    [HttpDelete("clear")]
     public async Task<ActionResult> DeleteAll()
     {
         var result = await cartItemsService.ClearCartAsync();
