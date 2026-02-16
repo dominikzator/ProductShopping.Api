@@ -12,6 +12,7 @@ namespace ProductShopping.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = RoleNames.User)]
 public class CartController(ICartItemsService cartItemsService) : BaseApiController
 {
     // GET: api/<ProductsController>
@@ -34,7 +35,6 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
 
     // POST api/<CartController>
     [HttpPost]
-    [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<GetCartItemDto>> Post(CreateCartItemDto cartItemDto)
     {
         var result = await cartItemsService.AddCartItemToCartAsync(cartItemDto);
@@ -45,10 +45,17 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
 
     // DELETE api/<CartController>/5
     [HttpDelete]
-    [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult> Delete(RemoveCartItemDto cartItemDto)
     {
         var result = await cartItemsService.DeleteCartItemFromCartAsync(cartItemDto);
+
+        return ToActionResult(result);
+    }
+
+    [HttpDelete("api/[controller]/clear")]
+    public async Task<ActionResult> DeleteAll()
+    {
+        var result = await cartItemsService.ClearCartAsync();
 
         return ToActionResult(result);
     }

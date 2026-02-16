@@ -20,6 +20,9 @@ public class ProductShoppingDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem > CartItems { get; set; }
 
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -41,6 +44,10 @@ public class ProductShoppingDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
+        builder.Entity<Cart>()
+            .HasMany(c => c.CartItems)
+            .WithOne(ci => ci.Cart)
+            .HasForeignKey(ci => ci.CartId);
 
         builder.Entity<ProductCategory>().HasData(
             new { Id = 1, Name = "Food" },

@@ -7,6 +7,7 @@ namespace ProductShopping.Api.Contracts
     public interface ICartItemsService
     {
         Task<Result<GetCartItemDto>> AddCartItemToCartAsync(CreateCartItemDto createCartItemDto);
+        Task<Result> ClearCartAsync();
         Task<Result> DeleteCartItemFromCartAsync(RemoveCartItemDto removeCartItemDto);
         Task<Result<GetCartItemDto>> GetCartItemAsync(int id);
         Task<Result<PagedResult<GetCartItemDto>>> GetCartItemsAsync(PaginationParameters paginationParameters);

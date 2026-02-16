@@ -89,6 +89,7 @@ builder.Services.AddAutoMapper(config => { }, typeof(ProductMappingProfile).Asse
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ICartItemsService, CartItemsService>();
+builder.Services.AddScoped<IOrdersService, OrdersService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

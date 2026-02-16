@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.CartItem;
+using ProductShopping.Api.DTOs.Order;
 using ProductShopping.Api.Models;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
@@ -137,9 +138,32 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
     }
 
     public async Task<Cart?> GetUserCart() => await context.Carts
+            .Include(c => c.CartItems)
             .FirstOrDefaultAsync(c => c.UserId ==
                 httpContextAccessor
                 .HttpContext!
                 .User
                 .FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    public async Task<Result> ClearCartAsync()
+    {
+        var userCart = await GetUserCart();
+
+        if (userCart == null)
+        {
+            return Result.Failure(new Error(ErrorCodes.Failure,
+                $"User '{httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value}' " +
+                $"does not have a Cart. This should not happen. Contact developers."));
+        }
+
+        if (userCart.CartItems.Count == 0)
+        {
+            return Result.Failure(new Error(ErrorCodes.Failure, $"User Cart is empty. There is nothing to delete."));
+        }
+
+        context.CartItems.RemoveRange(userCart.CartItems);
+        await context.SaveChangesAsync();
+
+        return Result.Success();
+    }
 }
