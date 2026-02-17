@@ -15,7 +15,11 @@ namespace ProductShopping.Api.Controllers;
 [Authorize(Roles = RoleNames.User)]
 public class CartController(ICartItemsService cartItemsService) : BaseApiController
 {
-    // GET: api/<ProductsController>
+    /// <summary>
+    /// Returns all Cart Items from User Cart. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="paginationParameters"></param>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<PagedResult<GetCartItemDto>>> GetCartItems([FromQuery] PaginationParameters paginationParameters)
     {
@@ -24,7 +28,11 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
         return ToActionResult(result);
     }
 
-    // GET api/<ProductsController>/5
+    /// <summary>
+    /// Returns a Cart Item from User Cart with a given Cart Item ID. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<GetCartItemDto>> GetCartItem(int id)
     {
@@ -33,7 +41,11 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
         return ToActionResult(result);
     }
 
-    // POST api/<CartController>
+    /// <summary>
+    /// Adds a given Product to a User Cart. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="cartItemDto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<GetCartItemDto>> Post(CreateCartItemDto cartItemDto)
     {
@@ -43,7 +55,11 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
         return ToActionResult(result);
     }
 
-    // DELETE api/<CartController>/5
+    /// <summary>
+    /// Deletes a given Product from a User Cart. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="cartItemDto"></param>
+    /// <returns></returns>
     [HttpDelete]
     public async Task<ActionResult> Delete(RemoveCartItemDto cartItemDto)
     {
@@ -52,6 +68,10 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Deletes all Products from a User Cart. Can be called only by authenticated User.
+    /// </summary>
+    /// <returns></returns>
     [HttpDelete("clear")]
     public async Task<ActionResult> DeleteAll()
     {

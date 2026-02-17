@@ -15,7 +15,12 @@ namespace ProductShopping.Api.Controllers
     [ApiController]
     public class ProductsController(IProductsService productsService) : BaseApiController
     {
-        // GET: api/<ProductsController>
+        /// <summary>
+        /// Returns all Products in database paged by PaginationParameters and filtered by ProductFilterParameters. Can be called without authentication.
+        /// </summary>
+        /// <param name="paginationParameters"></param>
+        /// <param name="productFilters"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] PaginationParameters paginationParameters, [FromQuery] ProductFilterParameters productFilters)
         {
@@ -24,7 +29,11 @@ namespace ProductShopping.Api.Controllers
             return ToActionResult(result);
         }
 
-        // GET api/<ProductsController>/5
+        /// <summary>
+        /// Returns a Product with a given Product ID. Can be called without authentication.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
@@ -33,7 +42,11 @@ namespace ProductShopping.Api.Controllers
             return ToActionResult(result);
         }
 
-        // POST api/<ProductsController>
+        /// <summary>
+        /// Adds a Product to a database. Can be called only by Administrator.
+        /// </summary>
+        /// <param name="productDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult<GetProductDto>> Post(CreateProductDto productDto)
@@ -44,7 +57,12 @@ namespace ProductShopping.Api.Controllers
             return CreatedAtAction(nameof(GetProduct), new { id = result.Value!.Id }, result.Value);
         }
 
-        // PUT api/<ProductsController>/5
+        /// <summary>
+        /// Updates Product in a database. Can be called only by Administrator.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult> Put(int id, UpdateProductDto updateDto)
@@ -54,7 +72,11 @@ namespace ProductShopping.Api.Controllers
             return ToActionResult(result);
         }
 
-        // DELETE api/<ProductsController>/5
+        /// <summary>
+        /// Deletes Product from database. Can be called only by Administrator.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult> Delete(int id)

@@ -14,6 +14,11 @@ namespace ProductShopping.Api.Controllers;
 [ApiController]
 public class OrdersController(IOrdersService ordersService) : BaseApiController
 {
+    /// <summary>
+    /// Returns all User Orders. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="paginationParameters"></param>
+    /// <returns></returns>
     [HttpGet]
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<PagedResult<GetOrderDto>>> GetOrders([FromQuery] PaginationParameters paginationParameters)
@@ -23,6 +28,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Returns a User Order with a given Order ID. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
     [HttpGet("{orderId}")]
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<GetOrderDto>> GetOrder(int orderId)
@@ -32,6 +42,12 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Returns all Order Items of an Order with a given Order ID. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <param name="paginationParameters"></param>
+    /// <returns></returns>
     [HttpGet("{orderId}/orderItems")]
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<PagedResult<GetOrderItemDto>>> GetOrderItems(int orderId, [FromQuery] PaginationParameters paginationParameters)
@@ -41,6 +57,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Returns an Order Item with a given Order Item ID. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="orderItemId"></param>
+    /// <returns></returns>
     [HttpGet("orderItems/{orderItemId}")]
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<GetOrderItemDto>> GetOrderItem(int orderItemId)
@@ -50,6 +71,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Creates an Order from items in a User Cart and takes Address parameter. Can be called only by authenticated User.
+    /// </summary>
+    /// <param name="createOrderDto"></param>
+    /// <returns></returns>
     [HttpPost]
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<GetOrderDto>> Post(CreateOrderDto createOrderDto)
@@ -61,6 +87,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Deletes an Order with all associated OrderItems with a given order ID. Can be called only by an Administrator.
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
     [HttpDelete("{orderId}")]
     [Authorize(Roles = RoleNames.Administrator)]
     public async Task<ActionResult> DeleteOrder(int orderId)
@@ -70,6 +101,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
         return ToActionResult(result);
     }
 
+    /// <summary>
+    /// Deletes a single Order Item with a given Order Item ID. Can be called only by Administrator.
+    /// </summary>
+    /// <param name="orderItemId"></param>
+    /// <returns></returns>
     [HttpDelete("orderItems/{orderItemId}")]
     [Authorize(Roles = RoleNames.Administrator)]
     public async Task<ActionResult> DeleteOrderItem(int orderItemId)

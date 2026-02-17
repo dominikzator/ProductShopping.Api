@@ -39,15 +39,14 @@ public class UsersService(UserManager<ApplicationUser> userManager
             return Result<RegisteredUserDto>.BadRequest(errors);
         }
 
-        await userManager.AddToRoleAsync(user, registerUserDto.Role);
+        await userManager.AddToRoleAsync(user, RoleNames.User);
 
         var registeredUser = new RegisteredUserDto
         {
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            Id = user.Id,
-            Role = registerUserDto.Role
+            Id = user.Id
         };
 
         //Create Cart for a new User

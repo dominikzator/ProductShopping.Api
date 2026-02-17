@@ -11,6 +11,11 @@ namespace ProductShopping.Api.Controllers
     [AllowAnonymous]
     public class AuthController(IUsersService usersService) : BaseApiController
     {
+        /// <summary>
+        /// Registers a user with given credentials. Can be called without authorization.
+        /// </summary>
+        /// <param name="registerUserDto"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<ActionResult<RegisteredUserDto>> Register(RegisterUserDto registerUserDto)
         {
@@ -19,6 +24,11 @@ namespace ProductShopping.Api.Controllers
             return ToActionResult(result);
         }
 
+        /// <summary>
+        /// Performs login operation with given credentials. Can be called without authorization.
+        /// </summary>
+        /// <param name="loginUserDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(LoginUserDto loginUserDto)
         {
