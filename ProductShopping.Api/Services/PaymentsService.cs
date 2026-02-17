@@ -6,7 +6,7 @@ namespace ProductShopping.Api.Services;
 
 public class PaymentsService : IPaymentsService
 {
-    public async Task CreatePaymentSession(CheckoutRequest checkoutRequest)
+    public async Task<Session> CreatePaymentSession(CheckoutRequest checkoutRequest)
     {
         var options = new SessionCreateOptions
         {
@@ -34,6 +34,7 @@ public class PaymentsService : IPaymentsService
         };
 
         var service = new SessionService();
-        var session = await service.CreateAsync(options);
+
+        return await service.CreateAsync(options);
     }
 }

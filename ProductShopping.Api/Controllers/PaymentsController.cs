@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Constants;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Api.Models.Paging;
+using ProductShopping.Api.Services;
 using Stripe;
 using Stripe.Checkout;
 
@@ -9,48 +12,15 @@ namespace ProductShopping.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PaymentsController : ControllerBase
+public class PaymentsController(IPaymentsService paymentsService, IConfiguration config) : ControllerBase
 {
-    private readonly IConfiguration _config;
-
-    public PaymentsController(IConfiguration config)
-    {
-        _config = config;
-    }
-
     [HttpPost("create-checkout-session")]
     [Authorize(Roles = RoleNames.User)]
     public async Task<IActionResult> CreateCheckoutSession([FromBody] CheckoutRequest request)
     {
-        var options = new SessionCreateOptions
-        {
-            SuccessUrl = $"{request.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}", // Twoja strona sukcesu
-            CancelUrl = $"{request.Domain}/api/payments/cancel", // Strona anulowania
-            PaymentMethodTypes = new List<string> { "card" },
-            LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
-            {
-                PriceData = new SessionLineItemPriceDataOptions
-                {
-                    Currency = "usd", // Lub "pln"
-                    ProductData = new SessionLineItemPriceDataProductDataOptions
-                    {
-                        Name = request.ProductName ?? "Produkt",
-                        Description = request.Description,
-                    },
-                    UnitAmount = (long)(request.Amount * 100), // np. 20.00 -> 2000
-                },
-                Quantity = 1,
-            }
-        },
-            Mode = "payment",
-        };
+        var result = await paymentsService.CreatePaymentSession(request);
 
-        var service = new SessionService();
-        var session = await service.CreateAsync(options);
-
-        return Ok(new { Url = session.Url });
+        return Ok(new { Url = result.Url });
     }
 
     [HttpPost("stripe/webhook")]
@@ -67,7 +37,7 @@ public class PaymentsController : ControllerBase
             var stripeEvent = EventUtility.ConstructEvent(
                 json,
                 signature,
-                _config["Stripe:WebhookKey"],
+                config["Stripe:WebhookKey"],
                 throwOnApiVersionMismatch: false
             );
 
@@ -98,7 +68,7 @@ public class PaymentsController : ControllerBase
     }
 
 
-/*    [HttpGet("success")]
+    [HttpGet("success")]
     public async Task<IActionResult> Success([FromQuery] string session_id)
     {
         if (string.IsNullOrEmpty(session_id))
@@ -109,11 +79,6 @@ public class PaymentsController : ControllerBase
             var service = new SessionService();
             var session = await service.GetAsync(session_id);
             Console.WriteLine($"✅ Success redirect: {session.PaymentStatus}, ID: {session.Id}"); // Log w konsoli VS
-
-            if (session.PaymentStatus == "paid")
-            {
-                // await UpdateOrderAsync(session.Id, true);
-            }
 
             return Ok(new
             {
@@ -128,14 +93,7 @@ public class PaymentsController : ControllerBase
             Console.WriteLine($"Błąd success: {ex.Message}");
             return StatusCode(500, "Błąd przetwarzania");
         }
-    }*/
-
-/*    [HttpGet("cancel")]
-    public IActionResult Cancel([FromQuery] string session_id = null)
-    {
-        Console.WriteLine($"❌ Cancel redirect: {session_id ?? "brak ID"}");
-        return Ok(new { Message = "Płatność anulowana. Możesz spróbować ponownie." });
-    }*/
+    }
 }
 
 public class CheckoutRequest
