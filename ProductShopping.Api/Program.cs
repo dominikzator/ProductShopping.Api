@@ -15,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
 using Azure.Storage.Blobs;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,9 +96,12 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ICartItemsService, CartItemsService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
+builder.Services.AddScoped<IPaymentsService, PaymentsService>();
 
 builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -126,7 +130,7 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
-    if (File.Exists(xmlPath))
+    if (System.IO.File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath);
     }
