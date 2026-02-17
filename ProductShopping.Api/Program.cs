@@ -14,6 +14,7 @@ using Serilog;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,10 @@ builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ICartItemsService, CartItemsService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
+builder.Services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
+
+builder.Services.AddSingleton(x =>
+    new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -172,23 +177,19 @@ var app = builder.Build();
 
 app.MapGroup("api/defaultauth").MapIdentityApi<ApplicationUser>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Shopping API V1");
-        options.RoutePrefix = "swagger";
-        options.DocumentTitle = "Product Shopping API Documentation";
-        options.DisplayRequestDuration();
-        options.EnableDeepLinking();
-        options.EnableFilter();
-        options.ShowExtensions();
-        options.EnableValidator();
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Shopping API V1");
+    options.RoutePrefix = "swagger";
+    options.DocumentTitle = "Product Shopping API Documentation";
+    options.DisplayRequestDuration();
+    options.EnableDeepLinking();
+    options.EnableFilter();
+    options.ShowExtensions();
+    options.EnableValidator();
+});
 
 app.UseHttpsRedirection();
 
