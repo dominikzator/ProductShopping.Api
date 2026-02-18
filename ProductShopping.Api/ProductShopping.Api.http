@@ -1,5 +1,5 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YjI3YWFkNC1mMzAzLTQ3YWUtYWJmYS1lMTFkOTRmYTM2ODYiLCJlbWFpbCI6InRlc3Rpbmd1c2VyQGxvY2FsaG9zdC5jb20iLCJqdGkiOiJiNDcyN2I2OC02MTBhLTRhMGUtYmZhZi03ZDBkY2VjNTk5ZjkiLCJuYW1lIjoiRG9lLCBKb2huIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3MTM3Njk0OCwiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.FtuvCHWPulUsY_F9FZVbCC6PQJRsViuGeYxJOT4fOjY
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MmZlNzRkZS0xNDE4LTQ2ZGItOTIwYS0zOTM2Y2I3ZDIyMmEiLCJlbWFpbCI6InphdGlhZG1pbkBsb2NhbGhvc3QuY29tIiwianRpIjoiNmM1MjFlNzktNmUxNy00N2EzLWIyZjItNWJlNGFmNGRmZWIxIiwibmFtZSI6IkFkbWluLCBNYWluIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc3MTQxNDIyMywiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.b8fb0mGFXSyALTJi5_n-SqDXPNczMRiVYMVzqXR9SvA
 
 
 GET {{ProductShopping.Api_HostAddress}}/api/products
@@ -96,8 +96,8 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "productId" : 3557,
-  "quantity" : 7
+  "productId" : 3287,
+  "quantity" : 4
 }
 
 ###
@@ -179,34 +179,12 @@ Authorization: Bearer {{token}}
 ###
 
 
-POST {{ProductShopping.Api_HostAddress}}/api/products/3014/productimagegenerator/generate
+POST {{ProductShopping.Api_HostAddress}}/api/products/3016/productimagegenerator/generate
 Authorization: Bearer {{token}}
-
-###
-
-POST {{ProductShopping.Api_HostAddress}}/api/payments/create-payment-intent?amount=200
-Authorization: Bearer {{token}}
-
-###
-
-POST {{ProductShopping.Api_HostAddress}}/api/payments/create-checkout-session
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "domain": "https://localhost:7298",
-  "amount": 19,
-  "productName": "Testowy Zielony Produkt",
-  "description": "To jest zaplata za testowy zielony produkt."
-}
 
 ###
 
 GET {{ProductShopping.Api_HostAddress}}/api/payments/success?session_id=string
-
-###
-
-GET {{ProductShopping.Api_HostAddress}}/api/payments/cancel
 
 ###
 

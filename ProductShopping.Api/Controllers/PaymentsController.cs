@@ -15,15 +15,10 @@ namespace ProductShopping.Api.Controllers;
 [Route("api/[controller]")]
 public class PaymentsController(IPaymentsService paymentsService, IConfiguration config) : ControllerBase
 {
-    [HttpPost("create-checkout-session")]
-    [Authorize(Roles = RoleNames.User)]
-    public async Task<IActionResult> CreateCheckoutSession([FromBody] PaymentRequestDto request)
-    {
-        var result = await paymentsService.CreatePaymentSessionAsync(request);
-
-        return Ok(new { Url = result.Url });
-    }
-
+    /// <summary>
+    /// Anonymous webhook endpoint which is beeing called after successful payment. Changes Order Status to Payed. This shouldn't be called manually.
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("stripe/webhook")]
     [AllowAnonymous]
     public async Task<IActionResult> StripeWebhook()
@@ -45,56 +40,64 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
             switch (stripeEvent.Type)
             {
                 case "checkout.session.completed":
-                    var session = stripeEvent.Data.Object as Session;
-
-                    int orderId;
-                    int.TryParse(session.ClientReferenceId, out orderId);
-                    var orderPayedResult = await paymentsService.SetOrderPayed(orderId);
-
-                    if(!orderPayedResult.IsSuccess)
                     {
-                        return NotFound(orderPayedResult.Errors[0].Description);
+                        var session = stripeEvent.Data.Object as Session;
+
+                        int orderId;
+                        int.TryParse(session.ClientReferenceId, out orderId);
+                        var orderPayedResult = await paymentsService.SetOrderPayed(orderId);
+
+                        if (!orderPayedResult.IsSuccess)
+                        {
+                            return NotFound(orderPayedResult.Errors[0].Description);
+                        }
+                        Console.WriteLine($"Payment Successfull! ID: {session.Id}, Price: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
+                        break;
                     }
 
-                    Console.WriteLine($"UDANA PŁATNOŚĆ! ID: {session.Id}, Kwota: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
-                    Console.WriteLine($"ClientReferenceId(OrderId): {session.ClientReferenceId}");
-                    break;
 
                 case "checkout.session.expired":
-                    var expired = stripeEvent.Data.Object as Session;
-                    Console.WriteLine($"SESJA WYGASŁA: {expired.Id}");
-                    break;
+                    {
+                        var expired = stripeEvent.Data.Object as Session;
+                        Console.WriteLine($"Session Expired: {expired.Id}");
+                        break;
+                    }
 
                 default:
-                    Console.WriteLine($"Nieobsłużony: {stripeEvent.Type}");
-                    break;
+                    {
+                        Console.WriteLine($"Unhandled: {stripeEvent.Type}");
+                        break;
+                    }
             }
 
             return Ok();
         }
         catch (StripeException e)
         {
-            Console.WriteLine($"Stripe błąd: {e.Message}");
+            Console.WriteLine($"Stripe Error: {e.Message}");
             return BadRequest(e.Message);
         }
     }
 
-
+    /// <summary>
+    /// Anonymous redirection endpoint after successfull payment that is displaying Success info.
+    /// </summary>
+    /// <param name="session_id"></param>
+    /// <returns></returns>
     [HttpGet("success")]
     public async Task<IActionResult> Success([FromQuery] string session_id)
     {
         if (string.IsNullOrEmpty(session_id))
-            return BadRequest("Brak session_id");
+            return BadRequest("No session_id");
 
         try
         {
             var service = new SessionService();
             var session = await service.GetAsync(session_id);
-            Console.WriteLine($"✅ Success redirect: {session.PaymentStatus}, ID: {session.Id}"); // Log w konsoli VS
 
             return Ok(new
             {
-                Message = "Płatność udana!",
+                Message = "Payment successfull!!!",
                 Status = session.PaymentStatus,
                 SessionId = session.Id,
                 Amount = session.AmountTotal / 100m
@@ -102,8 +105,8 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Błąd success: {ex.Message}");
-            return StatusCode(500, "Błąd przetwarzania");
+            Console.WriteLine($"Error success: {ex.Message}");
+            return StatusCode(500, "Redirection Error");
         }
     }
 }
