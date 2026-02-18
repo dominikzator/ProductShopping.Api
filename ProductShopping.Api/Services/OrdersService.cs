@@ -13,7 +13,7 @@ using System.Security.Claims;
 
 namespace ProductShopping.Api.Services;
 
-public class OrdersService(ProductShoppingDbContext context, ICartItemsService cartItemsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
+public class OrdersService(ProductShoppingDbContext context, IConfiguration config, ICartItemsService cartItemsService, IPaymentsService paymentsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
 {
     public async Task<Result<PagedResult<GetOrderDto>>> GetOrdersAsync(PaginationParameters paginationParameters)
     {
@@ -157,7 +157,21 @@ public class OrdersService(ProductShoppingDbContext context, ICartItemsService c
         }
         await cartItemsService.ClearCartAsync();
 
+        var orderItems = await context.OrderItems.Where(o => o.OrderId == createdOrder.OrderId).ToListAsync();
+
+        var session = await paymentsService.CreatePaymentSessionAsync(new DTOs.Payment.PaymentRequestDto
+        {
+            OrderId = createdOrder.OrderId,
+            Domain = config["Constants:DomainName"],
+            OrderNumber = createdOrder.OrderNumber,
+            Items = mapper.Map<List<GetOrderItemDto>>(orderItems),
+            TotalPrice = orderItems.Sum(o => o.TotalPrice)
+        });
+
         var outputDto = mapper.Map<GetOrderDto>(createdOrder);
+        outputDto.PaymentUrl = session.Url;
+
+        Console.WriteLine($"Order ID: {session.ClientReferenceId}");
 
         return Result<GetOrderDto>.Success(outputDto);
     }

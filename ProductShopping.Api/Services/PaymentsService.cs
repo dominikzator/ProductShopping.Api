@@ -1,40 +1,70 @@
-﻿using ProductShopping.Api.Contracts;
-using ProductShopping.Api.Controllers;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductShopping.Api.Constants;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Api.DTOs.Order;
+using ProductShopping.Api.DTOs.Payment;
+using ProductShopping.Api.Results;
 using Stripe.Checkout;
+using System.Text;
 
 namespace ProductShopping.Api.Services;
 
-public class PaymentsService : IPaymentsService
+public class PaymentsService(ProductShoppingDbContext context) : IPaymentsService
 {
-    public async Task<Session> CreatePaymentSession(CheckoutRequest checkoutRequest)
+    public async Task<Session> CreatePaymentSessionAsync(PaymentRequestDto paymentRequest)
     {
-        var options = new SessionCreateOptions
+        List<SessionLineItemOptions> lineItems = new();
+        foreach (var item in paymentRequest.Items)
         {
-            SuccessUrl = $"{checkoutRequest.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}", // Twoja strona sukcesu
-            CancelUrl = $"{checkoutRequest.Domain}/api/payments/cancel", // Strona anulowania
-            PaymentMethodTypes = new List<string> { "card" },
-            LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
+            lineItems.Add(new SessionLineItemOptions
             {
                 PriceData = new SessionLineItemPriceDataOptions
                 {
-                    Currency = "usd", // Lub "pln"
+                    Currency = "pln",
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = checkoutRequest.ProductName ?? "Produkt",
-                        Description = checkoutRequest.Description,
+                        Name = item.ProductName,
+                        Description = $"{item.Quantity}x {item.ProductName}",
                     },
-                    UnitAmount = (long)(checkoutRequest.Amount * 100), // np. 20.00 -> 2000
+                    UnitAmount = (long)(item.UnitPrice * 100),
                 },
-                Quantity = 1,
-            }
-        },
+                Quantity = item.Quantity
+            });
+        }
+
+        var options = new SessionCreateOptions
+        {
+            SuccessUrl = $"{paymentRequest.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}", // Twoja strona sukcesu
+            CancelUrl = $"{paymentRequest.Domain}/api/payments/cancel",
+            PaymentMethodTypes = new List<string> { "card" },
+            LineItems = lineItems,
+            ClientReferenceId = paymentRequest.OrderId.ToString(),
             Mode = "payment",
         };
 
         var service = new SessionService();
 
         return await service.CreateAsync(options);
+    }
+
+    public async Task<Result> SetOrderPayed(int orderId)
+    {
+        var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+        if(order == null)
+        {
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{orderId}' was not found."));
+        }
+        order.OrderStatus = OrderStatus.Payed;
+        context.Orders.Update(order);
+
+        foreach (var orderItem in context.OrderItems.Where(o => o.OrderId == orderId))
+        {
+            orderItem.OrderStatus = OrderStatus.Payed;
+            context.OrderItems.Update(orderItem);
+        }
+
+        await context.SaveChangesAsync();
+
+        return Result.Success();
     }
 }

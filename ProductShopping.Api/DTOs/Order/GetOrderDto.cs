@@ -18,4 +18,5 @@ public class GetOrderDto
     public string Country { get; set; }
     public string? PhoneNumber { get; set; }
     public string Status { get; set; }
+    public string PaymentUrl { get; set; }
 }

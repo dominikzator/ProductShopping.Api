@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Api.DTOs.Payment;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Services;
 using Stripe;
@@ -16,9 +17,9 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
 {
     [HttpPost("create-checkout-session")]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<IActionResult> CreateCheckoutSession([FromBody] CheckoutRequest request)
+    public async Task<IActionResult> CreateCheckoutSession([FromBody] PaymentRequestDto request)
     {
-        var result = await paymentsService.CreatePaymentSession(request);
+        var result = await paymentsService.CreatePaymentSessionAsync(request);
 
         return Ok(new { Url = result.Url });
     }
@@ -44,12 +45,23 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
             switch (stripeEvent.Type)
             {
                 case "checkout.session.completed":
-                    var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    var session = stripeEvent.Data.Object as Session;
+
+                    int orderId;
+                    int.TryParse(session.ClientReferenceId, out orderId);
+                    var orderPayedResult = await paymentsService.SetOrderPayed(orderId);
+
+                    if(!orderPayedResult.IsSuccess)
+                    {
+                        return NotFound(orderPayedResult.Errors[0].Description);
+                    }
+
                     Console.WriteLine($"UDANA PŁATNOŚĆ! ID: {session.Id}, Kwota: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
+                    Console.WriteLine($"ClientReferenceId(OrderId): {session.ClientReferenceId}");
                     break;
 
                 case "checkout.session.expired":
-                    var expired = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    var expired = stripeEvent.Data.Object as Session;
                     Console.WriteLine($"SESJA WYGASŁA: {expired.Id}");
                     break;
 
@@ -94,12 +106,4 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
             return StatusCode(500, "Błąd przetwarzania");
         }
     }
-}
-
-public class CheckoutRequest
-{
-    public string Domain { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public string? ProductName { get; set; }
-    public string? Description { get; set; }
 }

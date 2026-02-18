@@ -1,5 +1,5 @@
 @ProductShopping.Api_HostAddress = https://localhost:7298
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YjI3YWFkNC1mMzAzLTQ3YWUtYWJmYS1lMTFkOTRmYTM2ODYiLCJlbWFpbCI6InRlc3Rpbmd1c2VyQGxvY2FsaG9zdC5jb20iLCJqdGkiOiJkYmQ2NTI0MS1jZDZjLTRhZDctYjYxYy1iZGEyMzhkNjg0YWQiLCJuYW1lIjoiRG9lLCBKb2huIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3MTM2NTY3MywiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.um6_5l1JNPpxjsXIlI35NVMl6B9JfYNN57OIb2IafYA
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YjI3YWFkNC1mMzAzLTQ3YWUtYWJmYS1lMTFkOTRmYTM2ODYiLCJlbWFpbCI6InRlc3Rpbmd1c2VyQGxvY2FsaG9zdC5jb20iLCJqdGkiOiJiNDcyN2I2OC02MTBhLTRhMGUtYmZhZi03ZDBkY2VjNTk5ZjkiLCJuYW1lIjoiRG9lLCBKb2huIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3MTM3Njk0OCwiaXNzIjoiUHJvZHVjdFNob3BwaW5nQVBJIiwiYXVkIjoiUHJvZHVjdFNob3BwaW5nQVBJQ2xpZW50In0.FtuvCHWPulUsY_F9FZVbCC6PQJRsViuGeYxJOT4fOjY
 
 
 GET {{ProductShopping.Api_HostAddress}}/api/products
@@ -96,8 +96,8 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "productId" : 3387,
-  "quantity" : 19
+  "productId" : 3557,
+  "quantity" : 7
 }
 
 ###
@@ -149,8 +149,8 @@ Authorization: Bearer {{token}}
     "address":
     {
         "street": "Milkyway street",
-        "buildingNumber": "21",
-        "apartmentNumber": "3",
+        "buildingNumber": "24",
+        "apartmentNumber": "7",
         "city": "Glasgow",
         "postalCode": "12-345",
         "country": "Scotland",
