@@ -10,10 +10,11 @@ using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
 using Serilog;
 using System.Security.Claims;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ProductShopping.Api.Services;
 
-public class OrdersService(ProductShoppingDbContext context, IConfiguration config, ICartItemsService cartItemsService, IPaymentsService paymentsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
+public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersService> logger, IConfiguration config, ICartItemsService cartItemsService, IPaymentsService paymentsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
 {
     public async Task<Result<PagedResult<GetOrderDto>>> GetOrdersAsync(PaginationParameters paginationParameters)
     {
@@ -159,10 +160,14 @@ public class OrdersService(ProductShoppingDbContext context, IConfiguration conf
 
         var orderItems = await context.OrderItems.Where(o => o.OrderId == createdOrder.OrderId).ToListAsync();
 
+        string domainName = config["Constants:DomainName"];
+
+        logger.LogInformation($"domainName: {domainName}");
+
         var session = await paymentsService.CreatePaymentSessionAsync(new DTOs.Payment.PaymentRequestDto
         {
             OrderId = createdOrder.OrderId,
-            Domain = config["Constants:DomainName"],
+            Domain = domainName,
             OrderNumber = createdOrder.OrderNumber,
             Items = mapper.Map<List<GetOrderItemDto>>(orderItems),
             TotalPrice = orderItems.Sum(o => o.TotalPrice)

@@ -34,7 +34,7 @@ public class PaymentsService(ProductShoppingDbContext context) : IPaymentsServic
 
         var options = new SessionCreateOptions
         {
-            SuccessUrl = $"{paymentRequest.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}", // Twoja strona sukcesu
+            SuccessUrl = $"{paymentRequest.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
             CancelUrl = $"{paymentRequest.Domain}/api/payments/cancel",
             PaymentMethodTypes = new List<string> { "card" },
             LineItems = lineItems,
