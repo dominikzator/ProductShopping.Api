@@ -116,6 +116,7 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Product Shopping API",
         Description = "API for browsing, adding to cart and ordering products. <br /><br />"
         + " Test flow: <br /> 🔐 Register a new User with Post register endpoint or Login with a testing User: email: testinguser@localhost.com, password: P@ssword1234.<br />"
+        + "📧 If You will register with your real email, You will get a Confirmation Email and after creating an order and successfull testing payment You will get an order/payment confirmation email. <br />"
         + "🔐 After logging in You will get a JWT Token as a response. Copy it and place it in Authorize Section, value in a field should be: Bearer [space] [yourToken] and click Authorize. <br />"
         + "🛍️ You can browse Products with Filters and/or with PaginationParameters with Products Get endpoint. This endpoint doesn't need a token authorization. <br />"
         + "🛍️ Products in database have id range from 3009 to 4008. <br />"

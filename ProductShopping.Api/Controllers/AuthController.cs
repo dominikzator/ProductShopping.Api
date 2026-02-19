@@ -41,6 +41,12 @@ namespace ProductShopping.Api.Controllers
             return ToActionResult(result);
         }
 
+        /// <summary>
+        /// Endpoint for confirming an Email from email confirmation link. This endpoint is Anonymous.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
@@ -54,16 +60,14 @@ namespace ProductShopping.Api.Controllers
             if (user == null)
                 return NotFound("User not found");
 
-            // dekodowanie tokena
-            var decodedBytes = WebEncoders.Base64UrlDecode(code);   // [web:597]
+            var decodedBytes = WebEncoders.Base64UrlDecode(code);
             var decodedToken = Encoding.UTF8.GetString(decodedBytes);
 
-            var result = await userManager.ConfirmEmailAsync(user, decodedToken); // ustawia EmailConfirmed = true [web:582][web:592]
+            var result = await userManager.ConfirmEmailAsync(user, decodedToken);
 
             if (!result.Succeeded)
                 return BadRequest("Token incorrect or expired");
 
-            // w API możesz zwrócić np. prostą odpowiedź albo 302 do frontu
             return Ok("E-mail Confirmed.");
         }
     }
