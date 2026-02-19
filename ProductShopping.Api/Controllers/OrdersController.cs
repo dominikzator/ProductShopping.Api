@@ -7,12 +7,13 @@ using ProductShopping.Api.DTOs.CartItem;
 using ProductShopping.Api.DTOs.Order;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Services;
+using System.Security.Claims;
 
 namespace ProductShopping.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OrdersController(IOrdersService ordersService) : BaseApiController
+public class OrdersController(IOrdersService ordersService, ILogger<OrdersController> logger, IHttpContextAccessor httpContextAccessor) : BaseApiController
 {
     /// <summary>
     /// Returns all User Orders. Can be called only by authenticated User.

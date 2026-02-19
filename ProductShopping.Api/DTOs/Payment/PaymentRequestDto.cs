@@ -9,4 +9,5 @@ public class PaymentRequestDto
     public string Domain { get; set; }
     public List<GetOrderItemDto> Items { get; set; }
     public decimal TotalPrice { get; set; }
+    public string UserEmail { get; set; }
 }

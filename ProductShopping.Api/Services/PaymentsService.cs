@@ -6,6 +6,7 @@ using ProductShopping.Api.DTOs.Payment;
 using ProductShopping.Api.Results;
 using Stripe.Checkout;
 using System.Text;
+using System.Text.Json;
 
 namespace ProductShopping.Api.Services;
 
@@ -40,6 +41,10 @@ public class PaymentsService(ProductShoppingDbContext context) : IPaymentsServic
             LineItems = lineItems,
             ClientReferenceId = paymentRequest.OrderId.ToString(),
             Mode = "payment",
+            Metadata = new Dictionary<string, string>
+            {
+                {"userEmail", paymentRequest.UserEmail}
+            }
         };
 
         var service = new SessionService();

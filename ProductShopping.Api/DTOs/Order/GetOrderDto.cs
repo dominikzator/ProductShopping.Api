@@ -1,4 +1,5 @@
 ﻿using ProductShopping.Api.Constants;
+using ProductShopping.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductShopping.Api.DTOs.Order;
@@ -8,6 +9,7 @@ public class GetOrderDto
     public string OrderId { get; set; }
     public string OrderNumber { get; set; }
     public string OwnerId { get; set; }
+    public List<GetOrderItemDto> OrderItems { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string Street { get; set; }

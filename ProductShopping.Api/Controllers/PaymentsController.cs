@@ -1,19 +1,24 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Api.DTOs.Order;
 using ProductShopping.Api.DTOs.Payment;
+using ProductShopping.Api.Models;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Services;
 using Stripe;
 using Stripe.Checkout;
+using System.Text;
 
 namespace ProductShopping.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PaymentsController(IPaymentsService paymentsService, IConfiguration config) : ControllerBase
+public class PaymentsController(IPaymentsService paymentsService, UserManager<ApplicationUser> userManager, IMailService mailService, IConfiguration config, ILogger<PaymentsController> logger) : ControllerBase
 {
     /// <summary>
     /// Anonymous webhook endpoint which is beeing called after successful payment. Changes Order Status to Payed. This shouldn't be called manually.
@@ -45,27 +50,29 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
 
                         int orderId;
                         int.TryParse(session.ClientReferenceId, out orderId);
-                        var orderPayedResult = await paymentsService.SetOrderPayed(orderId);
+                        await paymentsService.SetOrderPayed(orderId);
 
-                        if (!orderPayedResult.IsSuccess)
-                        {
-                            return NotFound(orderPayedResult.Errors[0].Description);
-                        }
-                        Console.WriteLine($"Payment Successfull! ID: {session.Id}, Price: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
+                        logger.LogInformation($"Payment Successfull! ID: {session.Id}, Price: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
+
+                        session.Metadata.TryGetValue("userEmail", out var userEmail);
+
+                        await mailService.TrySendPaymentConfirmation(orderId, userEmail);
+
                         break;
                     }
-
 
                 case "checkout.session.expired":
                     {
                         var expired = stripeEvent.Data.Object as Session;
-                        Console.WriteLine($"Session Expired: {expired.Id}");
+                        logger.LogInformation($"Session Expired: {expired.Id}");
+
                         break;
                     }
 
                 default:
                     {
-                        Console.WriteLine($"Unhandled: {stripeEvent.Type}");
+                        logger.LogInformation($"Unhandled: {stripeEvent.Type}");
+
                         break;
                     }
             }
@@ -74,7 +81,8 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
         }
         catch (StripeException e)
         {
-            Console.WriteLine($"Stripe Error: {e.Message}");
+            logger.LogInformation($"Stripe Error: {e.Message}");
+
             return BadRequest(e.Message);
         }
     }
@@ -105,7 +113,8 @@ public class PaymentsController(IPaymentsService paymentsService, IConfiguration
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error success: {ex.Message}");
+            logger.LogInformation($"Error success: {ex.Message}");
+
             return StatusCode(500, "Redirection Error");
         }
     }

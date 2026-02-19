@@ -97,6 +97,7 @@ builder.Services.AddScoped<ICartItemsService, CartItemsService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
 builder.Services.AddScoped<IPaymentsService, PaymentsService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));

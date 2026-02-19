@@ -10,11 +10,17 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using ProductShopping.Api.Contracts;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Stripe.Climate;
+using System;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace ProductShopping.Api.Services;
 
 public class UsersService(UserManager<ApplicationUser> userManager
+    , IMailService mailService
     , IOptions<JwtSettings> jwtOptions
+    , IConfiguration config
     , ProductShoppingDbContext productShoppingDbContext
     , IHttpContextAccessor httpContextAccessor
     , ILogger<UsersService> logger) : IUsersService
@@ -49,7 +55,6 @@ public class UsersService(UserManager<ApplicationUser> userManager
             Id = user.Id
         };
 
-        //Create Cart for a new User
         if (!productShoppingDbContext.Carts.Any(cart => cart.UserId == registeredUser.Id))
         {
             var userCart = new Cart
@@ -62,6 +67,24 @@ public class UsersService(UserManager<ApplicationUser> userManager
             productShoppingDbContext.Carts.Add(userCart);
 
             await productShoppingDbContext.SaveChangesAsync();
+        }
+
+        var emailConfirmed = await userManager.IsEmailConfirmedAsync(user);
+
+        if(!emailConfirmed)
+        {
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user); // [web:582][web:601]
+
+            var tokenBytes = Encoding.UTF8.GetBytes(token);
+            var codeEncoded = WebEncoders.Base64UrlEncode(tokenBytes); // [web:597]
+
+            var confirmationUrl = $"{config["Constants:DomainName"]}/api/auth/confirm-email" +
+                                  $"?userId={user.Id}&code={codeEncoded}";
+
+            await mailService.SendEmailAsync(
+                user.Email!,
+                "Potwierdź swój e-mail",
+                $"Kliknij, aby potwierdzić konto: {confirmationUrl}");
         }
 
         return Result<RegisteredUserDto>.Success(registeredUser);

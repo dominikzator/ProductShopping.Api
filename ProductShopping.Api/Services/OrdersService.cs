@@ -8,9 +8,12 @@ using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Models;
 using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
+using Azure.Communication.Email;
 using Serilog;
 using System.Security.Claims;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
+using Azure;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ProductShopping.Api.Services;
 
@@ -164,17 +167,26 @@ public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersServi
 
         logger.LogInformation($"domainName: {domainName}");
 
+        var userEmail = httpContextAccessor?
+            .HttpContext?
+            .User?
+            .FindFirst(ClaimTypes.Email)?.Value;
+
+        logger.LogInformation($"userEmail from OrdersService: {userEmail}");
+
         var session = await paymentsService.CreatePaymentSessionAsync(new DTOs.Payment.PaymentRequestDto
         {
             OrderId = createdOrder.OrderId,
             Domain = domainName,
             OrderNumber = createdOrder.OrderNumber,
             Items = mapper.Map<List<GetOrderItemDto>>(orderItems),
-            TotalPrice = orderItems.Sum(o => o.TotalPrice)
+            TotalPrice = orderItems.Sum(o => o.TotalPrice),
+            UserEmail = userEmail
         });
 
         var outputDto = mapper.Map<GetOrderDto>(createdOrder);
         outputDto.PaymentUrl = session.Url;
+        outputDto.OrderItems = mapper.Map<List<GetOrderItemDto>>(orderItems);
 
         Console.WriteLine($"Order ID: {session.ClientReferenceId}");
 
