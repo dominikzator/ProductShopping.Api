@@ -116,7 +116,6 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Title = "Product Shopping API",
         Description = "API for browsing, adding to cart and ordering products. <br /><br />"
-        + "⚠️ First Database request can take a bit long because it will wake up the database. In that case wait a bit and refresh page and do a request again.<br /><br />"
 		+ " Test flow: <br /> 🔐 Register a new User with Post register endpoint or Login with a testing User: email: testinguser@localhost.com, password: P@ssword1234.<br />"
         + "📧 If You will register with your real email, You will get a Confirmation Email and after creating an order and successfull testing payment You will get an order/payment confirmation email. <br />"
         + "🔐 After logging in You will get a JWT Token as a response. Copy it and place it in Authorize Section, value in a field should be: Bearer [space] [yourToken] and click Authorize. <br />"
