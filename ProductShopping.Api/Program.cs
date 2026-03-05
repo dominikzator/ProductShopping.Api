@@ -115,18 +115,20 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Title = "Product Shopping API",
         Description = "API for browsing, adding to cart and ordering products. <br /><br />"
-        + " Test flow: <br /> 🔐 Register a new User with Post register endpoint or Login with a testing User: email: testinguser@localhost.com, password: P@ssword1234.<br />"
+        + "⚠️ First Database request can take a bit long because it will wake up the database. In that case wait a bit and refresh page and do a request again.<br /><br />"
+		+ " Test flow: <br /> 🔐 Register a new User with Post register endpoint or Login with a testing User: email: testinguser@localhost.com, password: P@ssword1234.<br />"
         + "📧 If You will register with your real email, You will get a Confirmation Email and after creating an order and successfull testing payment You will get an order/payment confirmation email. <br />"
         + "🔐 After logging in You will get a JWT Token as a response. Copy it and place it in Authorize Section, value in a field should be: Bearer [space] [yourToken] and click Authorize. <br />"
         + "🛍️ You can browse Products with Filters and/or with PaginationParameters with Products Get endpoint. This endpoint doesn't need a token authorization. <br />"
         + "🛍️ Products in database have id range from 3009 to 4008. <br />"
         + "🛒 Now You can add some Products to Cart. You need to specify product ID and Amount. You can add/remove multiple Products to Cart.<br />"
-        + "🛒 You can check current Cart content by Cart Get endpoint<br />"
+        + "🛒 You can check current Cart content by Cart Get endpoint. <br />"
         + "📦 When Your Cart is not empty, You can make an Order with Order Post endpoint. You need to specify some Address informations. <br />"
         + "💳 After successfull order You will get a testing payment url as a response. Open it in a different browser card. <br />"
         + "💳 In payment url site You should see your products from Cart. <br />"
         + "💳 To realize testing payment enter card number: 4242 4242 4242 4242. The rest card credentials can be random. This is testing payment. You won't be charged for anything. <br />"
-        + "🚀 This is it! You can check your Order with Get Order endpoint to check if your order changed its status from Pending to Payed.",
+        + "🚀 This is it! You can check your Order with Get Order endpoint to check if your order changed its status from Pending to Payed. <br />"
+        + "📧 If Your Account have confirmed Email You will also get an email with order confirmation!",
         Contact = new OpenApiContact
         {
             Name = "Support Team",
@@ -190,6 +192,16 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsDev", policy =>
+    {
+        policy.WithOrigins("https://localhost:7277")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.MapGroup("api/defaultauth").MapIdentityApi<ApplicationUser>();
@@ -209,6 +221,8 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 
