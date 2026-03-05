@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 
-namespace ProductShopping.Api.Services;
+namespace ProductShopping.Api.Services.Utilities;
 
 public class ProductImageGeneratorService : IProductImageGeneratorService
 {

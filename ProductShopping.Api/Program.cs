@@ -16,6 +16,7 @@ using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
 using Azure.Storage.Blobs;
 using Stripe;
+using ProductShopping.Api.Services.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -191,6 +192,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+builder.Services.AddHostedService<KeepAliveDbService>();
 
 builder.Services.AddCors(options =>
 {
