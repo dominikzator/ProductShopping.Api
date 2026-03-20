@@ -1,18 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Order;
-using ProductShopping.Api.DTOs.Payment;
-using ProductShopping.Api.Models;
-using ProductShopping.Api.Models.Paging;
-using ProductShopping.Api.Services;
+using ProductShopping.Identity.Models;
 using Stripe;
 using Stripe.Checkout;
-using System.Text;
 
 namespace ProductShopping.Api.Controllers;
 

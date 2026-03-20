@@ -1,14 +1,12 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Components.QuickGrid;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.CartItem;
-using ProductShopping.Api.DTOs.Order;
-using ProductShopping.Api.Models;
-using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
+using ProductShopping.Application.Models.Paging;
+using ProductShopping.Identity.DbContext;
+using ProductShopping.Domain.Models;
 using System.Security.Claims;
 
 namespace ProductShopping.Api.Services;

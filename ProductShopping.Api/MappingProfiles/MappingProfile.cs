@@ -2,7 +2,7 @@
 using ProductShopping.Api.DTOs.CartItem;
 using ProductShopping.Api.DTOs.Order;
 using ProductShopping.Api.DTOs.Product;
-using ProductShopping.Api.Models;
+using ProductShopping.Domain.Models;
 
 public class ProductMappingProfile : Profile
 {

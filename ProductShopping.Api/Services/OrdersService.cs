@@ -2,18 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.CartItem;
 using ProductShopping.Api.DTOs.Order;
-using ProductShopping.Api.DTOs.Product;
-using ProductShopping.Api.Models;
-using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
-using Azure.Communication.Email;
+using ProductShopping.Application.Models.Paging;
+using ProductShopping.Domain.Models;
+using ProductShopping.Identity.DbContext;
 using Serilog;
 using System.Security.Claims;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-using Azure;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ProductShopping.Api.Services;
 

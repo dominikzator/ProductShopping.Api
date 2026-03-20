@@ -1,16 +1,13 @@
-﻿using Azure.Communication.Email;
-using Azure;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Order;
-using ProductShopping.Api.Results;
-using ProductShopping.Api.DTOs.Payment;
-using Microsoft.EntityFrameworkCore;
-using ProductShopping.Api.Models;
-using System.Text;
-using Stripe.Climate;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+﻿using Azure;
+using Azure.Communication.Email;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Api.Results;
+using ProductShopping.Domain.Models;
+using ProductShopping.Identity.DbContext;
+using ProductShopping.Identity.Models;
+using System.Text;
 
 namespace ProductShopping.Api.Services;
 

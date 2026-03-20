@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.CartItem;
-using ProductShopping.Api.DTOs.Product;
-using ProductShopping.Api.Models.Filtering;
-using ProductShopping.Api.Models.Paging;
-using ProductShopping.Api.Services;
+using ProductShopping.Application.Models.Paging;
 
 namespace ProductShopping.Api.Controllers;
 

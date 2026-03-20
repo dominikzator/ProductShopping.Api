@@ -1,5 +1,5 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductShopping.Identity.DbContext;
 
 namespace ProductShopping.Api.Services.Utilities;
 
@@ -17,6 +17,7 @@ public class KeepAliveDbService : IHostedService, IAsyncDisposable
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _logger.LogInformation("KeepAliveDbService Constructor!!!");
     }
 
     public Task StartAsync(CancellationToken stoppingToken)
@@ -34,7 +35,7 @@ public class KeepAliveDbService : IHostedService, IAsyncDisposable
         {
             for (int i = 0; i < 3; i++)
             {
-                await dbContext.Database.ExecuteSqlRawAsync("SELECT 1");
+                await dbContext.Database.ExecuteSqlRawAsync("SELECT * FROM ProductCategories");
                 _logger.LogInformation("Ping {PingNumber} at {Time}", i + 1, DateTimeOffset.Now);
                 if (i < 2) await Task.Delay(_shortIntervalInSeconds * 1000, CancellationToken.None);
             }
@@ -42,7 +43,7 @@ public class KeepAliveDbService : IHostedService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Burst ping failed at {Time}", DateTimeOffset.Now);
+            _logger.LogInformation(ex, "Burst ping failed at {Time}", DateTimeOffset.Now);
         }
     }
 

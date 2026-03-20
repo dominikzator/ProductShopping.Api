@@ -13,28 +13,23 @@
     <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
     <PackageReference Include="AutoMapper" Version="16.0.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.23" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.23" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.23" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.23" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.13.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
     <PackageReference Include="Sdcb.StabilityAI" Version="1.0.6" />
     <PackageReference Include="Stripe.net" Version="48.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.23" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.23" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.23" />
+
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-dev-02318" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProductShopping.Identity\ProductShopping.Identity.csproj" />
   </ItemGroup>
 
 </Project>

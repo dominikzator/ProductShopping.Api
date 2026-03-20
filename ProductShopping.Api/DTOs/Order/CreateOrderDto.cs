@@ -1,4 +1,4 @@
-﻿using ProductShopping.Api.Models;
+﻿using ProductShopping.Domain.Models;
 
 namespace ProductShopping.Api.DTOs.Order;
 

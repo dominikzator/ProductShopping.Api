@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Product;
-using ProductShopping.Api.Models.Filtering;
-using ProductShopping.Api.Models.Paging;
-using ProductShopping.Api.Results;
+using ProductShopping.Application.Models.Filtering;
+using ProductShopping.Application.Models.Paging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

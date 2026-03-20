@@ -1,8 +1,4 @@
-﻿using ProductShopping.Api.Constants;
-using ProductShopping.Api.Models;
-using System.ComponentModel.DataAnnotations;
-
-namespace ProductShopping.Api.DTOs.Order;
+﻿namespace ProductShopping.Api.DTOs.Order;
 
 public class GetOrderDto
 {

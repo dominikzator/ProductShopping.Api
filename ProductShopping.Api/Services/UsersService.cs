@@ -1,19 +1,18 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProductShopping.Api.Constants;
+using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Auth;
-using ProductShopping.Api.Models.Config;
-using ProductShopping.Api.Models;
 using ProductShopping.Api.Results;
+using ProductShopping.Application.Models.Identity;
+using ProductShopping.Domain.Models;
+using ProductShopping.Identity.DbContext;
+using ProductShopping.Identity.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ProductShopping.Api.Contracts;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Stripe.Climate;
-using System;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace ProductShopping.Api.Services;
 
@@ -60,7 +59,7 @@ public class UsersService(UserManager<ApplicationUser> userManager
             var userCart = new Cart
             {
                 UserId = registeredUser.Id,
-                User = user,
+                //User = user,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

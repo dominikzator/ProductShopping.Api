@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Auth;
-using ProductShopping.Api.Models;
+using ProductShopping.Identity.Models;
 using System.Text;
 
 namespace ProductShopping.Api.Controllers

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProductShopping.Api.Models.Paging;
+using ProductShopping.Application.Models.Paging;
 
 namespace ProductShopping.Api.Extensions;
 

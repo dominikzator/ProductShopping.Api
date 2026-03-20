@@ -1,4 +1,5 @@
 ﻿using ProductShopping.Api.Constants;
+using ProductShopping.Domain.Enums;
 
 namespace ProductShopping.Api.DTOs.Order;
 

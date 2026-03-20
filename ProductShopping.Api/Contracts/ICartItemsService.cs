@@ -1,5 +1,5 @@
 ﻿using ProductShopping.Api.DTOs.CartItem;
-using ProductShopping.Api.Models.Paging;
+using ProductShopping.Application.Models.Paging;
 using ProductShopping.Api.Results;
 
 namespace ProductShopping.Api.Contracts

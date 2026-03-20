@@ -5,10 +5,11 @@ using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Api.Extensions;
-using ProductShopping.Api.Models;
-using ProductShopping.Api.Models.Filtering;
-using ProductShopping.Api.Models.Paging;
 using ProductShopping.Api.Results;
+using ProductShopping.Application.Models.Filtering;
+using ProductShopping.Application.Models.Paging;
+using ProductShopping.Domain.Models;
+using ProductShopping.Identity.DbContext;
 
 namespace ProductShopping.Api.Services;
 
