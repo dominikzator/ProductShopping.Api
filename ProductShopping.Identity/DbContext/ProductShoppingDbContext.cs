@@ -29,6 +29,8 @@ public class ProductShoppingDbContext : IdentityDbContext<ApplicationUser>
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        builder.Entity<Order>().OwnsOne(typeof(Address), "Address");
+
         builder.Entity<ProductCategory>()
             .HasIndex(c => c.Name)
             .HasDatabaseName("IX_Countries_Name");

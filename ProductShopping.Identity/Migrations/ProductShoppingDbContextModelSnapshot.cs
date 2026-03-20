@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProductShopping.Api;
 using ProductShopping.Identity.DbContext;
 
 #nullable disable
@@ -48,20 +47,6 @@ namespace ProductShopping.Identity.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "20c6b8ed-2a3f-4d2d-8f34-022c6a6c2fb7",
-                            Name = "Administrator",
-                            NormalizedName = "ADMINISTRATOR"
-                        },
-                        new
-                        {
-                            Id = "79cde6d7-7f52-4d4e-95fc-9084a64970f1",
-                            Name = "User",
-                            NormalizedName = "USER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -170,83 +155,7 @@ namespace ProductShopping.Identity.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.ApplicationUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("ProductShopping.Api.Models.Cart", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Cart", b =>
                 {
                     b.Property<int>("CartId")
                         .ValueGeneratedOnAdd()
@@ -262,16 +171,14 @@ namespace ProductShopping.Identity.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CartId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Carts");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.CartItem", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.CartItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -297,7 +204,7 @@ namespace ProductShopping.Identity.Migrations
                     b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Order", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
@@ -333,7 +240,7 @@ namespace ProductShopping.Identity.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.OrderItem", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.OrderItem", b =>
                 {
                     b.Property<int>("OrderItemId")
                         .ValueGeneratedOnAdd()
@@ -381,7 +288,7 @@ namespace ProductShopping.Identity.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Product", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -409,7 +316,7 @@ namespace ProductShopping.Identity.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.ProductCategory", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.ProductCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -611,6 +518,82 @@ namespace ProductShopping.Identity.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ProductShopping.Identity.Models.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -622,7 +605,7 @@ namespace ProductShopping.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.ApplicationUser", null)
+                    b.HasOne("ProductShopping.Identity.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -631,7 +614,7 @@ namespace ProductShopping.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.ApplicationUser", null)
+                    b.HasOne("ProductShopping.Identity.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -646,7 +629,7 @@ namespace ProductShopping.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductShopping.Api.Models.ApplicationUser", null)
+                    b.HasOne("ProductShopping.Identity.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -655,33 +638,22 @@ namespace ProductShopping.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.ApplicationUser", null)
+                    b.HasOne("ProductShopping.Identity.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Cart", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.CartItem", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ProductShopping.Api.Models.CartItem", b =>
-                {
-                    b.HasOne("ProductShopping.Api.Models.Cart", "Cart")
+                    b.HasOne("ProductShopping.Domain.Models.Cart", "Cart")
                         .WithMany("CartItems")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductShopping.Api.Models.Product", "Product")
+                    b.HasOne("ProductShopping.Domain.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -692,9 +664,9 @@ namespace ProductShopping.Identity.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Order", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Order", b =>
                 {
-                    b.OwnsOne("ProductShopping.Api.Models.Address", "Address", b1 =>
+                    b.OwnsOne("ProductShopping.Domain.Models.Address", "Address", b1 =>
                         {
                             b1.Property<int>("OrderId")
                                 .HasColumnType("int");
@@ -743,15 +715,15 @@ namespace ProductShopping.Identity.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.OrderItem", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.OrderItem", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.Order", "Order")
+                    b.HasOne("ProductShopping.Domain.Models.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProductShopping.Api.Models.Product", "Product")
+                    b.HasOne("ProductShopping.Domain.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -762,9 +734,9 @@ namespace ProductShopping.Identity.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Product", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Product", b =>
                 {
-                    b.HasOne("ProductShopping.Api.Models.ProductCategory", "Category")
+                    b.HasOne("ProductShopping.Domain.Models.ProductCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -773,12 +745,12 @@ namespace ProductShopping.Identity.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Cart", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Cart", b =>
                 {
                     b.Navigation("CartItems");
                 });
 
-            modelBuilder.Entity("ProductShopping.Api.Models.Order", b =>
+            modelBuilder.Entity("ProductShopping.Domain.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });
