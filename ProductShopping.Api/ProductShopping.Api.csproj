@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProductShopping.Identity\ProductShopping.Identity.csproj" />
+    <ProjectReference Include="..\ProductShopping.Infrastructure\ProductShopping.Infrastructure.csproj" />
     <ProjectReference Include="..\ProductShopping.Persistance\ProductShopping.Persistence.csproj" />
   </ItemGroup>
 
