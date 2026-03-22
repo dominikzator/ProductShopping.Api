@@ -1,11 +1,10 @@
 ﻿using Azure;
 using Azure.Communication.Email;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.Results;
+using ProductShopping.Application.Contracts;
 using ProductShopping.Domain.Models;
-using ProductShopping.Identity.Models;
 using ProductShopping.Persistence.DatabaseContext;
 using System.Text;
 

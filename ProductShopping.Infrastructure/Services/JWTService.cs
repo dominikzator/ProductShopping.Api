@@ -1,33 +1,32 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using ProductShopping.Application.Contracts;
+using ProductShopping.Application.DTOs;
 using ProductShopping.Application.Models.Identity;
 using ProductShopping.Identity.Models;
-using ProductShopping.Infrastructure.Contracts;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ProductShopping.Infrastructure.Services;
 
 public class JWTService(UserManager<ApplicationUser> userManager, IOptions<JwtSettings> jwtOptions) : IJWTService
 {
-    public async Task<string> GenerateToken(ApplicationUser user)
+    public async Task<string> GenerateToken(UserDto userDTO)
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Sub, userDTO.Id),
+            new Claim(JwtRegisteredClaimNames.Email, userDTO.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Name, user.FullName)
+            new Claim(JwtRegisteredClaimNames.Name, userDTO.FullName)
         };
 
+        var user = await userManager.FindByEmailAsync(userDTO.Email);
+
         // Set user role claims
-        var roles = await userManager.GetRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(user!);
         var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
 
         claims = claims.Union(roleClaims).ToList();

@@ -1,6 +1,6 @@
 ﻿using ProductShopping.Domain.Models;
 
-namespace ProductShopping.Api.Contracts;
+namespace ProductShopping.Application.Contracts;
 
 public interface IIdentityUserService
 {

@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Auth;
 using ProductShopping.Api.Results;
-using ProductShopping.Application.Models.Identity;
+using ProductShopping.Application.Contracts;
 using ProductShopping.Domain.Models;
 using ProductShopping.Identity.Constants;
 using ProductShopping.Identity.Models;
-using ProductShopping.Infrastructure.Contracts;
 using ProductShopping.Persistence.DatabaseContext;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -107,7 +104,12 @@ public class UsersService(UserManager<ApplicationUser> userManager
         }
 
         //Issue a token
-        var token = await jWTService.GenerateToken(user);
+        var token = await jWTService.GenerateToken(new Application.DTOs.UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+        });
 
 
         return Result<string>.Success(token);

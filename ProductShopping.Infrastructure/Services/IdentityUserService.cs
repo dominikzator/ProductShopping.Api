@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Domain.Models;
+using ProductShopping.Application.Contracts;
 using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
-using Stripe.Climate;
 
-namespace ProductShopping.Api.Services;
+namespace ProductShopping.Infrastructure.Services;
 
 public class IdentityUserService(ProductShoppingIdentityDbContext context, UserManager<ApplicationUser> userManager) : IIdentityUserService
 {
