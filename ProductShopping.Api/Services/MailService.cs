@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Api.Results;
 using ProductShopping.Domain.Models;
-using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
+using ProductShopping.Persistence.DatabaseContext;
 using System.Text;
 
 namespace ProductShopping.Api.Services;
 
-public class MailService(ProductShoppingDbContext context, UserManager<ApplicationUser> userManager, ILogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
+public class MailService(ProductShoppingDbContext context, IIdentityUserService identityUserService, ILogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
 {
     public async Task<Result> SendEmailAsync(string email, string title, string description)
     {
@@ -66,9 +66,10 @@ public class MailService(ProductShoppingDbContext context, UserManager<Applicati
         {
             var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == order.CustomerId);
+            var userId = await identityUserService.GetUserIdFromOrderAsync(order);
 
-            var emailConfirmed = await userManager.IsEmailConfirmedAsync(user);
+            var emailConfirmed = await identityUserService.IsEmailConfirmedAsync(userId);
+            logger.LogInformation($"Emailconfirmed: " + emailConfirmed);
             if (emailConfirmed)
             {
                 await SendPaymentConfirmationEmail(orderId, userEmail);

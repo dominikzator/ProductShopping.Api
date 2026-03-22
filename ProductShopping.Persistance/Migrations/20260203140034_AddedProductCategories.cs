@@ -4,14 +4,26 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ProductShopping.Identity.Migrations
+namespace ProductShopping.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class RevertedCategorySeed : Migration
+    public partial class AddedProductCategories : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Description",
+                table: "ProductCategories");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
+                table: "ProductCategories",
+                type: "nvarchar(450)",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
             migrationBuilder.InsertData(
                 table: "ProductCategories",
                 columns: new[] { "Id", "Name" },
@@ -29,7 +41,7 @@ namespace ProductShopping.Identity.Migrations
                     { 10, "Fitness" },
                     { 11, "Audio" },
                     { 12, "Electronics" },
-                    { 13, "Home Improvement" },
+                    { 13, "Home Improvements" },
                     { 14, "Pets" },
                     { 15, "Travel" },
                     { 16, "Toys" },
@@ -51,14 +63,22 @@ namespace ProductShopping.Identity.Migrations
                     { 32, "Computers" },
                     { 33, "Safety" },
                     { 34, "Storage" },
-                    { 35, "Home Security" },
-                    { 36, "Accessories" }
+                    { 35, "Home Security" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Countries_Name",
+                table: "ProductCategories",
+                column: "Name");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_Countries_Name",
+                table: "ProductCategories");
+
             migrationBuilder.DeleteData(
                 table: "ProductCategories",
                 keyColumn: "Id",
@@ -234,10 +254,20 @@ namespace ProductShopping.Identity.Migrations
                 keyColumn: "Id",
                 keyValue: 35);
 
-            migrationBuilder.DeleteData(
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
                 table: "ProductCategories",
-                keyColumn: "Id",
-                keyValue: 36);
+                type: "nvarchar(max)",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)");
+
+            migrationBuilder.AddColumn<string>(
+                name: "Description",
+                table: "ProductCategories",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
         }
     }
 }

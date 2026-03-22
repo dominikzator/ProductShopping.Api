@@ -1,21 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
+﻿using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
-using ProductShopping.Api;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.Controllers;
-using ProductShopping.Api.Services;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Serilog;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
-using Swashbuckle.AspNetCore.Filters;
-using Azure.Storage.Blobs;
-using Stripe;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Api.Services;
 using ProductShopping.Api.Services.Utilities;
 using ProductShopping.Identity;
 using ProductShopping.Identity.Models;
+using ProductShopping.Persistence;
+using Stripe;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +23,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 // Add services to the container.
 
 builder.Services.AddIdentityServices(builder);
+builder.Services.AddPersistenceServices(builder);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();
@@ -42,6 +37,7 @@ builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
 builder.Services.AddScoped<IPaymentsService, PaymentsService>();
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IIdentityUserService, IdentityUserService>();
 
 builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));

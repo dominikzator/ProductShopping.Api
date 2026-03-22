@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProductShopping.Api.Constants;
+using ProductShopping.Identity.Constants;
 
-namespace ProductShopping.Api.Configurations;
+namespace ProductShopping.Identity.Configurations;
 
 public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
 {

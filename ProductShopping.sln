@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Identity", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Infrastructure", "ProductShopping.Infrastructure\ProductShopping.Infrastructure.csproj", "{3DABDB84-78BF-4EA4-90A0-7C8B2EB73AB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Persistance", "ProductShopping.Persistance\ProductShopping.Persistance.csproj", "{9651EA25-F541-490A-ADBD-E9F8979536FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Persistence", "ProductShopping.Persistance\ProductShopping.Persistence.csproj", "{9651EA25-F541-490A-ADBD-E9F8979536FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{BF4654AC-1709-4EA8-9346-CD87C1688762}"
 EndProject

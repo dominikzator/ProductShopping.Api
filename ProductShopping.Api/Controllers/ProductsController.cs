@@ -5,6 +5,7 @@ using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.Product;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
+using ProductShopping.Identity.Constants;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

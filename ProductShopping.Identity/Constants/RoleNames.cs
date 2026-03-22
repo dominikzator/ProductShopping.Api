@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.Api.Constants;
+﻿namespace ProductShopping.Identity.Constants;
 
 public static class RoleNames
 {

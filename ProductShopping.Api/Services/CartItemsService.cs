@@ -5,8 +5,8 @@ using ProductShopping.Api.Contracts;
 using ProductShopping.Api.DTOs.CartItem;
 using ProductShopping.Api.Results;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.Identity.DbContext;
 using ProductShopping.Domain.Models;
+using ProductShopping.Persistence.DatabaseContext;
 using System.Security.Claims;
 
 namespace ProductShopping.Api.Services;

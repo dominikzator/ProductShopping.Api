@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace ProductShopping.Identity.Migrations
+namespace ProductShopping.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedCategoryHasDataToAnonymousCreation : Migration
+    public partial class AddedRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

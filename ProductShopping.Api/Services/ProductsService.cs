@@ -9,7 +9,7 @@ using ProductShopping.Api.Results;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Domain.Models;
-using ProductShopping.Identity.DbContext;
+using ProductShopping.Persistence.DatabaseContext;
 
 namespace ProductShopping.Api.Services;
 

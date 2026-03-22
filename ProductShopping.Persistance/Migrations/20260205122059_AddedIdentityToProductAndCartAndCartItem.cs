@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace ProductShopping.Identity.Migrations
+namespace ProductShopping.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRoles : Migration
+    public partial class AddedIdentityToProductAndCartAndCartItem : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

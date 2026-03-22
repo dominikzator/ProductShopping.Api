@@ -1,14 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Constants;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Order;
 using ProductShopping.Api.DTOs.Payment;
 using ProductShopping.Api.Results;
 using ProductShopping.Domain.Enums;
-using ProductShopping.Identity.DbContext;
+using ProductShopping.Persistence.DatabaseContext;
 using Stripe.Checkout;
-using System.Text;
-using System.Text.Json;
 
 namespace ProductShopping.Api.Services;
 

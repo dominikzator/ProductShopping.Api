@@ -7,7 +7,7 @@
 namespace ProductShopping.Identity.Migrations
 {
     /// <inheritdoc />
-    public partial class RolesFix : Migration
+    public partial class AddedRolesConfigurations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

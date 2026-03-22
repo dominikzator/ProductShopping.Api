@@ -9,11 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProductShopping.Application.Models.Identity;
 using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ProductShopping.Identity;
 
@@ -22,7 +18,7 @@ public static class IdentityServicesRegistration
     public static IServiceCollection AddIdentityServices(this IServiceCollection services, WebApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("ProductShoppingDbConnectionString");
-        services.AddDbContext<ProductShoppingDbContext>(options =>
+        services.AddDbContext<ProductShoppingIdentityDbContext>(options =>
         {
             options.UseSqlServer(connectionString, sqlOptions =>
             {
@@ -44,7 +40,7 @@ public static class IdentityServicesRegistration
 
         services.AddIdentityApiEndpoints<ApplicationUser>()
         .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<ProductShoppingDbContext>()
+        .AddEntityFrameworkStores<ProductShoppingIdentityDbContext>()
         .AddDefaultTokenProviders();
 
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));

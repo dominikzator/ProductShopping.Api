@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ProductShopping.Identity.Migrations
+namespace ProductShopping.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitialModels : Migration

@@ -29,7 +29,7 @@ public class KeepAliveDbService : IHostedService, IAsyncDisposable
     private async void DoWork(object? state)
     {
         using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ProductShoppingDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ProductShoppingIdentityDbContext>();
 
         try
         {

@@ -4,7 +4,7 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ProductShopping.Identity.Migrations
+namespace ProductShopping.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class AddedDedicatedSeederToCategories : Migration
