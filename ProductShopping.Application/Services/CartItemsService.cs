@@ -20,7 +20,7 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
         var query = context.CartItems.AsQueryable();
 
         var cartItems = await query
-            .Where(c => c.CartId == userCart.CartId)
+            .Where(c => c.CartId == userCart.Id)
             .Include(c => c.Product)
             .ThenInclude(p => p.Category).ToListAsync();
 
@@ -40,7 +40,7 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
         var userCart = await GetUserCart();
 
         var cartItem = await context.CartItems
-            .Where(c => c.CartId == userCart.CartId && c.Id == id)
+            .Where(c => c.CartId == userCart.Id && c.Id == id)
             .Include(c => c.Product)
             .ThenInclude(p => p.Category)
             .FirstOrDefaultAsync();
@@ -73,7 +73,7 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
             return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"A Product with id: '{createCartItemDto.ProductId}' does not exists."));
         }
 
-        var cartItem = context.CartItems.FirstOrDefault(cartItem => cartItem.ProductId == createCartItemDto.ProductId && cartItem.CartId == userCart.CartId);
+        var cartItem = context.CartItems.FirstOrDefault(cartItem => cartItem.ProductId == createCartItemDto.ProductId && cartItem.CartId == userCart.Id);
 
         if (cartItem != null)
         {
@@ -83,7 +83,7 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
         else
         {
             cartItem = mapper.Map<CartItem>(createCartItemDto);
-            cartItem.CartId = userCart.CartId;
+            cartItem.CartId = userCart.Id;
 
             context.CartItems.Add(cartItem);
         }

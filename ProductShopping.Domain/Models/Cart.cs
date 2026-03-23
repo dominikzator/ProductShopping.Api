@@ -1,14 +1,11 @@
-﻿namespace ProductShopping.Domain.Models;
+﻿using ProductShopping.Domain.Common;
 
-public class Cart
+namespace ProductShopping.Domain.Models;
+
+public class Cart : BaseEntity
 {
-    public int CartId { get; set; }
-
     public string UserId { get; set; }
     //public ApplicationUser User { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 
     public List<CartItem> CartItems { get; set; }
 }

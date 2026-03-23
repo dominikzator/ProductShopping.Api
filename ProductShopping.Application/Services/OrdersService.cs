@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace ProductShopping.Application.Services;
 
-public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersService> logger, 
+public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersService> logger,
     IConfiguration config, ICartItemsService cartItemsService, IPaymentsService paymentsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
 {
     public async Task<Result<PagedResult<GetOrderDto>>> GetOrdersAsync(PaginationParameters paginationParameters)
@@ -127,8 +127,6 @@ public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersServi
 
         var order = new Order
         {
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
             Address = createOrderDto.Address,
             CustomerId = userId,
             OrderNumber = orderNumber
@@ -143,8 +141,6 @@ public class OrdersService(ProductShoppingDbContext context, ILogger<OrdersServi
             var orderItem = new OrderItem
             {
                 OrderId = createdOrder.OrderId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
                 CustomerId = userId,
                 ProductId = item.ProductId,
                 ProductName = item.Product.Name,

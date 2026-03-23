@@ -62,8 +62,6 @@ public class UsersService(UserManager<ApplicationUser> userManager
             {
                 UserId = registeredUser.Id,
                 //User = user,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
             };
             productShoppingDbContext.Carts.Add(userCart);
 

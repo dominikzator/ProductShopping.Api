@@ -37,7 +37,7 @@ public class ProductShoppingDbContext : DbContext
         });
         builder.Entity<Cart>(entity =>
         {
-            entity.Property(e => e.CartId).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
         builder.Entity<CartItem>(entity =>
         {

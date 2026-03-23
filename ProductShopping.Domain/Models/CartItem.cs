@@ -1,9 +1,9 @@
-﻿namespace ProductShopping.Domain.Models;
+﻿using ProductShopping.Domain.Common;
 
-public class CartItem
+namespace ProductShopping.Domain.Models;
+
+public class CartItem : BaseEntity
 {
-    public int Id { get; set; }
-
     public int CartId { get; set; }
     public Cart Cart { get; set; }
 

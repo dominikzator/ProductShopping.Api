@@ -1,8 +1,9 @@
-﻿namespace ProductShopping.Domain.Models;
+﻿using ProductShopping.Domain.Common;
 
-public class Product
+namespace ProductShopping.Domain.Models;
+
+public class Product : BaseEntity
 {
-    public int Id { get; set; }
     public string Name { get; set; }
 
     public int CategoryId { get; set;}

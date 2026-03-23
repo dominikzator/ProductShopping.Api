@@ -61,7 +61,7 @@ public class PaymentsService(ProductShoppingDbContext context, IMapper mapper) :
 
     public async Task<Result> SetOrderPayed(int orderId)
     {
-        var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+        var order = await context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
         if(order == null)
         {
             return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{orderId}' was not found."));
