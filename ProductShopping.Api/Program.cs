@@ -1,17 +1,12 @@
-﻿using Azure.Storage.Blobs;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.Services;
-using ProductShopping.Api.Services.Utilities;
+using ProductShopping.Application;
 using ProductShopping.Application.Models.Identity;
 using ProductShopping.Identity;
 using ProductShopping.Identity.Models;
 using ProductShopping.Infrastructure;
 using ProductShopping.Persistence;
-using Stripe;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using System.Text;
@@ -30,19 +25,10 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 builder.Services.AddInfrastructureServices(builder);
 builder.Services.AddIdentityServices(builder);
 builder.Services.AddPersistenceServices(builder);
+builder.Services.AddApplicationServices();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();
-
-builder.Services.AddAutoMapper(config => { }, typeof(ProductMappingProfile).Assembly);
-
-builder.Services.AddScoped<IProductsService, ProductsService>();
-builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<ICartItemsService, CartItemsService>();
-builder.Services.AddScoped<IOrdersService, OrdersService>();
-builder.Services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
-builder.Services.AddScoped<IPaymentsService, PaymentsService>();
-builder.Services.AddScoped<IMailService, MailService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
@@ -75,12 +61,6 @@ builder.Services.AddAuthentication(options =>
 //.AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { })
 //.AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(AuthenticationDefaults.apiKeyScheme, _ => { }
 //);
-
-
-builder.Services.AddSingleton(x =>
-    new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
-
-StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -168,7 +148,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
-builder.Services.AddHostedService<KeepAliveDbService>();
 
 builder.Services.AddCors(options =>
 {
@@ -203,7 +182,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 app.UseAuthorization();
-
 
 app.MapControllers();
 

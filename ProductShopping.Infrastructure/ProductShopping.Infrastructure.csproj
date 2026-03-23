@@ -8,11 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.23" />
+    <PackageReference Include="Stripe.net" Version="48.4.0" />
+    <PackageReference Include="Sdcb.StabilityAI" Version="1.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ProductShopping.Application\ProductShopping.Application.csproj" />
     <ProjectReference Include="..\ProductShopping.Identity\ProductShopping.Identity.csproj" />
+    <ProjectReference Include="..\ProductShopping.Persistance\ProductShopping.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

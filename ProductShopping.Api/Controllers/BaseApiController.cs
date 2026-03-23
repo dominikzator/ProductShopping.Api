@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Api.Constants;
-using ProductShopping.Api.Results;
+using ProductShopping.Application.Constants;
+using ProductShopping.Application.Results;
 
 namespace ProductShopping.Api.Controllers;
 

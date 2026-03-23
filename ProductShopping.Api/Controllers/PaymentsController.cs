@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Application.Contracts;
 using ProductShopping.Identity.Models;
 using Stripe;
 using Stripe.Checkout;

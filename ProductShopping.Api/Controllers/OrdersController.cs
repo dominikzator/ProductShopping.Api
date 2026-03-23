@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Api.Constants;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Order;
+using ProductShopping.Application.Contracts;
+using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Identity.Constants;
 

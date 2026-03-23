@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Auth;
+using ProductShopping.Application.DTOs.Auth;
 using ProductShopping.Identity.Models;
 using System.Text;
 
