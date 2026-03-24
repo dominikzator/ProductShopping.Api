@@ -5,14 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Models;
-using ProductShopping.Persistence.DatabaseContext;
+using System.Security.Claims;
 using System.Text;
 
 namespace ProductShopping.Application.Services;
 
-public class MailService(ProductShoppingDbContext context, IIdentityUserService identityUserService, ILogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
+public class MailService(IOrdersRepository ordersRepository, IIdentityUserService identityUserService,
+    ILogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
 {
     public async Task<Result> SendEmailAsync(string email, string title, string description)
     {
@@ -65,9 +67,7 @@ public class MailService(ProductShoppingDbContext context, IIdentityUserService 
     {
         try
         {
-            var order = await context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
-
-            var userId = await identityUserService.GetUserIdFromOrderAsync(order);
+            var userId = GetUserId();
 
             var emailConfirmed = await identityUserService.IsEmailConfirmedAsync(userId);
             logger.LogInformation($"Emailconfirmed: " + emailConfirmed);
@@ -90,10 +90,11 @@ public class MailService(ProductShoppingDbContext context, IIdentityUserService 
 
     private async Task<Result> SendPaymentConfirmationEmail(int orderId, string userEmail)
     {
-        var order = await context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == orderId);
+        var userId = GetUserId();
+        var order = await ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
 
-        var subject = $"Hello, we have received your payment for order: {order.OrderNumber}";
-        var message = GetItemListings(order.OrderItems);
+        var subject = $"Hello, we have received your payment for order: {order.Value!.OrderNumber}";
+        var message = GetItemListings(order.Value.OrderItems);
 
         try
         {
@@ -122,6 +123,12 @@ public class MailService(ProductShoppingDbContext context, IIdentityUserService 
 
         return stringBuilder.ToString();
     }
+
+    private string GetUserId() => httpContextAccessor?
+        .HttpContext?
+        .User?
+        .FindFirst(ClaimTypes.NameIdentifier)?.Value
+    ?? string.Empty;
 }
 
 public class EmailData

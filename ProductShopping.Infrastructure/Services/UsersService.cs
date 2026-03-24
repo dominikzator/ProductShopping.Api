@@ -6,23 +6,23 @@ using Microsoft.Extensions.Logging;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.Auth;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Models;
 using ProductShopping.Identity.Constants;
 using ProductShopping.Identity.Models;
-using ProductShopping.Persistence.DatabaseContext;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace ProductShopping.Application.Services;
 
-public class UsersService(UserManager<ApplicationUser> userManager
+public class UsersService(ICartsRepository cartsRepository
+    , UserManager<ApplicationUser> userManager
     , IJWTService jWTService
     , IMailService mailService
     , IConfiguration config
-    , ProductShoppingDbContext productShoppingDbContext
     , IHttpContextAccessor httpContextAccessor
     , ILogger<UsersService> logger) : IUsersService
 {
@@ -56,17 +56,11 @@ public class UsersService(UserManager<ApplicationUser> userManager
             Id = user.Id
         };
 
-        if (!productShoppingDbContext.Carts.Any(cart => cart.UserId == registeredUser.Id))
+        var userCart = new Cart
         {
-            var userCart = new Cart
-            {
-                UserId = registeredUser.Id,
-                //User = user,
-            };
-            productShoppingDbContext.Carts.Add(userCart);
-
-            await productShoppingDbContext.SaveChangesAsync();
-        }
+            UserId = registeredUser.Id,
+        };
+        await cartsRepository.CreateAsync(userCart);
 
         var emailConfirmed = await userManager.IsEmailConfirmedAsync(user);
 

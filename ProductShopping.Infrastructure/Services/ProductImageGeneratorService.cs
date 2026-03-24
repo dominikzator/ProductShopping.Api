@@ -1,12 +1,10 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs;
-using ProductShopping.Persistence.DatabaseContext;
-using Sdcb.StabilityAI;
 using System.Text;
 using System.Text.Json;
 
@@ -14,29 +12,26 @@ namespace ProductShopping.Infrastructure.Services;
 
 public class ProductImageGeneratorService : IProductImageGeneratorService
 {
-    private readonly StabilityAIClient _stabilityClient;
+    private readonly IProductsRepository _productsRepository;
     private readonly BlobContainerClient _blobClient;
-    private readonly ProductShoppingDbContext _context;
     private readonly IConfiguration _config;
     private readonly ILogger<ProductImageGeneratorService> _logger;
 
     public ProductImageGeneratorService(
+        IProductsRepository productsRepository,
         IConfiguration config,
         BlobServiceClient blobServiceClient,
-        ProductShoppingDbContext context,
         ILogger<ProductImageGeneratorService> logger)
     {
+        _productsRepository = productsRepository;
         _config = config;
-        _stabilityClient = new StabilityAIClient(_config["StabilityAI:ApiKey"]);
         _blobClient = blobServiceClient.GetBlobContainerClient("productshoppingapi");
-        _context = context;
         _logger = logger;
     }
 
     public async Task<GeneratedImageDto> GenerateProductImageAsync(int productId)
     {
-        var product = await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == productId)
-            ?? throw new Exception($"Produkt {productId} nie znaleziony");
+        var product = await _productsRepository.GetByIdAsync(productId) ?? throw new Exception($"Produkt {productId} nie znaleziony");
 
         var prompt = $"Product of category: {product.Category.Name}, Name: {product.Name}";
 

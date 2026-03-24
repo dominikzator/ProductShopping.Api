@@ -23,7 +23,7 @@ public class CartItemsService(ICartsRepository cartsRepository, IUsersService us
 
         var cartItems = await cartsRepository.GetUserCartItemsAsync(userId);
 
-        var dtos = mapper.Map<List<GetCartItemDto>>(cartItems);
+        var dtos = mapper.Map<List<GetCartItemDto>>(cartItems.Value);
 
         var pagedResult = new PagedResult<GetCartItemDto>
         {
@@ -84,7 +84,7 @@ public class CartItemsService(ICartsRepository cartsRepository, IUsersService us
         }
 
         var savedItem = await cartsRepository.GetUserCartItemAsync(userId, cartItem.Id);
-        var outputDto = mapper.Map<GetCartItemDto>(savedItem);
+        var outputDto = mapper.Map<GetCartItemDto>(savedItem.Value);
 
         return Result<GetCartItemDto>.Success(outputDto);
     }

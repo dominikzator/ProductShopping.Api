@@ -149,7 +149,7 @@ public class OrdersService(IOrdersRepository ordersRepository, ICartsRepository 
             OrderId = createdOrder.Value.Id,
             Domain = domainName,
             OrderNumber = createdOrder.Value.OrderNumber,
-            Items = mapper.Map<List<GetOrderItemDto>>(orderItems),
+            Items = mapper.Map<List<GetOrderItemDto>>(orderItems.Value),
             TotalPrice = ordersRepository.GetOrderItemsTotalPrice(orderItems.Value!).Value,
             UserEmail = userEmail
         });

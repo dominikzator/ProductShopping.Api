@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
@@ -7,7 +6,6 @@ using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Results;
-using ProductShopping.Domain.Enums;
 using Stripe.Checkout;
 
 namespace ProductShopping.Application.Services;
@@ -55,9 +53,10 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
 
         var userId = usersService.GetUserId();
 
+        var order = await ordersRepository.GetUserOrderAsync(userId, paymentRequest.OrderId.ToString());
         var orderItems = await ordersRepository.GetUserOrderItemsByOrderIdAsync(userId, paymentRequest.OrderId.ToString());
 
-        var outputDto = mapper.Map<GetOrderDto>(paymentRequest);
+        var outputDto = mapper.Map<GetOrderDto>(order.Value);
         outputDto.PaymentUrl = session.Url;
         outputDto.OrderItems = mapper.Map<List<GetOrderItemDto>>(orderItems.Value);
 

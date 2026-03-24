@@ -3,7 +3,7 @@ using ProductShopping.Domain.Models;
 
 namespace ProductShopping.Application.Contracts.Persistence
 {
-    public interface ICartsRepository
+    public interface ICartsRepository : IGenericRepository<Cart>
     {
         Task<Result<bool>> ClearCartAsync(string userId);
         Task<Result<bool>> CreateCartItemAsync(CartItem cartItem);
