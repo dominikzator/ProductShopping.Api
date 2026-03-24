@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductShopping.Persistence.DatabaseContext;
 
@@ -11,9 +12,11 @@ using ProductShopping.Persistence.DatabaseContext;
 namespace ProductShopping.Persistence.Migrations
 {
     [DbContext(typeof(ProductShoppingDbContext))]
-    partial class ProductShoppingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324200857_MigrationAfterAddingRepositoryPattern")]
+    partial class MigrationAfterAddingRepositoryPattern
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

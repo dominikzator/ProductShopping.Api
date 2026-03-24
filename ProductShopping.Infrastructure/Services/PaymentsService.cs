@@ -1,17 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Enums;
-using ProductShopping.Persistence.DatabaseContext;
 using Stripe.Checkout;
 
 namespace ProductShopping.Application.Services;
 
-public class PaymentsService(ProductShoppingDbContext context, IMapper mapper) : IPaymentsService
+public class PaymentsService(IOrdersRepository ordersRepository, IUsersService usersService, IMapper mapper) : IPaymentsService
 {
     public async Task<GetOrderDto> CreatePaymentSessionAsync(PaymentRequestDto paymentRequest)
     {
@@ -52,30 +53,28 @@ public class PaymentsService(ProductShoppingDbContext context, IMapper mapper) :
 
         var session = await service.CreateAsync(options);
 
+        var userId = usersService.GetUserId();
+
+        var orderItems = await ordersRepository.GetUserOrderItemsByOrderIdAsync(userId, paymentRequest.OrderId.ToString());
+
         var outputDto = mapper.Map<GetOrderDto>(paymentRequest);
         outputDto.PaymentUrl = session.Url;
-        outputDto.OrderItems = mapper.Map<List<GetOrderItemDto>>(orderItems);
+        outputDto.OrderItems = mapper.Map<List<GetOrderItemDto>>(orderItems.Value);
 
         return outputDto;
     }
 
     public async Task<Result> SetOrderPayed(int orderId)
     {
-        var order = await context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        var userId = usersService.GetUserId();
+
+        var order = ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
         if(order == null)
         {
             return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{orderId}' was not found."));
         }
-        order.OrderStatus = OrderStatus.Payed;
-        context.Orders.Update(order);
 
-        foreach (var orderItem in context.OrderItems.Where(o => o.OrderId == orderId))
-        {
-            orderItem.OrderStatus = OrderStatus.Payed;
-            context.OrderItems.Update(orderItem);
-        }
-
-        await context.SaveChangesAsync();
+        await ordersRepository.SetUserOrderPayedAsync(userId, orderId);
 
         return Result.Success();
     }

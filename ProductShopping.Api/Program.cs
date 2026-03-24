@@ -22,10 +22,10 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 
 // Add services to the container.
 
-builder.Services.AddInfrastructureServices(builder);
-builder.Services.AddIdentityServices(builder);
-builder.Services.AddPersistenceServices(builder);
 builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder);
+builder.Services.AddPersistenceServices(builder);
+builder.Services.AddIdentityServices(builder);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();

@@ -45,9 +45,6 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
     {
         var products = _context.Products.AsQueryable();
 
-        var totalCount = await products.CountAsync();
-        var totalPages = (int)Math.Ceiling(totalCount / (double)paginationParameters.PageSize);
-
         if (!string.IsNullOrWhiteSpace(filters.Search))
         {
             var search = filters.Search.Trim();
@@ -91,6 +88,9 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
             .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
             .Take(paginationParameters.PageSize)
             .ToListAsync();
+
+        var totalCount = queryableProducts.Count();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)paginationParameters.PageSize);
 
         return (finalItems, totalCount, totalPages);
     }

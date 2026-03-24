@@ -1,8 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Services;
 using ProductShopping.Persistence.DatabaseContext;
-using Microsoft.AspNetCore.Builder;
+using ProductShopping.Persistence.Repositories;
 
 namespace ProductShopping.Persistence;
 
@@ -30,6 +34,10 @@ public static class PersistenceServicesRegistration
 
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+
+        services.AddScoped<ICartsRepository, CartsRepository>();
+        services.AddScoped<IOrdersRepository, OrdersRepository>();
+        services.AddScoped<IProductsRepository, ProductsRepository>();
 
         return services;
     }

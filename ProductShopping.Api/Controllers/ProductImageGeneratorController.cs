@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Api.Constants;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.ImageGeneration;
-using ProductShopping.Api.Services;
+using ProductShopping.Application.Contracts;
+using ProductShopping.Application.DTOs;
 using ProductShopping.Identity.Constants;
 
 namespace ProductShopping.Api.Controllers;

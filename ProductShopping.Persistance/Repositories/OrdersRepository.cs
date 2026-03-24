@@ -4,6 +4,7 @@ using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.Product;
 using ProductShopping.Application.Results;
+using ProductShopping.Domain.Enums;
 using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.DatabaseContext;
 
@@ -75,6 +76,14 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
         return Result<bool>.Success(true);
     }
 
+    public async Task<Result<bool>> UpdateOrderItemAsync(OrderItem orderItem)
+    {
+        _context.OrderItems.Update(orderItem);
+        await _context.SaveChangesAsync();
+
+        return Result<bool>.Success(true);
+    }
+
     public async Task<Result<bool>> RemoveOrderItemAsync(OrderItem orderItem)
     {
         _context.OrderItems.Remove(orderItem);
@@ -96,5 +105,23 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
         decimal totalPrice = orderItems.Sum(o => o.TotalPrice);
 
         return Result<decimal>.Success(totalPrice);
+    }
+
+    public async Task<Result<bool>> SetUserOrderPayedAsync(string userId, int orderId)
+    {
+        var orderResult = await GetUserOrderAsync(userId, orderId.ToString());
+
+        var order = orderResult.Value;
+
+        order!.OrderStatus = OrderStatus.Payed;
+        await UpdateAsync(order);
+
+        foreach (var orderItem in order.OrderItems.Where(o => o.OrderId == orderId))
+        {
+            orderItem.OrderStatus = OrderStatus.Payed;
+            await UpdateOrderItemAsync(orderItem);
+        }
+
+        return Result<bool>.Success(true);
     }
 }
