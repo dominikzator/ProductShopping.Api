@@ -8,6 +8,7 @@ namespace ProductShopping.Api.Contracts
         Task<Result<string>> LoginAsync(LoginUserDto dto);
         Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto);
 
-        string UserId { get; }
+        string GetUserId();
+        string GetUserEmail();
     }
 }

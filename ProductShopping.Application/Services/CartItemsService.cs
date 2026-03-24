@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.CartItem;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Application.Results;
@@ -11,18 +13,15 @@ using System.Security.Claims;
 
 namespace ProductShopping.Application.Services;
 
-public class CartItemsService(ProductShoppingDbContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper, ILogger<CartItemsService> logger) : ICartItemsService
+public class CartItemsService(ICartsRepository cartsRepository, IUsersService usersService,
+    IHttpContextAccessor httpContextAccessor, IMapper mapper, ILogger<CartItemsService> logger) : ICartItemsService
 {
     public async Task<Result<PagedResult<GetCartItemDto>>> GetCartItemsAsync(PaginationParameters paginationParameters)
     {
-        var userCart = await GetUserCart();
+        var userId = usersService.GetUserId();
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        var query = context.CartItems.AsQueryable();
-
-        var cartItems = await query
-            .Where(c => c.CartId == userCart.Id)
-            .Include(c => c.Product)
-            .ThenInclude(p => p.Category).ToListAsync();
+        var cartItems = await cartsRepository.GetUserCartItemsAsync(userId);
 
         var dtos = mapper.Map<List<GetCartItemDto>>(cartItems);
 
@@ -35,19 +34,16 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
         return Result<PagedResult<GetCartItemDto>>.Success(pagedResult);
     }
 
-    public async Task<Result<GetCartItemDto>> GetCartItemAsync(int id)
+    public async Task<Result<GetCartItemDto>> GetCartItemAsync(int cartItemId)
     {
-        var userCart = await GetUserCart();
+        var userId = usersService.GetUserId();
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        var cartItem = await context.CartItems
-            .Where(c => c.CartId == userCart.Id && c.Id == id)
-            .Include(c => c.Product)
-            .ThenInclude(p => p.Category)
-            .FirstOrDefaultAsync();
+        var cartItem = cartsRepository.GetUserCartItemAsync(userId, cartItemId);
 
         if (cartItem is null)
         {
-            return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"CartItem '{id}' was not found."));
+            return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"CartItem '{cartItemId}' was not found."));
         }
 
         var outputDto = mapper.Map<GetCartItemDto>(cartItem);
@@ -57,43 +53,37 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
 
     public async Task<Result<GetCartItemDto>> AddCartItemToCartAsync(CreateCartItemDto createCartItemDto)
     {
-        var userCart = await GetUserCart();
+        var userId = usersService.GetUserId();
+        var userEmail = usersService.GetUserEmail();
 
-        if(userCart == null)
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
+
+        if (userCart.Value == null)
         {
             return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.Failure, 
-                $"User '{httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value}' " +
+                $"User '{userEmail}' " +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
-        var product = await context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == createCartItemDto.ProductId);
+        var cartItemResult = await cartsRepository.GetUserCartItemByProductIdAsync(userId, createCartItemDto.ProductId);
 
-        if(product == null)
-        {
-            return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"A Product with id: '{createCartItemDto.ProductId}' does not exists."));
-        }
-
-        var cartItem = context.CartItems.FirstOrDefault(cartItem => cartItem.ProductId == createCartItemDto.ProductId && cartItem.CartId == userCart.Id);
+        CartItem cartItem = cartItemResult.Value!;
 
         if (cartItem != null)
         {
             cartItem.Quantity += createCartItemDto.Quantity;
-            context.CartItems.Update(cartItem);
+
+            await cartsRepository.UpdateCartItemAsync(cartItem);
         }
         else
         {
             cartItem = mapper.Map<CartItem>(createCartItemDto);
-            cartItem.CartId = userCart.Id;
+            cartItem.CartId = userCart.Value.Id;
 
-            context.CartItems.Add(cartItem);
+            await cartsRepository.CreateCartItemAsync(cartItem);
         }
-        await context.SaveChangesAsync();
 
-        var savedItem = await context.CartItems
-            .Include(c => c.Product)
-            .ThenInclude(c => c.Category)
-            .FirstAsync(c => c.Id == cartItem.Id);
-
+        var savedItem = await cartsRepository.GetUserCartItemAsync(userId, cartItem.Id);
         var outputDto = mapper.Map<GetCartItemDto>(savedItem);
 
         return Result<GetCartItemDto>.Success(outputDto);
@@ -101,16 +91,19 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
 
     public async Task<Result> DeleteCartItemFromCartAsync(RemoveCartItemDto removeCartItemDto)
     {
-        var userCart = await GetUserCart();
+        var userId = usersService.GetUserId();
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        if (userCart == null)
+        if (userCart.Value == null)
         {
             return Result.Failure(new Error(ErrorCodes.Failure,
                 $"User '{httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value}' " +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
-        var cartItem = context.CartItems.FirstOrDefault(cartItem => cartItem.Id == removeCartItemDto.CartItemId);
+        var cartItemResult = await cartsRepository.GetUserCartItemAsync(userId, removeCartItemDto.CartItemId);
+
+        var cartItem = cartItemResult.Value;
 
         if (cartItem == null)
         {
@@ -124,43 +117,36 @@ public class CartItemsService(ProductShoppingDbContext context, IHttpContextAcce
         else if (removeCartItemDto.Quantity < cartItem.Quantity)
         {
             cartItem.Quantity -= removeCartItemDto.Quantity;
-            context.CartItems.Update(cartItem);
+
+            await cartsRepository.UpdateCartItemAsync(cartItem);
         }
         else
         {
-            context.CartItems.Remove(cartItem);
+            await cartsRepository.DeleteCartItemAsync(cartItem);
         }
-        await context.SaveChangesAsync();
 
         return Result.Success();
     }
 
-    public async Task<Cart?> GetUserCart() => await context.Carts
-            .Include(c => c.CartItems)
-            .FirstOrDefaultAsync(c => c.UserId ==
-                httpContextAccessor
-                .HttpContext!
-                .User
-                .FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
     public async Task<Result> ClearCartAsync()
     {
-        var userCart = await GetUserCart();
+        var userId = usersService.GetUserId();
+        var userEmail = usersService.GetUserEmail();
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        if (userCart == null)
+        if (userCart.Value == null)
         {
             return Result.Failure(new Error(ErrorCodes.Failure,
-                $"User '{httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value}' " +
+                $"User '{userEmail}' " +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
-        if (userCart.CartItems.Count == 0)
+        if (userCart.Value.CartItems.Count == 0)
         {
             return Result.Failure(new Error(ErrorCodes.Failure, $"User Cart is empty. There is nothing to delete."));
         }
 
-        context.CartItems.RemoveRange(userCart.CartItems);
-        await context.SaveChangesAsync();
+        await cartsRepository.ClearCartAsync(userId);
 
         return Result.Success();
     }

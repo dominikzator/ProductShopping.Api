@@ -65,7 +65,7 @@ public class MailService(ProductShoppingDbContext context, IIdentityUserService 
     {
         try
         {
-            var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            var order = await context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
 
             var userId = await identityUserService.GetUserIdFromOrderAsync(order);
 
@@ -90,7 +90,7 @@ public class MailService(ProductShoppingDbContext context, IIdentityUserService 
 
     private async Task<Result> SendPaymentConfirmationEmail(int orderId, string userEmail)
     {
-        var order = await context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.OrderId == orderId);
+        var order = await context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == orderId);
 
         var subject = $"Hello, we have received your payment for order: {order.OrderNumber}";
         var message = GetItemListings(order.OrderItems);

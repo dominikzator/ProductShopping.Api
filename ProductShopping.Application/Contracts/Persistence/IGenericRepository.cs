@@ -1,4 +1,6 @@
-﻿using ProductShopping.Domain.Common;
+﻿using ProductShopping.Application.Results;
+using ProductShopping.Domain.Common;
+using ProductShopping.Domain.Models;
 
 namespace ProductShopping.Application.Contracts.Persistence
 {
@@ -7,7 +9,7 @@ namespace ProductShopping.Application.Contracts.Persistence
         Task CreateAsync(T entity);
         Task DeleteAsync(T entity);
         Task<IReadOnlyList<T>> GetAsync();
-        Task<T> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(int? id);
         Task UpdateAsync(T entity);
     }
 }

@@ -7,7 +7,7 @@ namespace ProductShopping.Application.Contracts;
 
 public interface IProductsService
 {
-    Task<Result<PagedResult<GetProductDto>>> GetProductsAsync(PaginationParameters paginationParameters, ProductFilterParameters filters);
+    Task<Result<PagedResult<GetProductDto>>> GetProductsAsync(ProductFilterParameters filters, PaginationParameters paginationParameters);
     Task<Result<GetProductDto>> GetProductAsync(int id);
     Task<Result<GetProductDto>> CreateProductAsync(CreateProductDto productDto);
     Task<Result> UpdateProductAsync(int id, UpdateProductDto productDto);

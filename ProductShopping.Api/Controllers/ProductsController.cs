@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Api.Constants;
-using ProductShopping.Api.Contracts;
-using ProductShopping.Api.DTOs.Product;
+using ProductShopping.Application.Contracts;
+using ProductShopping.Application.DTOs.Product;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Identity.Constants;
@@ -22,9 +21,9 @@ namespace ProductShopping.Api.Controllers
         /// <param name="productFilters"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] PaginationParameters paginationParameters, [FromQuery] ProductFilterParameters productFilters)
+        public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] ProductFilterParameters productFilters, [FromQuery] PaginationParameters paginationParameters)
         {
-            var result = await productsService.GetProductsAsync(paginationParameters, productFilters);
+            var result = await productsService.GetProductsAsync(productFilters, paginationParameters);
 
             return ToActionResult(result);
         }

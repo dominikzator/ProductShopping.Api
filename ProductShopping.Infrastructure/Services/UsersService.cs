@@ -105,7 +105,7 @@ public class UsersService(UserManager<ApplicationUser> userManager
         }
 
         //Issue a token
-        var token = await jWTService.GenerateToken(new Application.DTOs.UserDto
+        var token = await jWTService.GenerateToken(new DTOs.UserDto
         {
             Id = user.Id,
             Email = user.Email,
@@ -116,7 +116,7 @@ public class UsersService(UserManager<ApplicationUser> userManager
         return Result<string>.Success(token);
     }
 
-    public string UserId => httpContextAccessor?
+    public string GetUserId() => httpContextAccessor?
             .HttpContext?
             .User?
             .FindFirst(JwtRegisteredClaimNames.Sub)?.Value
@@ -125,4 +125,13 @@ public class UsersService(UserManager<ApplicationUser> userManager
             .User?
             .FindFirst(ClaimTypes.NameIdentifier)?.Value
         ?? string.Empty;
+
+    public string GetUserEmail() => httpContextAccessor?
+            .HttpContext?
+            .User?
+            .FindFirst(JwtRegisteredClaimNames.Email)?.Value!
+        ?? httpContextAccessor?
+            .HttpContext?
+            .User?
+            .FindFirst(ClaimTypes.Email)?.Value!;
 }

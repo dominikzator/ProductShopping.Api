@@ -5,7 +5,7 @@ using ProductShopping.Persistence.DatabaseContext;
 
 namespace ProductShopping.Persistence.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+    public abstract class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         protected readonly ProductShoppingDbContext _context;
 
@@ -30,7 +30,7 @@ namespace ProductShopping.Persistence.Repositories
             return await _context.Set<T>().AsNoTracking().ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int? id)
         {
             return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(q => q.Id == id);
         }
