@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using HR.LeaveManagement.Application.Contracts.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ProductShopping.Application.Contracts;
@@ -15,13 +16,13 @@ public class ProductImageGeneratorService : IProductImageGeneratorService
     private readonly IProductsRepository _productsRepository;
     private readonly BlobContainerClient _blobClient;
     private readonly IConfiguration _config;
-    private readonly ILogger<ProductImageGeneratorService> _logger;
+    private readonly IAppLogger<ProductImageGeneratorService> _logger;
 
     public ProductImageGeneratorService(
         IProductsRepository productsRepository,
         IConfiguration config,
         BlobServiceClient blobServiceClient,
-        ILogger<ProductImageGeneratorService> logger)
+        IAppLogger<ProductImageGeneratorService> logger)
     {
         _productsRepository = productsRepository;
         _config = config;
@@ -31,11 +32,11 @@ public class ProductImageGeneratorService : IProductImageGeneratorService
 
     public async Task<GeneratedImageDto> GenerateProductImageAsync(int productId)
     {
-        var product = await _productsRepository.GetByIdAsync(productId) ?? throw new Exception($"Produkt {productId} nie znaleziony");
+        var product = await _productsRepository.GetByIdAsync(productId) ?? throw new Exception($"Product {productId} not found");
 
         var prompt = $"Product of category: {product.Category.Name}, Name: {product.Name}";
 
-        _logger.LogInformation("Generowanie obrazu dla produktu {ProductId}: {Prompt}",
+        _logger.LogInformation("Generating Image for Product {ProductId}: {Prompt}",
             productId, prompt);
 
         var imageBytes = await GenerateImageRawAsync(prompt);
@@ -50,7 +51,7 @@ public class ProductImageGeneratorService : IProductImageGeneratorService
 
         var imageUrl = blobClient.Uri.ToString();
 
-        _logger.LogInformation("Obraz zapisany: {ImageUrl}", imageUrl);
+        _logger.LogInformation("Image saved: {ImageUrl}", imageUrl);
 
         return new GeneratedImageDto
         {

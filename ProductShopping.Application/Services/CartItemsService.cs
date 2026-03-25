@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
@@ -14,7 +13,7 @@ using System.Security.Claims;
 namespace ProductShopping.Application.Services;
 
 public class CartItemsService(ICartsRepository cartsRepository, IUsersService usersService,
-    IHttpContextAccessor httpContextAccessor, IMapper mapper, ILogger<CartItemsService> logger) : ICartItemsService
+    IHttpContextAccessor httpContextAccessor, IMapper mapper) : ICartItemsService
 {
     public async Task<Result<PagedResult<GetCartItemDto>>> GetCartItemsAsync(PaginationParameters paginationParameters)
     {

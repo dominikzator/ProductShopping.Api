@@ -1,4 +1,6 @@
 ﻿using Azure.Storage.Blobs;
+using HR.LeaveManagement.Application.Contracts.Logging;
+using HR.LeaveManagement.Infrastructure.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +22,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IPaymentsService, PaymentsService>();
         services.AddScoped<IMailService, MailService>();
         services.AddScoped<IUsersService, UsersService>();
+        services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
 
         builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Identity.Models;
 

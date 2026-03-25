@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using HR.LeaveManagement.Application.Contracts.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Contracts;
-using ProductShopping.Identity.Models;
 using Stripe;
 using Stripe.Checkout;
 
@@ -11,7 +9,8 @@ namespace ProductShopping.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PaymentsController(IPaymentsService paymentsService, UserManager<ApplicationUser> userManager, IMailService mailService, IConfiguration config, ILogger<PaymentsController> logger) : ControllerBase
+public class PaymentsController(IPaymentsService paymentsService,
+    IMailService mailService, IConfiguration config, IAppLogger<PaymentsController> logger) : ControllerBase
 {
     /// <summary>
     /// Anonymous webhook endpoint which is beeing called after successful payment. Changes Order Status to Payed. This shouldn't be called manually.
@@ -24,7 +23,7 @@ public class PaymentsController(IPaymentsService paymentsService, UserManager<Ap
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
         var signature = Request.Headers["Stripe-Signature"];
 
-        Console.WriteLine("StripeWebhook!");
+        logger.LogInformation("Stripe Webhook callback");
 
         try
         {
@@ -106,7 +105,7 @@ public class PaymentsController(IPaymentsService paymentsService, UserManager<Ap
         }
         catch (Exception ex)
         {
-            logger.LogInformation($"Error success: {ex.Message}");
+            logger.LogInformation($"Error: {ex.Message}");
 
             return StatusCode(500, "Redirection Error");
         }

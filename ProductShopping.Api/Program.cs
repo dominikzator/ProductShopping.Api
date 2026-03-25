@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using HR.LeaveManagement.Api.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProductShopping.Application;
@@ -7,20 +8,18 @@ using ProductShopping.Identity;
 using ProductShopping.Identity.Models;
 using ProductShopping.Infrastructure;
 using ProductShopping.Persistence;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/*Log.Information("Starting ProductShopping API");
-
 builder.Host.UseSerilog((context, services, configuration) => configuration
+        .WriteTo.Console()
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
-    );*/
-
-// Add services to the container.
+    );
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder);
@@ -35,7 +34,6 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 
 if (string.IsNullOrWhiteSpace(jwtSettings.Key))
 {
-    //Log.Fatal("JwtSettings:Key is not configured");
     throw new InvalidOperationException("JwtSettings:Key is not configured");
 }
 builder.Services.AddAuthentication(options =>
@@ -161,6 +159,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.MapGroup("api/defaultauth").MapIdentityApi<ApplicationUser>();
 
 app.UseSwagger();
@@ -176,7 +176,7 @@ app.UseSwaggerUI(options =>
     options.ShowExtensions();
     options.EnableValidator();
 });
-
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.UseCors();

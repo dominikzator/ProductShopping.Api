@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using HR.LeaveManagement.Application.Contracts.Logging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
@@ -24,7 +24,7 @@ public class UsersService(ICartsRepository cartsRepository
     , IMailService mailService
     , IConfiguration config
     , IHttpContextAccessor httpContextAccessor
-    , ILogger<UsersService> logger) : IUsersService
+    , IAppLogger<UsersService> logger) : IUsersService
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
@@ -76,8 +76,8 @@ public class UsersService(ICartsRepository cartsRepository
 
             await mailService.SendEmailAsync(
                 user.Email!,
-                "Potwierdź swój e-mail",
-                $"Kliknij, aby potwierdzić konto: {confirmationUrl}");
+                "Confirm your e-mail",
+                $"Click to confirm e-mail: {confirmationUrl}");
         }
 
         return Result<RegisteredUserDto>.Success(registeredUser);

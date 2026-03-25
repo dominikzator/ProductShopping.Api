@@ -14,7 +14,7 @@ using System.Security.Claims;
 
 namespace ProductShopping.Application.Services;
 
-public class OrdersService(IOrdersRepository ordersRepository, ICartsRepository cartsRepository, IUsersService usersService, ILogger<OrdersService> logger,
+public class OrdersService(IOrdersRepository ordersRepository, ICartsRepository cartsRepository, IUsersService usersService,
     IConfiguration config, ICartItemsService cartItemsService, IPaymentsService paymentsService, IHttpContextAccessor httpContextAccessor, IMapper mapper) : IOrdersService
 {
     public async Task<Result<PagedResult<GetOrderDto>>> GetOrdersAsync(PaginationParameters paginationParameters)

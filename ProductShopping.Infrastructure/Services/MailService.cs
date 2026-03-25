@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Azure.Communication.Email;
+using HR.LeaveManagement.Application.Contracts.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,7 @@ using System.Text;
 namespace ProductShopping.Application.Services;
 
 public class MailService(IOrdersRepository ordersRepository, IIdentityUserService identityUserService,
-    ILogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
+    IAppLogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
 {
     public async Task<Result> SendEmailAsync(string email, string title, string description)
     {

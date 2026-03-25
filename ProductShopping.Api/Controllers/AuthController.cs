@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using HR.LeaveManagement.Application.Contracts.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -12,7 +13,7 @@ namespace ProductShopping.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    public class AuthController(IUsersService usersService, UserManager<ApplicationUser> userManager, ILogger<AuthController> logger) : BaseApiController
+    public class AuthController(IUsersService usersService, UserManager<ApplicationUser> userManager, IAppLogger<AuthController> logger) : BaseApiController
     {
         /// <summary>
         /// Registers a user with given credentials. Can be called without authorization.
@@ -50,7 +51,7 @@ namespace ProductShopping.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
-            logger.LogInformation("Entered Anonymous ConfirmEmail Endpoint!");
+            logger.LogInformation("Entered Anonymous ConfirmEmail Endpoint");
 
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(code))
                 return BadRequest("Invalid data");

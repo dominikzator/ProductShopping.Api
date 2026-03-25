@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using HR.LeaveManagement.Application.Contracts.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.DTOs.Order;
@@ -9,7 +10,7 @@ namespace ProductShopping.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OrdersController(IOrdersService ordersService, ILogger<OrdersController> logger, IHttpContextAccessor httpContextAccessor) : BaseApiController
+public class OrdersController(IOrdersService ordersService) : BaseApiController
 {
     /// <summary>
     /// Returns all User Orders. Can be called only by authenticated User.
