@@ -1,7 +1,7 @@
-﻿using HR.LeaveManagement.Application.Contracts.Logging;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using Stripe;
 using Stripe.Checkout;
 

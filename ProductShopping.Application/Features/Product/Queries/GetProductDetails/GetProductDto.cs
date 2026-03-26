@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.Application.DTOs.Product;
+﻿namespace ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 
 public class GetProductDto
 {

@@ -96,4 +96,6 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
     }
 
     public async Task<ProductCategory?> GetCategoryFromNameAsync(string categoryName) => await _context.ProductCategories.FirstOrDefaultAsync(p => p.Name == categoryName);
+
+    public async Task<Product?> GetProductByNameAsync(string name) => await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
 }

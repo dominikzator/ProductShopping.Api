@@ -1,10 +1,15 @@
-﻿using HR.LeaveManagement.Application.Exceptions;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
-using ProductShopping.Application.DTOs.Product;
+using ProductShopping.Application.Features.Product.Commands.CreateProduct;
+using ProductShopping.Application.Features.Product.Commands.DeleteProduct;
+using ProductShopping.Application.Features.Product.Commands.UpdateProduct;
+using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
+using ProductShopping.Application.Features.Product.Queries.GetProducts;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
+using ProductShopping.Application.Results;
 using ProductShopping.Identity.Constants;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,7 +18,7 @@ namespace ProductShopping.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController(IProductsService productsService) : BaseApiController
+    public class ProductsController(IMediator mediator) : BaseApiController
     {
         /// <summary>
         /// Returns all Products in database paged by PaginationParameters and filtered by ProductFilterParameters. Can be called without authentication.
@@ -24,9 +29,9 @@ namespace ProductShopping.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] ProductFilterParameters productFilters, [FromQuery] PaginationParameters paginationParameters)
         {
-            var result = await productsService.GetProductsAsync(productFilters, paginationParameters);
+            var productsResult = await mediator.Send(new GetProductListQuery{ PaginationParameters = paginationParameters, ProductFilterParameters = productFilters });
 
-            return ToActionResult(result);
+            return ToActionResult(productsResult);
         }
 
         /// <summary>
@@ -37,9 +42,9 @@ namespace ProductShopping.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GetProductDto>> GetProduct(int id)
         {
-            var result = await productsService.GetProductAsync(id);
-
-            return ToActionResult(result);
+            var productResult = await mediator.Send(new GetProductDetailQuery { Id = id });
+            
+            return Ok(productResult);
         }
 
         /// <summary>
@@ -49,12 +54,11 @@ namespace ProductShopping.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = RoleNames.Administrator)]
-        public async Task<ActionResult<GetProductDto>> Post(CreateProductDto productDto)
+        public async Task<ActionResult<GetProductDto>> Post(CreateProductCommand product)
         {
-            var result = await productsService.CreateProductAsync(productDto);
-            if (!result.IsSuccess) return MapErrorsToResponse(result.Errors);
+            var createdProductDtoResult = await mediator.Send(product);
 
-            return CreatedAtAction(nameof(GetProduct), new { id = result.Value!.Id }, result.Value);
+            return CreatedAtAction(nameof(GetProduct), new { id = createdProductDtoResult.Value!.Id }, createdProductDtoResult.Value);
         }
 
         /// <summary>
@@ -65,11 +69,11 @@ namespace ProductShopping.Api.Controllers
         /// <returns></returns>
         [HttpPut("{id}")]
         [Authorize(Roles = RoleNames.Administrator)]
-        public async Task<ActionResult> Put(int id, UpdateProductDto updateDto)
+        public async Task<ActionResult> Put(UpdateProductCommand product)
         {
-            var result = await productsService.UpdateProductAsync(id, updateDto);
+            var updateResult = await mediator.Send<Result>(product);
 
-            return ToActionResult(result);
+            return ToActionResult(updateResult);
         }
 
         /// <summary>
@@ -81,9 +85,9 @@ namespace ProductShopping.Api.Controllers
         [Authorize(Roles = RoleNames.Administrator)]
         public async Task<ActionResult> Delete(int id)
         {
-            var result = await productsService.DeleteProductAsync(id);
+            var deleteResult = await mediator.Send(new DeleteProductCommand { Id = id });
 
-            return ToActionResult(result);
+            return ToActionResult(deleteResult);
         }
     }
 }

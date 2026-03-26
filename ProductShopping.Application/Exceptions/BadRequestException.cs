@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
 
-namespace HR.LeaveManagement.Application.Exceptions;
+namespace ProductShopping.Application.Exceptions;
 
 public class BadRequestException : Exception
 {

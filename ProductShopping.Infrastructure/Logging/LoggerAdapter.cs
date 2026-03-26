@@ -1,7 +1,7 @@
-﻿using HR.LeaveManagement.Application.Contracts.Logging;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using ProductShopping.Application.Contracts.Logging;
 
-namespace HR.LeaveManagement.Infrastructure.Logging;
+namespace ProductShopping.Infrastructure.Logging;
 
 public class LoggerAdapter<T> : IAppLogger<T>
 {

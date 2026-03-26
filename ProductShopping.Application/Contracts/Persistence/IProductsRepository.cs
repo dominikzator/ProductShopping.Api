@@ -10,6 +10,7 @@ namespace ProductShopping.Application.Contracts.Persistence
     {
         Task<ProductCategory?> GetCategoryFromNameAsync(string categoryName);
         Task<(List<Product> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters);
+        Task<Product> GetProductByNameAsync(string name);
         Task<Result<bool>> ValidateProductAsync(CreateProductDto productDto);
     }
 }

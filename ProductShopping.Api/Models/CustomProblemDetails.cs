@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace HR.LeaveManagement.Api.Models;
+namespace ProductShopping.Api.Models;
 
 public class CustomProblemDetails : ProblemDetails
 {

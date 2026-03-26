@@ -1,12 +1,12 @@
 ﻿using Azure.Storage.Blobs;
-using HR.LeaveManagement.Application.Contracts.Logging;
-using HR.LeaveManagement.Infrastructure.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Services;
+using ProductShopping.Infrastructure.Logging;
 using ProductShopping.Infrastructure.Services;
 using Stripe;
 

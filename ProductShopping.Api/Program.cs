@@ -1,7 +1,7 @@
-﻿using HR.LeaveManagement.Api.Middleware;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using ProductShopping.Api.Middleware;
 using ProductShopping.Application;
 using ProductShopping.Application.Models.Identity;
 using ProductShopping.Identity;

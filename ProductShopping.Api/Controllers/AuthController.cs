@@ -1,9 +1,9 @@
-﻿using HR.LeaveManagement.Application.Contracts.Logging;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.DTOs.Auth;
 using ProductShopping.Identity.Models;
 using System.Text;

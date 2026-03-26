@@ -1,11 +1,10 @@
 ﻿using Azure;
 using Azure.Communication.Email;
-using HR.LeaveManagement.Application.Contracts.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Models;

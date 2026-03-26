@@ -1,23 +1,21 @@
-﻿using HR.LeaveManagement.Api.Models;
-using HR.LeaveManagement.Application.Contracts.Logging;
-using HR.LeaveManagement.Application.Exceptions;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using ProductShopping.Api.Models;
+using ProductShopping.Application.Contracts.Logging;
+using ProductShopping.Application.Exceptions;
 using System.Net;
 
-namespace HR.LeaveManagement.Api.Middleware
+namespace ProductShopping.Api.Middleware
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IAppLogger<ExceptionMiddleware> _logger;
 
-        public ExceptionMiddleware(RequestDelegate next, IAppLogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
-            this._logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, IAppLogger<ExceptionMiddleware> logger)
         {
             try
             {
@@ -25,11 +23,11 @@ namespace HR.LeaveManagement.Api.Middleware
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(httpContext, ex);
+                await HandleExceptionAsync(httpContext, ex, logger);
             }
         }
 
-        private async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+        private async Task HandleExceptionAsync(HttpContext httpContext, Exception ex, IAppLogger<ExceptionMiddleware> logger)
         {
             HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
             CustomProblemDetails problem = new();
@@ -85,7 +83,7 @@ namespace HR.LeaveManagement.Api.Middleware
 
             httpContext.Response.StatusCode = (int)statusCode;
             var logMessage = JsonConvert.SerializeObject(problem);
-            _logger.LogError(logMessage);
+            logger.LogError(logMessage);
             await httpContext.Response.WriteAsJsonAsync(problem);
 
         }
