@@ -3,6 +3,7 @@ using ProductShopping.Application.DTOs.CartItem;
 using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.DTOs.Product;
+using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 

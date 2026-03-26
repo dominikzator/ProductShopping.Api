@@ -15,7 +15,7 @@ public class CreateProductCommandHandler(IProductsRepository productsRepository,
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
-            throw new BadRequestException("Invalid Leave Allocation Request", validationResult);
+            throw new ValidationFailedException("Validation failed for Creating a Product");
 
         var category = await productsRepository.GetCategoryFromNameAsync(request.CategoryName);
 

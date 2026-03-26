@@ -1,7 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.DTOs.CartItem;
+using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
+using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
+using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
+using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
+using ProductShopping.Application.Features.CartItem.Queries.GetCartItems;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Identity.Constants;
 
@@ -10,7 +16,7 @@ namespace ProductShopping.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = RoleNames.User)]
-public class CartController(ICartItemsService cartItemsService) : BaseApiController
+public class CartController(IMediator mediator) : BaseApiController
 {
     /// <summary>
     /// Returns all Cart Items from User Cart. Can be called only by authenticated User.
@@ -20,9 +26,9 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
     [HttpGet]
     public async Task<ActionResult<PagedResult<GetCartItemDto>>> GetCartItems([FromQuery] PaginationParameters paginationParameters)
     {
-        var result = await cartItemsService.GetCartItemsAsync(paginationParameters);
+        var cartItemsResult = await mediator.Send(new GetCartItemListQuery { PaginationParameters = paginationParameters });
 
-        return ToActionResult(result);
+        return ToActionResult(cartItemsResult);
     }
 
     /// <summary>
@@ -33,9 +39,9 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
     [HttpGet("{id}")]
     public async Task<ActionResult<GetCartItemDto>> GetCartItem(int id)
     {
-        var result = await cartItemsService.GetCartItemAsync(id);
+        var cartItemResult = await mediator.Send(new GetCartItemDetailQuery { Id = id });
 
-        return ToActionResult(result);
+        return ToActionResult(cartItemResult);
     }
 
     /// <summary>
@@ -44,12 +50,11 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
     /// <param name="cartItemDto"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<GetCartItemDto>> Post(CreateCartItemDto cartItemDto)
+    public async Task<ActionResult<GetCartItemDto>> Post(AddCartItemCommand cartItem)
     {
-        var result = await cartItemsService.AddCartItemToCartAsync(cartItemDto);
-        if (!result.IsSuccess) return MapErrorsToResponse(result.Errors);
+        var addCartItemResult = await mediator.Send(cartItem);
 
-        return ToActionResult(result);
+        return ToActionResult(addCartItemResult);
     }
 
     /// <summary>
@@ -58,11 +63,11 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
     /// <param name="cartItemDto"></param>
     /// <returns></returns>
     [HttpDelete]
-    public async Task<ActionResult> Delete(RemoveCartItemDto cartItemDto)
+    public async Task<ActionResult> Remove(RemoveCartItemCommand cartItem)
     {
-        var result = await cartItemsService.DeleteCartItemFromCartAsync(cartItemDto);
+        var removeCartItemResult = await mediator.Send(cartItem);
 
-        return ToActionResult(result);
+        return ToActionResult(removeCartItemResult);
     }
 
     /// <summary>
@@ -70,10 +75,10 @@ public class CartController(ICartItemsService cartItemsService) : BaseApiControl
     /// </summary>
     /// <returns></returns>
     [HttpDelete("clear")]
-    public async Task<ActionResult> DeleteAll()
+    public async Task<ActionResult> RemoveAll(RemoveCartItemsCommand cartItems)
     {
-        var result = await cartItemsService.ClearCartAsync();
+        var clearCartResult = await mediator.Send(cartItems);
 
-        return ToActionResult(result);
+        return ToActionResult(clearCartResult);
     }
 }

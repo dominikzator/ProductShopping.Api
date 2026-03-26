@@ -8,7 +8,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Queries.GetProducts;
 
-public class GetProductListHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductListQuery, Result<PagedResult<GetProductDto>>>
+public class GetProductListQueryHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductListQuery, Result<PagedResult<GetProductDto>>>
 {
     public async Task<Result<PagedResult<GetProductDto>>> Handle(GetProductListQuery request, CancellationToken cancellationToken)
     {

@@ -10,7 +10,6 @@ public static class ApplicationServiceRegistration
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddScoped<ICartItemsService, CartItemsService>();
         services.AddScoped<IOrdersService, OrdersService>();
 
         services.AddAutoMapper(config => { }, typeof(ProductMappingProfile).Assembly);

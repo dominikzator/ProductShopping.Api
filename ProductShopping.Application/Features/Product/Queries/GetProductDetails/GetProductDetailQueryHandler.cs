@@ -6,7 +6,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 
-public class GetProductDetailRequestHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductDetailQuery, Result<GetProductDto>>
+public class GetProductDetailQueryHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductDetailQuery, Result<GetProductDto>>
 {
     public async Task<Result<GetProductDto>> Handle(GetProductDetailQuery request, CancellationToken cancellationToken)
     {

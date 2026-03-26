@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.Application.DTOs.CartItem;
+﻿namespace ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 
 public class GetCartItemDto
 {
