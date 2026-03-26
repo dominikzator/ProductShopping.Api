@@ -1,4 +1,6 @@
-﻿namespace ProductShopping.Application.DTOs.Order;
+﻿using ProductShopping.Application.DTOs.Order;
+
+namespace ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 
 public class GetOrderDto
 {

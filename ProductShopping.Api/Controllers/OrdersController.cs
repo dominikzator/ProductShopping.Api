@@ -1,15 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Application.Contracts;
-using ProductShopping.Application.DTOs.Order;
+using ProductShopping.Application.Features.Order.Commands.CreateOrder;
+using ProductShopping.Application.Features.Order.Commands.DeleteOrder;
+using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
+using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
+using ProductShopping.Application.Features.Order.Queries.GetOrders;
 using ProductShopping.Application.Models.Paging;
+using ProductShopping.Application.Results;
 using ProductShopping.Identity.Constants;
 
 namespace ProductShopping.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OrdersController(IOrdersService ordersService) : BaseApiController
+public class OrdersController(IMediator mediator) : BaseApiController
 {
     /// <summary>
     /// Returns all User Orders. Can be called only by authenticated User.
@@ -20,9 +25,9 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
     [Authorize(Roles = RoleNames.User)]
     public async Task<ActionResult<PagedResult<GetOrderDto>>> GetOrders([FromQuery] PaginationParameters paginationParameters)
     {
-        var result = await ordersService.GetOrdersAsync(paginationParameters);
+        var ordersResult = await mediator.Send(new GetOrderListQuery { PaginationParameters = paginationParameters});
 
-        return ToActionResult(result);
+        return ToActionResult(ordersResult);
     }
 
     /// <summary>
@@ -32,40 +37,11 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
     /// <returns></returns>
     [HttpGet("{orderId}")]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<GetOrderDto>> GetOrder(int orderId)
+    public async Task<ActionResult<GetOrderDto>> GetOrder(GetOrderDetailQuery order)
     {
-        var result = await ordersService.GetOrderAsync(orderId);
+        var orderResult = await mediator.Send(order);
 
-        return ToActionResult(result);
-    }
-
-    /// <summary>
-    /// Returns all Order Items of an Order with a given Order ID. Can be called only by authenticated User.
-    /// </summary>
-    /// <param name="orderId"></param>
-    /// <param name="paginationParameters"></param>
-    /// <returns></returns>
-    [HttpGet("{orderId}/orderItems")]
-    [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<PagedResult<GetOrderItemDto>>> GetOrderItems(int orderId, [FromQuery] PaginationParameters paginationParameters)
-    {
-        var result = await ordersService.GetOrderItemsAsync(orderId, paginationParameters);
-
-        return ToActionResult(result);
-    }
-
-    /// <summary>
-    /// Returns an Order Item with a given Order Item ID. Can be called only by authenticated User.
-    /// </summary>
-    /// <param name="orderItemId"></param>
-    /// <returns></returns>
-    [HttpGet("orderItems/{orderItemId}")]
-    [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<GetOrderItemDto>> GetOrderItem(int orderItemId)
-    {
-        var result = await ordersService.GetOrderItemAsync(orderItemId);
-
-        return ToActionResult(result);
+        return ToActionResult(orderResult);
     }
 
     /// <summary>
@@ -75,13 +51,25 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
     /// <returns></returns>
     [HttpPost]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<GetOrderDto>> Post(CreateOrderDto createOrderDto)
+    public async Task<ActionResult<GetOrderDto>> Post(CreateOrderCommand order)
     {
-        var result = await ordersService.CreateOrder(createOrderDto);
+        var createOrderResult = await mediator.Send(order);
 
-        if (!result.IsSuccess) return MapErrorsToResponse(result.Errors);
+        return ToActionResult(createOrderResult);
+    }
 
-        return ToActionResult(result);
+    /// <summary>
+    /// Updates an Order. Can be called only by an Administrator.
+    /// </summary>
+    /// <param name="createOrderDto"></param>
+    /// <returns></returns>
+    [HttpPut("{id}")]
+    [Authorize(Roles = RoleNames.Administrator)]
+    public async Task<ActionResult<GetOrderDto>> Put(UpdateOrderCommand order)
+    {
+        var updateOrderResult = await mediator.Send<Result>(order);
+
+        return ToActionResult(updateOrderResult);
     }
 
     /// <summary>
@@ -91,24 +79,10 @@ public class OrdersController(IOrdersService ordersService) : BaseApiController
     /// <returns></returns>
     [HttpDelete("{orderId}")]
     [Authorize(Roles = RoleNames.Administrator)]
-    public async Task<ActionResult> DeleteOrder(int orderId)
+    public async Task<ActionResult> DeleteOrder(DeleteOrderCommand order)
     {
-        var result = await ordersService.DeleteOrderAsync(orderId);
+        var deleteOrderResult = await mediator.Send(order);
 
-        return ToActionResult(result);
-    }
-
-    /// <summary>
-    /// Deletes a single Order Item with a given Order Item ID. Can be called only by Administrator.
-    /// </summary>
-    /// <param name="orderItemId"></param>
-    /// <returns></returns>
-    [HttpDelete("orderItems/{orderItemId}")]
-    [Authorize(Roles = RoleNames.Administrator)]
-    public async Task<ActionResult> DeleteOrderItem(int orderItemId)
-    {
-        var result = await ordersService.DeleteOrderItemAsync(orderItemId);
-
-        return ToActionResult(result);
+        return ToActionResult(deleteOrderResult);
     }
 }

@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Persistence;
-using ProductShopping.Application.Services;
 using ProductShopping.Persistence.DatabaseContext;
 using ProductShopping.Persistence.Repositories;
 
