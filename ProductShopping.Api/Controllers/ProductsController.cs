@@ -27,7 +27,7 @@ namespace ProductShopping.Api.Controllers
         /// <param name="productFilters"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<GetProductDto>>> GetProducts([FromQuery] ProductFilterParameters productFilters, [FromQuery] PaginationParameters paginationParameters)
+        public async Task<ActionResult<PagedResult<ProductDto>>> GetProducts([FromQuery] ProductFilterParameters productFilters, [FromQuery] PaginationParameters paginationParameters)
         {
             var productsResult = await mediator.Send(new GetProductListQuery{ PaginationParameters = paginationParameters, ProductFilterParameters = productFilters });
 
@@ -40,7 +40,7 @@ namespace ProductShopping.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<GetProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var productResult = await mediator.Send(new GetProductDetailQuery { Id = id });
             
@@ -54,7 +54,7 @@ namespace ProductShopping.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = RoleNames.Administrator)]
-        public async Task<ActionResult<GetProductDto>> Post(CreateProductCommand product)
+        public async Task<ActionResult<ProductDto>> Post(CreateProductCommand product)
         {
             var createdProductDtoResult = await mediator.Send(product);
 

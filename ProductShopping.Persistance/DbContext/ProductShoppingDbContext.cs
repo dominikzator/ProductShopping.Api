@@ -20,6 +20,8 @@ public class ProductShoppingDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
 
+    public Task<List<ProductCategory>> GetProductCategoriesAsNoTracking() => ProductCategories.AsNoTracking().ToListAsync();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

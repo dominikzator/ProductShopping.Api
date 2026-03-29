@@ -24,9 +24,9 @@ public class RemoveCartItemHandler(ICartsRepository cartsRepository, IProductsRe
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
-        var cartItemResult = await cartsRepository.GetUserCartItemAsync(userId, request.CartItemId);
+        var cartItemDtoResult = await cartsRepository.GetUserCartItemAsync(userId, request.CartItemId);
 
-        var cartItem = cartItemResult.Value;
+        var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
 
         if (cartItem == null)
         {

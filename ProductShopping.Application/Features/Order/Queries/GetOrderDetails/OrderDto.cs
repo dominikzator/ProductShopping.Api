@@ -1,13 +1,13 @@
-﻿using ProductShopping.Application.DTOs.Order;
+﻿using ProductShopping.Domain.Enums;
 
 namespace ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 
-public class GetOrderDto
+public class OrderDto
 {
-    public string OrderId { get; set; }
+    public int Id { get; set; }
     public string OrderNumber { get; set; }
     public string OwnerId { get; set; }
-    public List<GetOrderItemDto> OrderItems { get; set; }
+    public List<OrderItemDto> OrderItems { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string Street { get; set; }
@@ -17,6 +17,6 @@ public class GetOrderDto
     public string PostalCode { get; set; }
     public string Country { get; set; }
     public string? PhoneNumber { get; set; }
-    public string Status { get; set; }
+    public OrderStatus OrderStatus { get; set; }
     public string PaymentUrl { get; set; }
 }

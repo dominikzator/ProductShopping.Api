@@ -2,8 +2,8 @@
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
-using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Results;
@@ -11,9 +11,9 @@ using Stripe.Checkout;
 
 namespace ProductShopping.Application.Services;
 
-public class PaymentsService(IOrdersRepository ordersRepository, IUsersService usersService, IMapper mapper) : IPaymentsService
+public class PaymentsService(IOrdersRepository ordersRepository, IUsersService usersService, IMapper mapper, IAppLogger<PaymentsService> logger) : IPaymentsService
 {
-    public async Task<GetOrderDto> CreatePaymentSessionAsync(PaymentRequestDto paymentRequest)
+    public async Task<OrderDto> CreatePaymentSessionAsync(PaymentRequestDto paymentRequest)
     {
         List<SessionLineItemOptions> lineItems = new();
         foreach (var item in paymentRequest.Items)
@@ -33,6 +33,7 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
                 Quantity = item.Quantity
             });
         }
+        var userId = usersService.GetUserId();
 
         var options = new SessionCreateOptions
         {
@@ -44,7 +45,8 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
             Mode = "payment",
             Metadata = new Dictionary<string, string>
             {
-                {"userEmail", paymentRequest.UserEmail}
+                {"userEmail", paymentRequest.UserEmail},
+                {"userId", userId}
             }
         };
 
@@ -52,29 +54,26 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
 
         var session = await service.CreateAsync(options);
 
-        var userId = usersService.GetUserId();
 
         var order = await ordersRepository.GetUserOrderAsync(userId, paymentRequest.OrderId.ToString());
         var orderItems = await ordersRepository.GetUserOrderItemsByOrderIdAsync(userId, paymentRequest.OrderId.ToString());
 
-        var outputDto = mapper.Map<GetOrderDto>(order.Value);
+        var outputDto = mapper.Map<OrderDto>(order.Value);
         outputDto.PaymentUrl = session.Url;
-        outputDto.OrderItems = mapper.Map<List<GetOrderItemDto>>(orderItems.Value);
+        outputDto.OrderItems = mapper.Map<List<OrderItemDto>>(orderItems.Value);
 
         return outputDto;
     }
 
-    public async Task<Result> SetOrderPayed(int orderId)
+    public async Task<Result> SetOrderPayed(string userId, int orderId)
     {
-        var userId = usersService.GetUserId();
+        logger.LogInformation($"SetOrderPayed: orderId: {orderId}, userId: {userId}");
 
-        var order = ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
-        if(order == null)
+        var result = await ordersRepository.SetUserOrderPayedAsync(userId, orderId);
+        if (!result.IsSuccess)
         {
-            return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{orderId}' was not found."));
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"{result.Errors[0]}"));
         }
-
-        await ordersRepository.SetUserOrderPayedAsync(userId, orderId);
 
         return Result.Success();
     }

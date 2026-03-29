@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProductShopping.Application.Features.Product.Commands.CreateProduct;
 
-public class CreateProductCommand : IRequest<Result<GetProductDto>>
+public class CreateProductCommand : IRequest<Result<ProductDto>>
 {
     public required string Name { get; set; }
     public double Rating { get; set; }

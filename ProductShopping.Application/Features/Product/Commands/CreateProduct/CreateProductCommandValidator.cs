@@ -15,7 +15,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
         RuleFor(p => p.Name).MustAsync(ProductWithNameMustNotExist).WithMessage($"A product with the same Name already exists.");
 
         RuleFor(p => p.CategoryName).NotEmpty().WithMessage("CategoryName can't be empty.");
-        RuleFor(p => p.CategoryName).MustAsync(CategoryNameMustExist).WithMessage("CategoryName does not exist.");
+        RuleFor(p => p.CategoryName).Must(CategoryNameMustExist).WithMessage("CategoryName does not exist.");
 
         RuleFor(p => p.Rating).GreaterThanOrEqualTo(1).LessThanOrEqualTo(5).WithMessage("Rating must be in range from 1 to 5.");
 
@@ -27,9 +27,9 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 
         return product == null;
     }
-    private async Task<bool> CategoryNameMustExist(string categoryName, CancellationToken cancellationToken)
+    private bool CategoryNameMustExist(string categoryName)
     {
-        var category = await _productsRepository.GetCategoryFromNameAsync(categoryName);
+        var category = _productsRepository.GetCategoryFromName(categoryName);
 
         return category != null;
     }

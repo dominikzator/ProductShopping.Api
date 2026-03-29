@@ -8,23 +8,23 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Queries.GetCartItems;
 
-public class GetCartItemListQueryHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetCartItemListQuery, Result<PagedResult<GetCartItemDto>>>
+public class GetCartItemListQueryHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetCartItemListQuery, Result<PagedResult<CartItemDto>>>
 {
-    public async Task<Result<PagedResult<GetCartItemDto>>> Handle(GetCartItemListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<CartItemDto>>> Handle(GetCartItemListQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
         var userCart = await cartsRepository.GetUserCartAsync(userId);
 
         var cartItems = await cartsRepository.GetUserCartItemsAsync(userId);
 
-        var dtos = mapper.Map<List<GetCartItemDto>>(cartItems.Value);
+        var dtos = mapper.Map<List<CartItemDto>>(cartItems.Value);
 
-        var pagedResult = new PagedResult<GetCartItemDto>
+        var pagedResult = new PagedResult<CartItemDto>
         {
-            Data = PagedResult<GetCartItemDto>.GetData(dtos, request.PaginationParameters!),
-            Metadata = PagedResult<GetCartItemDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
+            Data = PagedResult<CartItemDto>.GetData(dtos, request.PaginationParameters!),
+            Metadata = PagedResult<CartItemDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
         };
 
-        return Result<PagedResult<GetCartItemDto>>.Success(pagedResult);
+        return Result<PagedResult<CartItemDto>>.Success(pagedResult);
     }
 }

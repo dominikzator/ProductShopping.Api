@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using ProductShopping.Application.DTOs.CartItem;
-using ProductShopping.Application.DTOs.Order;
-using ProductShopping.Application.DTOs.Payment;
-using ProductShopping.Application.DTOs.Product;
+using ProductShopping.Application.DTOs;
+using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
+using ProductShopping.Application.Features.Product.Commands.CreateProduct;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 
@@ -14,20 +13,21 @@ public class ProductMappingProfile : Profile
 {
     public ProductMappingProfile()
     {
-        CreateMap<Product, GetProductDto>();
-        CreateMap<CreateProductDto, Product>();
-        CreateMap<Product, GetProductDto>();
+        CreateMap<Product, ProductDto>();
+        CreateMap<CreateProductCommand, Product>();
+        CreateMap<Cart, CartDto>();
 
-        CreateMap<CreateCartItemDto, CartItem>();
-        CreateMap<CartItem, GetCartItemDto>().AfterMap((src, dest) =>
+        CreateMap<AddCartItemCommand, CartItem>();
+        CreateMap<CartItem, CartItemDto>().AfterMap((src, dest) =>
         {
             dest.CategoryName = src.Product.Category.Name;
             dest.Name = src.Product.Name;
             dest.Rating = src.Product.Rating;
+            dest.UnitPrice = src.Product.Price;
             dest.OverallPrice = dest.Quantity * src.Product.Price;
-        });
+        }).ReverseMap();
 
-        CreateMap<Order, GetOrderDto>().AfterMap((src, dest) =>
+        CreateMap<Order, OrderDto>().AfterMap((src, dest) =>
         {
             dest.OwnerId = src.CustomerId;
             dest.Street = src.Address.Street;
@@ -37,12 +37,9 @@ public class ProductMappingProfile : Profile
             dest.PostalCode = src.Address.PostalCode;
             dest.Country = src.Address.Country;
             dest.PhoneNumber = src.Address.PhoneNumber;
-            dest.Status = src.OrderStatus.ToString();
-        });
+            dest.OrderStatus = src.OrderStatus;
+        }).ReverseMap();
 
-        CreateMap<OrderItem, GetOrderItemDto>().AfterMap((src, dest) =>
-        {
-
-        });
+        CreateMap<OrderItem, OrderItemDto>().ReverseMap();
     }
 }

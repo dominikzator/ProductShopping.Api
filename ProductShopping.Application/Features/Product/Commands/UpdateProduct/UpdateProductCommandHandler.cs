@@ -23,7 +23,7 @@ public class UpdateProductCommandHandler(IProductsRepository productsRepository,
             throw new NotFoundException($"Product '{request.Id}' was not found.");
         }
 
-        var category = await productsRepository.GetCategoryFromNameAsync(request.CategoryName);
+        var category = productsRepository.GetCategoryFromName(request.CategoryName);
 
         if (category == null)
         {

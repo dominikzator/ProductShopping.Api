@@ -1,8 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductShopping.Application.Contracts;
-using ProductShopping.Application.DTOs.CartItem;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
 using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
@@ -24,7 +22,7 @@ public class CartController(IMediator mediator) : BaseApiController
     /// <param name="paginationParameters"></param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<PagedResult<GetCartItemDto>>> GetCartItems([FromQuery] PaginationParameters paginationParameters)
+    public async Task<ActionResult<PagedResult<CartItemDto>>> GetCartItems([FromQuery] PaginationParameters paginationParameters)
     {
         var cartItemsResult = await mediator.Send(new GetCartItemListQuery { PaginationParameters = paginationParameters });
 
@@ -37,7 +35,7 @@ public class CartController(IMediator mediator) : BaseApiController
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<GetCartItemDto>> GetCartItem(int id)
+    public async Task<ActionResult<CartItemDto>> GetCartItem(int id)
     {
         var cartItemResult = await mediator.Send(new GetCartItemDetailQuery { Id = id });
 
@@ -50,7 +48,7 @@ public class CartController(IMediator mediator) : BaseApiController
     /// <param name="cartItemDto"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<GetCartItemDto>> Post(AddCartItemCommand cartItem)
+    public async Task<ActionResult<CartItemDto>> Post(AddCartItemCommand cartItem)
     {
         var addCartItemResult = await mediator.Send(cartItem);
 

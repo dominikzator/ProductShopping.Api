@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Models;
 using System.Security.Claims;
@@ -63,17 +64,15 @@ public class MailService(IOrdersRepository ordersRepository, IIdentityUserServic
         return Result.Success();
     }
 
-    public async Task<Result> TrySendPaymentConfirmation(int orderId, string? userEmail)
+    public async Task<Result> TrySendPaymentConfirmation(int orderId, string userEmail, string userId)
     {
         try
         {
-            var userId = GetUserId();
-
             var emailConfirmed = await identityUserService.IsEmailConfirmedAsync(userId);
             logger.LogInformation($"Emailconfirmed: " + emailConfirmed);
             if (emailConfirmed)
             {
-                await SendPaymentConfirmationEmail(orderId, userEmail);
+                await SendPaymentConfirmationEmail(orderId, userEmail, userId);
 
                 return Result.Success();
             }
@@ -88,13 +87,12 @@ public class MailService(IOrdersRepository ordersRepository, IIdentityUserServic
         }
     }
 
-    private async Task<Result> SendPaymentConfirmationEmail(int orderId, string userEmail)
+    private async Task<Result> SendPaymentConfirmationEmail(int orderId, string userEmail, string userId)
     {
-        var userId = GetUserId();
-        var order = await ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
+        var orderDto = await ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
 
-        var subject = $"Hello, we have received your payment for order: {order.Value!.OrderNumber}";
-        var message = GetItemListings(order.Value.OrderItems);
+        var subject = $"Hello, we have received your payment for order: {orderDto.Value!.OrderNumber}";
+        var message = GetItemListings(orderDto.Value.OrderItems);
 
         try
         {
@@ -110,12 +108,12 @@ public class MailService(IOrdersRepository ordersRepository, IIdentityUserServic
         return Result.Failure();
     }
 
-    private string GetItemListings(List<OrderItem> orderItems)
+    private string GetItemListings(List<OrderItemDto> orderItems)
     {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.AppendLine($"Ordered Items:");
-        foreach (OrderItem item in orderItems)
+        foreach (OrderItemDto item in orderItems)
         {
             stringBuilder.AppendLine($"{item.Quantity}x {item.ProductName}, Price: {item.Quantity * item.UnitPrice}");
         }

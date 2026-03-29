@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Application.Constants;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
-using ProductShopping.Application.DTOs.Product;
+using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Enums;
 using ProductShopping.Domain.Models;
@@ -14,58 +16,68 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
 {
     private readonly ProductShoppingDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IAppLogger<OrdersRepository> _logger;
 
-    public OrdersRepository(ProductShoppingDbContext context, IMapper mapper) : base(context)
+    public OrdersRepository(ProductShoppingDbContext context, IMapper mapper, IAppLogger<OrdersRepository> logger) : base(context)
     {
         _context = context;
         _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<List<Order>> GetUserOrdersAsync(string userId) => await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).ToListAsync();
+    public async Task<List<OrderDto>> GetUserOrdersAsync(string userId)
+    {
+        var orders = await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).AsNoTracking().ToListAsync();
+        var ordersDtos = _mapper.Map<List<OrderDto>>(orders);
 
-    public async Task<Result<Order>> GetUserOrderAsync(string userId, string orderId)
+        return ordersDtos;
+    }
+
+    public async Task<Result<OrderDto>> GetUserOrderAsync(string userId, string orderId)
     {
         var userOrders = await GetUserOrdersAsync(userId);
-
         var userOrder = userOrders.FirstOrDefault(o => o.Id.ToString() == orderId);
 
         if (userOrder == null)
         {
-            return Result<Order>.Failure(new Error(ErrorCodes.NotFound, $"User Order of ID '{orderId}' does not exist."));
+            return Result<OrderDto>.Failure(new Error(ErrorCodes.NotFound, $"User Order of ID '{orderId}' does not exist."));
         }
 
-        return Result<Order>.Success(userOrder);
+        return Result<OrderDto>.Success(userOrder);
     }
 
-    public async Task<Result<Order>> GetUserOrderByOrderNumberAsync(string userId, string orderNumber)
+    public async Task<Result<OrderDto>> GetUserOrderByOrderNumberAsync(string userId, string orderNumber)
     {
         var order = await _context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.CustomerId == userId && o.OrderNumber == orderNumber);
 
         if (order == null)
         {
-            return Result<Order>.Failure(new Error(ErrorCodes.NotFound, $"User Order of Order Number: '{orderNumber}' does not exist."));
+            return Result<OrderDto>.Failure(new Error(ErrorCodes.NotFound, $"User Order of Order Number: '{orderNumber}' does not exist."));
         }
+        var orderDto = _mapper.Map<OrderDto>(order);
 
-        return Result<Order>.Success(order);
+        return Result<OrderDto>.Success(orderDto);
     }
 
-    public async Task<Result<OrderItem>> GetUserOrderItemAsync(string userId, string orderItemId)
+    public async Task<Result<OrderItemDto>> GetUserOrderItemAsync(string userId, string orderItemId)
     {
         var orderItem = await _context.OrderItems.Include(o => o.Order).Include(o => o.Product).FirstOrDefaultAsync(o => o.CustomerId == userId && o.Id.ToString() == orderItemId);
 
         if (orderItem == null)
         {
-            return Result<OrderItem>.Failure(new Error(ErrorCodes.NotFound, $"User Order Item of ID '{orderItemId}' does not exist."));
+            return Result<OrderItemDto>.Failure(new Error(ErrorCodes.NotFound, $"User Order Item of ID '{orderItemId}' does not exist."));
         }
+        var orderItemDto = _mapper.Map<OrderItemDto>(orderItem);
 
-        return Result<OrderItem>.Success(orderItem);
+        return Result<OrderItemDto>.Success(orderItemDto);
     }
 
-    public async Task<Result<List<OrderItem>>> GetUserOrderItemsByOrderIdAsync(string userId, string orderId)
+    public async Task<Result<List<OrderItemDto>>> GetUserOrderItemsByOrderIdAsync(string userId, string orderId)
     {
         var orderItems = await _context.OrderItems.Include(o => o.Order).Include(o => o.Product).Where(o => o.CustomerId == userId && o.OrderId.ToString() == orderId).ToListAsync();
+        var orderItemsDtos = _mapper.Map<List<OrderItemDto>>(orderItems);
 
-        return Result<List<OrderItem>>.Success(orderItems);
+        return Result<List<OrderItemDto>>.Success(orderItemsDtos);
     }
 
     public async Task<Result<bool>> AddOrderItemAsync(OrderItem orderItem)
@@ -100,7 +112,7 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
         return Result<bool>.Success(true);
     }
 
-    public Result<decimal> GetOrderItemsTotalPrice(List<OrderItem> orderItems)
+    public Result<decimal> GetOrderItemsTotalPrice(List<OrderItemDto> orderItems)
     {
         decimal totalPrice = orderItems.Sum(o => o.TotalPrice);
 
@@ -109,14 +121,27 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
 
     public async Task<Result<bool>> SetUserOrderPayedAsync(string userId, int orderId)
     {
+        _logger.LogInformation($"SetUserOrderPayedAsync: userId: {userId}, orderId: {orderId}");
+
         var orderResult = await GetUserOrderAsync(userId, orderId.ToString());
 
-        var order = orderResult.Value;
+        _logger.LogInformation($"SetUserOrderPayedAsync after taking orderResult");
+
+        var orderDto = orderResult.Value;
+
+        var order = await _context.Orders
+        .Include(o => o.OrderItems)
+        .FirstOrDefaultAsync(o => o.Id == orderId && o.CustomerId == userId);
+
+        if(order == null)
+        {
+            _logger.LogInformation("Order NULL!");
+        }
 
         order!.OrderStatus = OrderStatus.Payed;
         await UpdateAsync(order);
 
-        foreach (var orderItem in order.OrderItems.Where(o => o.OrderId == orderId))
+        foreach (var orderItem in order.OrderItems)
         {
             orderItem.OrderStatus = OrderStatus.Payed;
             await UpdateOrderItemAsync(orderItem);

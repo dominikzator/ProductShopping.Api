@@ -6,7 +6,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Queries.GetProducts;
 
-public class GetProductListQuery : IRequest<Result<PagedResult<GetProductDto>>>
+public class GetProductListQuery : IRequest<Result<PagedResult<ProductDto>>>
 {
     public PaginationParameters? PaginationParameters { get; set; }
     public ProductFilterParameters? ProductFilterParameters { get; set; }

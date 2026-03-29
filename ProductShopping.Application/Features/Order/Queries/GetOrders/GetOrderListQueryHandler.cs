@@ -8,22 +8,22 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Order.Queries.GetOrders;
 
-public class GetOrderListQueryHandler(IOrdersRepository ordersRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetOrderListQuery, Result<PagedResult<GetOrderDto>>>
+public class GetOrderListQueryHandler(IOrdersRepository ordersRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetOrderListQuery, Result<PagedResult<OrderDto>>>
 {
-    public async Task<Result<PagedResult<GetOrderDto>>> Handle(GetOrderListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<OrderDto>>> Handle(GetOrderListQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
 
         var userOrders = await ordersRepository.GetUserOrdersAsync(userId);
 
-        var dtos = mapper.Map<List<GetOrderDto>>(userOrders);
+        var dtos = mapper.Map<List<OrderDto>>(userOrders);
 
-        var pagedResult = new PagedResult<GetOrderDto>
+        var pagedResult = new PagedResult<OrderDto>
         {
-            Data = PagedResult<GetOrderDto>.GetData(dtos, request.PaginationParameters!),
-            Metadata = PagedResult<GetOrderDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
+            Data = PagedResult<OrderDto>.GetData(dtos, request.PaginationParameters!),
+            Metadata = PagedResult<OrderDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
         };
 
-        return Result<PagedResult<GetOrderDto>>.Success(pagedResult);
+        return Result<PagedResult<OrderDto>>.Success(pagedResult);
     }
 }

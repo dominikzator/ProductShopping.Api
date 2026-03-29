@@ -2,6 +2,7 @@
 using MediatR;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
@@ -9,10 +10,10 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 
-public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper) 
-    : IRequestHandler<AddCartItemCommand, Result<GetCartItemDto>>
+public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper, IAppLogger<AddCartItemCommandHandler> logger) 
+    : IRequestHandler<AddCartItemCommand, Result<CartItemDto>>
 {
-    public async Task<Result<GetCartItemDto>> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CartItemDto>> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
     {
         var validator = new AddCartItemCommandValidator();
         var validationResult = await validator.ValidateAsync(request);
@@ -27,7 +28,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
 
         if (userCart.Value == null)
         {
-            return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.Failure,
+            return Result<CartItemDto>.Failure(new Error(ErrorCodes.Failure,
                 $"User '{userEmail}' " +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
@@ -36,12 +37,11 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
 
         if(product is null)
         {
-            return Result<GetCartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"A Product with id: {request.ProductId} does not exist"));
+            return Result<CartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"A Product with id: {request.ProductId} does not exist"));
         }
 
-        var cartItemResult = await cartsRepository.GetUserCartItemByProductIdAsync(userId, request.ProductId);
-
-        Domain.Models.CartItem cartItem = cartItemResult.Value!;
+        var cartItemDtoResult = await cartsRepository.GetUserCartItemByProductIdAsync(userId, request.ProductId);
+        var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
 
         if (cartItem != null)
         {
@@ -58,8 +58,8 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
         }
 
         var savedItem = await cartsRepository.GetUserCartItemAsync(userId, cartItem.Id);
-        var outputDto = mapper.Map<GetCartItemDto>(savedItem.Value);
+        var outputDto = mapper.Map<CartItemDto>(savedItem.Value);
 
-        return Result<GetCartItemDto>.Success(outputDto);
+        return Result<CartItemDto>.Success(outputDto);
     }
 }

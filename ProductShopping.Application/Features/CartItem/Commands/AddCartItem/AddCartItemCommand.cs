@@ -4,7 +4,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 
-public class AddCartItemCommand : IRequest<Result<GetCartItemDto>>
+public class AddCartItemCommand : IRequest<Result<CartItemDto>>
 {
     public int ProductId { get; set; }
     public int Quantity { get; set; }

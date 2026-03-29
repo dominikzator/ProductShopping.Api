@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
-using ProductShopping.Application.DTOs.Order;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Results;
@@ -14,10 +15,10 @@ using ProductShopping.Domain.Models;
 namespace ProductShopping.Application.Features.Order.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICartsRepository cartsRepository, IUsersService usersService, 
-    IPaymentsService paymentsService, IConfiguration config, IMapper mapper) 
-    : IRequestHandler<CreateOrderCommand, Result<GetOrderDto>>
+    IPaymentsService paymentsService, IConfiguration config, IMapper mapper, IAppLogger<CreateOrderCommandHandler> logger)
+    : IRequestHandler<CreateOrderCommand, Result<OrderDto>>
 {
-    public async Task<Result<GetOrderDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var userEmail = usersService.GetUserEmail();
 
@@ -29,18 +30,20 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         var userId = usersService.GetUserId();
 
+        logger.LogInformation($"userId: {userId}");
+
         var userCart = await cartsRepository.GetUserCartAsync(userId);
 
         if (userCart.Value is null)
         {
-            return Result<GetOrderDto>.Failure(new Error(ErrorCodes.Failure,
+            return Result<OrderDto>.Failure(new Error(ErrorCodes.Failure,
                 $"User '{userEmail}'" +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
         if (userCart.Value.CartItems.Count == 0)
         {
-            return Result<GetOrderDto>.Failure(new Error(ErrorCodes.Failure, $"User Cart is empty"));
+            return Result<OrderDto>.Failure(new Error(ErrorCodes.Failure, $"User Cart is empty"));
         }
 
         var orderNumber = GenerateOrderNumber();
@@ -62,11 +65,11 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
             {
                 OrderId = createdOrder.Value!.Id,
                 CustomerId = userId,
-                ProductId = item.ProductId,
-                ProductName = item.Product.Name,
+                ProductId = int.Parse(item.ProductId),
+                ProductName = item.Name,
                 Quantity = item.Quantity,
-                UnitPrice = item.Product.Price,
-                TotalPrice = item.Product.Price * item.Quantity
+                UnitPrice = item.UnitPrice,
+                TotalPrice = item.OverallPrice
             };
 
             await ordersRepository.AddOrderItemAsync(orderItem);
@@ -82,12 +85,12 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
             OrderId = createdOrder.Value.Id,
             Domain = domainName,
             OrderNumber = createdOrder.Value.OrderNumber,
-            Items = mapper.Map<List<GetOrderItemDto>>(orderItems.Value),
+            Items = mapper.Map<List<OrderItemDto>>(orderItems.Value),
             TotalPrice = ordersRepository.GetOrderItemsTotalPrice(orderItems.Value!).Value,
             UserEmail = userEmail
         });
 
-        return Result<GetOrderDto>.Success(outputDto);
+        return Result<OrderDto>.Success(outputDto);
     }
 
     private string GenerateOrderNumber()

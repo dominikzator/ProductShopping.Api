@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
-using ProductShopping.Application.DTOs.Product;
+using ProductShopping.Application.DTOs;
+using ProductShopping.Application.Features.Product.Commands.CreateProduct;
+using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Application.Results;
@@ -22,9 +24,9 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
         _mapper = mapper;
     }
 
-    public async Task<Result<bool>> ValidateProductAsync(CreateProductDto productDto)
+    public async Task<Result<bool>> ValidateProductAsync(CreateProductCommand productDto)
     {
-        var category = await _context.ProductCategories.FirstOrDefaultAsync(p => p.Name == productDto.CategoryName);
+        var category = _context.GetProductCategoriesAsNoTracking().Result.FirstOrDefault(p => p.Name == productDto.CategoryName);
 
         if (category == null)
         {
@@ -41,7 +43,7 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
         return Result<bool>.Success(true);
     }
 
-    public async Task<(List<Product> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters)
+    public async Task<(List<ProductDto> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters)
     {
         var products = _context.Products.AsQueryable();
 
@@ -89,13 +91,27 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
             .Take(paginationParameters.PageSize)
             .ToListAsync();
 
+        var finalItemsDtos = _mapper.Map<List<ProductDto>>(finalItems);
+
         var totalCount = queryableProducts.Count();
         var totalPages = (int)Math.Ceiling(totalCount / (double)paginationParameters.PageSize);
 
-        return (finalItems, totalCount, totalPages);
+        return (finalItemsDtos, totalCount, totalPages);
     }
 
-    public async Task<ProductCategory?> GetCategoryFromNameAsync(string categoryName) => await _context.ProductCategories.FirstOrDefaultAsync(p => p.Name == categoryName);
+    public ProductCategoryDto? GetCategoryFromName(string categoryName)
+    {
+        var productCategory = _context.GetProductCategoriesAsNoTracking().Result.FirstOrDefault(p => p.Name == categoryName);
+        var productCategoryDto = _mapper.Map<ProductCategoryDto>(productCategory);
 
-    public async Task<Product?> GetProductByNameAsync(string name) => await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
+        return productCategoryDto;
+    }
+
+    public async Task<ProductDto?> GetProductByNameAsync(string name)
+    {
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
+        var productDto = _mapper.Map<ProductDto>(product);
+
+        return productDto;
+    }
 }

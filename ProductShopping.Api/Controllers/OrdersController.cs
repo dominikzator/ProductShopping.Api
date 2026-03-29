@@ -23,7 +23,7 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpGet]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<PagedResult<GetOrderDto>>> GetOrders([FromQuery] PaginationParameters paginationParameters)
+    public async Task<ActionResult<PagedResult<OrderDto>>> GetOrders([FromQuery] PaginationParameters paginationParameters)
     {
         var ordersResult = await mediator.Send(new GetOrderListQuery { PaginationParameters = paginationParameters});
 
@@ -37,7 +37,7 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpGet("{orderId}")]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<GetOrderDto>> GetOrder(GetOrderDetailQuery order)
+    public async Task<ActionResult<OrderDto>> GetOrder(GetOrderDetailQuery order)
     {
         var orderResult = await mediator.Send(order);
 
@@ -51,7 +51,7 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpPost]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<GetOrderDto>> Post(CreateOrderCommand order)
+    public async Task<ActionResult<OrderDto>> Post(CreateOrderCommand order)
     {
         var createOrderResult = await mediator.Send(order);
 
@@ -65,7 +65,7 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpPut("{id}")]
     [Authorize(Roles = RoleNames.Administrator)]
-    public async Task<ActionResult<GetOrderDto>> Put(UpdateOrderCommand order)
+    public async Task<ActionResult<OrderDto>> Put(UpdateOrderCommand order)
     {
         var updateOrderResult = await mediator.Send<Result>(order);
 

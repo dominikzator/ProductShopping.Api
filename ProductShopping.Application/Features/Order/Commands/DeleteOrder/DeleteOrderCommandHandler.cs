@@ -13,15 +13,17 @@ public class DeleteOrderCommandHandler(IOrdersRepository ordersRepository, IUser
     {
         var userId = usersService.GetUserId();
 
-        var order = await ordersRepository.GetUserOrderAsync(userId, request.Id.ToString());
+        var orderDto = await ordersRepository.GetUserOrderAsync(userId, request.Id.ToString());
 
-        if (order.Value is null)
+        if (orderDto.Value is null)
         {
             return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{request.Id}' was not found."));
         }
 
-        await ordersRepository.RemoveOrderItemsAsync(order.Value.OrderItems);
-        await ordersRepository.DeleteAsync(order.Value);
+        var order = mapper.Map<Domain.Models.Order>(orderDto);
+
+        await ordersRepository.RemoveOrderItemsAsync(order.OrderItems);
+        await ordersRepository.DeleteAsync(order);
 
         return Result.Success();
     }

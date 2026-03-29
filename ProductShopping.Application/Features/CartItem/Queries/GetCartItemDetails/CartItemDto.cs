@@ -1,11 +1,13 @@
 ﻿namespace ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 
-public class GetCartItemDto
+public class CartItemDto
 {
     public string Id { get; set; }
+    public string CartId { get; set; }
     public string ProductId { get; set; }
     public string Name { get; set; }
     public string CategoryName { get; set; }
+    public decimal UnitPrice { get; set; }
     public decimal OverallPrice { get; set; }
     public double Rating { get; set; }
     public int Quantity { get; set; }

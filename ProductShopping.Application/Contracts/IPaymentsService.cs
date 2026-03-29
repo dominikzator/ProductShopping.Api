@@ -6,7 +6,7 @@ namespace ProductShopping.Application.Contracts
 {
     public interface IPaymentsService
     {
-        Task<GetOrderDto> CreatePaymentSessionAsync(PaymentRequestDto checkoutRequest);
-        Task<Result> SetOrderPayed(int orderId);
+        Task<OrderDto> CreatePaymentSessionAsync(PaymentRequestDto checkoutRequest);
+        Task<Result> SetOrderPayed(string userId, int orderId);
     }
 }

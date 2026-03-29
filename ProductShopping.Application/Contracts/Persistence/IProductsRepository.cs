@@ -1,4 +1,6 @@
-﻿using ProductShopping.Application.DTOs.Product;
+﻿using ProductShopping.Application.DTOs;
+using ProductShopping.Application.Features.Product.Commands.CreateProduct;
+using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.Models.Filtering;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Application.Results;
@@ -8,9 +10,9 @@ namespace ProductShopping.Application.Contracts.Persistence
 {
     public interface IProductsRepository : IGenericRepository<Product>
     {
-        Task<ProductCategory?> GetCategoryFromNameAsync(string categoryName);
-        Task<(List<Product> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters);
-        Task<Product> GetProductByNameAsync(string name);
-        Task<Result<bool>> ValidateProductAsync(CreateProductDto productDto);
+        ProductCategoryDto? GetCategoryFromName(string categoryName);
+        Task<(List<ProductDto> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters);
+        Task<ProductDto> GetProductByNameAsync(string name);
+        Task<Result<bool>> ValidateProductAsync(CreateProductCommand productDto);
     }
 }

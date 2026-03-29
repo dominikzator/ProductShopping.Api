@@ -5,7 +5,7 @@ using ProductShopping.Domain.Models;
 
 namespace ProductShopping.Application.Features.Order.Commands.CreateOrder;
 
-public class CreateOrderCommand : IRequest<Result<GetOrderDto>>
+public class CreateOrderCommand : IRequest<Result<OrderDto>>
 {
     public Address Address { get; set; }
 }

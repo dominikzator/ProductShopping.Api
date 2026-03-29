@@ -29,6 +29,8 @@ public static class InfrastructureServicesRegistration
 
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
+        Console.WriteLine("StripeConfiguration.ApiKey: " + StripeConfiguration.ApiKey);
+
         return services;
     }
 }

@@ -6,9 +6,9 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 
-public class GetProductDetailQueryHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductDetailQuery, Result<GetProductDto>>
+public class GetProductDetailQueryHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductDetailQuery, Result<ProductDto>>
 {
-    public async Task<Result<GetProductDto>> Handle(GetProductDetailQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ProductDto>> Handle(GetProductDetailQuery request, CancellationToken cancellationToken)
     {
         var product = await productsRepository.GetByIdAsync(request.Id);
 
@@ -17,8 +17,8 @@ public class GetProductDetailQueryHandler(IProductsRepository productsRepository
             throw new NotFoundException($"Product with id: {request.Id} has not been found");
         }
 
-        var productDto = mapper.Map<GetProductDto>(product);
+        var productDto = mapper.Map<ProductDto>(product);
 
-        return Result<GetProductDto>.Success(productDto);
+        return Result<ProductDto>.Success(productDto);
     }
 }

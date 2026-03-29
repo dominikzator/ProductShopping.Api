@@ -5,7 +5,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Order.Queries.GetOrders;
 
-public class GetOrderListQuery : IRequest<Result<PagedResult<GetOrderDto>>>
+public class GetOrderListQuery : IRequest<Result<PagedResult<OrderDto>>>
 {
     public PaginationParameters? PaginationParameters { get; set; }
 }

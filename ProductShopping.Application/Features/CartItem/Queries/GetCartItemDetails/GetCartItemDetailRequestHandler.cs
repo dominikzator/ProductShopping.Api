@@ -7,9 +7,9 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 
-public class GetCartItemDetailRequestHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetCartItemDetailQuery, Result<GetCartItemDto>>
+public class GetCartItemDetailRequestHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper) : IRequestHandler<GetCartItemDetailQuery, Result<CartItemDto>>
 {
-    public async Task<Result<GetCartItemDto>> Handle(GetCartItemDetailQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CartItemDto>> Handle(GetCartItemDetailQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
         var userCart = await cartsRepository.GetUserCartAsync(userId);
@@ -21,8 +21,8 @@ public class GetCartItemDetailRequestHandler(ICartsRepository cartsRepository, I
             throw new NotFoundException($"CartItem '{request.Id}' was not found.");
         }
 
-        var outputDto = mapper.Map<GetCartItemDto>(cartItem);
+        var outputDto = mapper.Map<CartItemDto>(cartItem);
 
-        return Result<GetCartItemDto>.Success(outputDto);
+        return Result<CartItemDto>.Success(outputDto);
     }
 }

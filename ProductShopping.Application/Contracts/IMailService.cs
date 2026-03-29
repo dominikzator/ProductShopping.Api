@@ -5,6 +5,6 @@ namespace ProductShopping.Application.Contracts
     public interface IMailService
     {
         Task<Result> SendEmailAsync(string email, string title, string description);
-        Task<Result> TrySendPaymentConfirmation(int orderId, string? userEmail);
+        Task<Result> TrySendPaymentConfirmation(int orderId, string? userEmail, string userId);
     }
 }

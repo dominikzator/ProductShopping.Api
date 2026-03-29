@@ -31,6 +31,7 @@ public static class PersistenceServicesRegistration
             }*/
 
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            options.EnableSensitiveDataLogging();
         });
 
         services.AddScoped<ICartsRepository, CartsRepository>();

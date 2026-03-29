@@ -5,7 +5,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Queries.GetCartItems;
 
-public class GetCartItemListQuery : IRequest<Result<PagedResult<GetCartItemDto>>>
+public class GetCartItemListQuery : IRequest<Result<PagedResult<CartItemDto>>>
 {
     public PaginationParameters? PaginationParameters { get; set; }
 }

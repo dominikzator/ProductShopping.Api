@@ -1,10 +1,10 @@
 ﻿using ProductShopping.Domain.Enums;
 
-namespace ProductShopping.Application.DTOs.Order;
+namespace ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 
-public class GetOrderItemDto
+public class OrderItemDto
 {
-    public int OrderItemId { get; set; }
+    public int Id { get; set; }
 
     public int OrderId { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Logging;
@@ -42,13 +43,17 @@ public class PaymentsController(IPaymentsService paymentsService,
 
                         int orderId;
                         int.TryParse(session.ClientReferenceId, out orderId);
-                        await paymentsService.SetOrderPayed(orderId);
+
+                        session.Metadata.TryGetValue("userEmail", out var userEmail);
+                        session.Metadata.TryGetValue("userId", out var userId);
+
+                        logger.LogInformation($"StripeWebhook, session.userEmail: {userEmail}");
+
+                        await paymentsService.SetOrderPayed(userId, orderId);
 
                         logger.LogInformation($"Payment Successfull! ID: {session.Id}, Price: {session.AmountTotal / 100m}, Email: {session.CustomerDetails.Email}");
 
-                        session.Metadata.TryGetValue("userEmail", out var userEmail);
-
-                        await mailService.TrySendPaymentConfirmation(orderId, userEmail);
+                        await mailService.TrySendPaymentConfirmation(orderId, userEmail, userId);
 
                         break;
                     }

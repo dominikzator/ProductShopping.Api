@@ -1,6 +1,6 @@
 ﻿namespace ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 
-public class GetProductDto
+public class ProductDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
