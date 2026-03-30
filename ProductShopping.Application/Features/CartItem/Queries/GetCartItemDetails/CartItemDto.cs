@@ -2,9 +2,9 @@
 
 public class CartItemDto
 {
-    public string Id { get; set; }
-    public string CartId { get; set; }
-    public string ProductId { get; set; }
+    public int Id { get; set; }
+    public int CartId { get; set; }
+    public int ProductId { get; set; }
     public string Name { get; set; }
     public string CategoryName { get; set; }
     public decimal UnitPrice { get; set; }

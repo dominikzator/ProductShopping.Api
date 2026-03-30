@@ -1,9 +1,18 @@
-﻿namespace ProductShopping.Application.Exceptions;
+﻿using FluentValidation.Results;
+using ProductShopping.Application.Constants;
 
-public class ValidationFailedException : Exception
+namespace ProductShopping.Application.Exceptions;
+
+public class ValidationFailedException : ErrorCodeException
 {
-    public ValidationFailedException(string message) : base(message)
-    {
+    public ValidationResult ValidationResult { get; }
+    public List<ValidationFailure> Errors { get; }
+    public string InvalidFieldName { get; }
 
+    public ValidationFailedException(string message, ValidationResult validationResult) : base(message, ErrorCodes.Validation)
+    {
+        ValidationResult = validationResult;
+        Errors = ValidationResult.Errors;
+        InvalidFieldName = Errors[0].PropertyName;
     }
 }

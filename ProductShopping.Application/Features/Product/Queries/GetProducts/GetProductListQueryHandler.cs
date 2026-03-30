@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.Models.Paging;
@@ -7,7 +6,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Queries.GetProducts;
 
-public class GetProductListQueryHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<GetProductListQuery, Result<PagedResult<ProductDto>>>
+public class GetProductListQueryHandler(IProductsRepository productsRepository) : IRequestHandler<GetProductListQuery, Result<PagedResult<ProductDto>>>
 {
     public async Task<Result<PagedResult<ProductDto>>> Handle(GetProductListQuery request, CancellationToken cancellationToken)
     {

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.Order.Commands.CreateOrder;
@@ -18,7 +19,7 @@ public class UpdateOrderCommandHandler(IOrdersRepository ordersRepository, IUser
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
-            throw new ValidationFailedException("Validation failed for Updating an Order");
+            throw new ValidationFailedException("Validation failed for Updating an Order", validationResult);
 
         var order = await ordersRepository.GetByIdAsync(request.Id);
         if (order == null)

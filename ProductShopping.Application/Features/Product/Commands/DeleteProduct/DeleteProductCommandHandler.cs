@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using MediatR;
-using ProductShopping.Application.Constants;
+﻿using MediatR;
 using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Product.Commands.DeleteProduct;
 
-public class DeleteProductCommandHandler(IProductsRepository productsRepository, IMapper mapper) : IRequestHandler<DeleteProductCommand, Result>
+public class DeleteProductCommandHandler(IProductsRepository productsRepository) : IRequestHandler<DeleteProductCommand, Result>
 {
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
@@ -14,7 +13,7 @@ public class DeleteProductCommandHandler(IProductsRepository productsRepository,
 
         if (product == null)
         {
-            return Result.NotFound(new Error(ErrorCodes.NotFound, $"Product '{request.Id}' was not found."));
+            throw new NotFoundException($"Product '{request.Id}' was not found.");
         }
 
         await productsRepository.DeleteAsync(product);

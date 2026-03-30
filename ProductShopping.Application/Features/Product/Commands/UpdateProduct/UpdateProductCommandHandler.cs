@@ -15,7 +15,7 @@ public class UpdateProductCommandHandler(IProductsRepository productsRepository,
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
-            throw new BadRequestException("Invalid Leave Allocation Request", validationResult);
+            throw new ValidationFailedException($"Validation failed for Updating a Product: {validationResult.Errors[0].ErrorMessage}", validationResult);
 
         var product = await productsRepository.GetByIdAsync(request.Id);
         if (product == null)

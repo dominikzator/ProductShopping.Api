@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
 
-public class RemoveCartItemHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper)
+public class RemoveCartItemHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper)
     : IRequestHandler<RemoveCartItemCommand, Result>
 {
     public async Task<Result> Handle(RemoveCartItemCommand request, CancellationToken cancellationToken)

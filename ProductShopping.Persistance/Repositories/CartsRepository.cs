@@ -55,7 +55,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
     public async Task<Result<CartItemDto>> GetUserCartItemAsync(string userId, int cartItemId)
     {
         var userCart = await GetUserCartAsync(userId);
-        var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.Id == cartItemId.ToString());
+        var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.Id == cartItemId);
 
         return Result<CartItemDto>.Success(cartItem!);
     }
@@ -63,7 +63,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
     public async Task<Result<CartItemDto>> GetUserCartItemByProductIdAsync(string userId, int productId)
     {
         var userCart = await GetUserCartAsync(userId);
-        var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.ProductId == productId.ToString());
+        var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.ProductId == productId);
 
         return Result<CartItemDto>.Success(cartItem!);
     }

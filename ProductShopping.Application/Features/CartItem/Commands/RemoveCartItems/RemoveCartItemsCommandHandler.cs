@@ -7,7 +7,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
 
-public class RemoveCartItemsCommandHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper)
+public class RemoveCartItemsCommandHandler(ICartsRepository cartsRepository, IUsersService usersService)
     : IRequestHandler<RemoveCartItemsCommand, Result>
 {
     public async Task<Result> Handle(RemoveCartItemsCommand request, CancellationToken cancellationToken)

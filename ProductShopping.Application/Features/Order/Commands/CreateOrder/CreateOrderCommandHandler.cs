@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
-using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
@@ -15,7 +13,7 @@ using ProductShopping.Domain.Models;
 namespace ProductShopping.Application.Features.Order.Commands.CreateOrder;
 
 public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICartsRepository cartsRepository, IUsersService usersService, 
-    IPaymentsService paymentsService, IConfiguration config, IMapper mapper, IAppLogger<CreateOrderCommandHandler> logger)
+    IPaymentsService paymentsService, IConfiguration config, IMapper mapper)
     : IRequestHandler<CreateOrderCommand, Result<OrderDto>>
 {
     public async Task<Result<OrderDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -26,11 +24,9 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
-            throw new ValidationFailedException("Validation failed for Creating an Order");
+            throw new ValidationFailedException("Validation failed for Creating an Order", validationResult);
 
         var userId = usersService.GetUserId();
-
-        logger.LogInformation($"userId: {userId}");
 
         var userCart = await cartsRepository.GetUserCartAsync(userId);
 
@@ -65,7 +61,7 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
             {
                 OrderId = createdOrder.Value!.Id,
                 CustomerId = userId,
-                ProductId = int.Parse(item.ProductId),
+                ProductId = item.ProductId,
                 ProductName = item.Name,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,

@@ -1,22 +1,11 @@
-﻿namespace ProductShopping.Application.Exceptions;
+﻿using ProductShopping.Application.Constants;
 
-public class NotFoundException : Exception
+namespace ProductShopping.Application.Exceptions;
+
+public class NotFoundException : ErrorCodeException
 {
-    public NotFoundException(string name, object key) : base($"{name} {key} was not found")
-    {
-        
-    }
-
-    public NotFoundException(string message) : base(message) 
+    public NotFoundException(string message) : base(message, ErrorCodes.NotFound) 
     { 
-        
-    }
-}
-
-public class TestingException : Exception
-{
-    public TestingException(string name) : base($"{name}, testing Exception from Constructor")
-    {
         
     }
 }

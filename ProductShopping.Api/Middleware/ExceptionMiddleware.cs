@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Newtonsoft.Json;
 using ProductShopping.Api.Models;
 using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Exceptions;
@@ -42,32 +43,27 @@ namespace ProductShopping.Api.Middleware
                         Status = (int)statusCode,
                         Detail = badRequestException.InnerException?.Message,
                         Type = nameof(BadRequestException),
-                        Errors = badRequestException.ValidationErrors
                     };
                     break;
-                case NotFoundException NotFound:
+                case NotFoundException notFound:
                     statusCode = HttpStatusCode.NotFound;
                     problem = new CustomProblemDetails
                     {
-                        Title = NotFound.Message,
+                        Title = notFound.Message,
                         Status = (int)statusCode,
                         Type = nameof(NotFoundException),
-                        Detail = NotFound.InnerException?.Message,
+                        Detail = notFound.InnerException?.Message,
                     };
                     break;
-                case TestingException testingException:
-                    statusCode = HttpStatusCode.Forbidden;
+                case ValidationFailedException validationFailed:
+                    statusCode = HttpStatusCode.UnprocessableEntity;
                     problem = new CustomProblemDetails
                     {
-                        Title = "This is Testing Exception Title",
+                        Title = validationFailed.Message,
                         Status = (int)statusCode,
-                        Type = nameof(TestingException),
-                        Detail = "This is Testing Exception Detail",
-                        Errors = new Dictionary<string, string[]>
-                        {
-                            ["Errors"] = new[] { "Name is required", "Email is invalid" },
-                            ["Warnings"] = new[] { "Password is weak" }
-                        }
+                        Type = nameof(ValidationFailedException),
+                        Detail = validationFailed.InnerException?.Message,
+                        ErrorDetails = validationFailed.ValidationResult.Errors.Select(p => p.ErrorMessage).ToList()
                     };
                     break;
                 default:

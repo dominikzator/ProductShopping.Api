@@ -2,7 +2,6 @@
 using MediatR;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
-using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
@@ -10,7 +9,7 @@ using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 
-public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper, IAppLogger<AddCartItemCommandHandler> logger) 
+public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProductsRepository productsRepository, IUsersService usersService, IMapper mapper)
     : IRequestHandler<AddCartItemCommand, Result<CartItemDto>>
 {
     public async Task<Result<CartItemDto>> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
@@ -19,7 +18,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
         var validationResult = await validator.ValidateAsync(request);
 
         if (validationResult.Errors.Any())
-            throw new ValidationFailedException("Validation failed for creating a CartItem");
+            throw new ValidationFailedException("Validation failed for creating a CartItem", validationResult);
 
         var userId = usersService.GetUserId();
         var userEmail = usersService.GetUserEmail();
