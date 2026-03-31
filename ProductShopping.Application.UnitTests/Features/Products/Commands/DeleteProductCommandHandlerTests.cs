@@ -13,7 +13,7 @@ public class DeleteProductCommandHandlerTests
     [Fact]
     public async Task DeleteProductWithInvalidId()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
         var mapperMock = new Mock<IMapper>();
 
         var productCommand = new DeleteProductCommand
@@ -21,7 +21,7 @@ public class DeleteProductCommandHandlerTests
             Id = -1
         };
 
-        var handler = new DeleteProductCommandHandler(repoMock.Object);
+        var handler = new DeleteProductCommandHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<NotFoundException>();
 
@@ -31,7 +31,7 @@ public class DeleteProductCommandHandlerTests
     [Fact]
     public async Task DeleteValidProduct()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
         var mapperMock = new Mock<IMapper>();
 
         var productCommand = new DeleteProductCommand
@@ -39,7 +39,7 @@ public class DeleteProductCommandHandlerTests
             Id = 1
         };
 
-        var handler = new DeleteProductCommandHandler(repoMock.Object);
+        var handler = new DeleteProductCommandHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 

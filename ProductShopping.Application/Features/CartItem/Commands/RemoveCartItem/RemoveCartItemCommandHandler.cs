@@ -3,12 +3,13 @@ using MediatR;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
 using System.Security.Claims;
 
 namespace ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
 
-public class RemoveCartItemHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper)
+public class RemoveCartItemCommandHandler(ICartsRepository cartsRepository, IUsersService usersService, IMapper mapper)
     : IRequestHandler<RemoveCartItemCommand, Result>
 {
     public async Task<Result> Handle(RemoveCartItemCommand request, CancellationToken cancellationToken)
@@ -26,16 +27,21 @@ public class RemoveCartItemHandler(ICartsRepository cartsRepository, IUsersServi
 
         var cartItemDtoResult = await cartsRepository.GetUserCartItemAsync(userId, request.CartItemId);
 
+        if(cartItemDtoResult.Value == null)
+        {
+            throw new NotFoundException($"CartItem with id: {request.CartItemId} not found");
+        }
+
         var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
 
         if (cartItem == null)
         {
-            return Result.Failure(new Error(ErrorCodes.NotFound, $"A Cart Item with id: '{request.CartItemId}' does not exists in your Cart."));
+            throw new NotFoundException($"CartItem with id: {request.CartItemId} not found");
         }
 
         if (request.Quantity > cartItem.Quantity)
         {
-            return Result.Failure(new Error(ErrorCodes.NotFound, $"You are trying to remove more items than You have in your Cart. This should not happen. Please specify different Quantity"));
+            throw new NotFoundException($"You are trying to remove more items than You have in your Cart. This should not happen. Please specify different Quantity");
         }
         else if (request.Quantity < cartItem.Quantity)
         {

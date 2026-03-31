@@ -1,9 +1,5 @@
-﻿using AutoMapper;
-using Moq;
-using ProductShopping.Application.Constants;
-using ProductShopping.Application.Contracts.Logging;
+﻿using ProductShopping.Application.Constants;
 using ProductShopping.Application.Exceptions;
-using ProductShopping.Application.Features.Product.Commands.CreateProduct;
 using ProductShopping.Application.Features.Product.Commands.UpdateProduct;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.UnitTests.Mocks;
@@ -17,9 +13,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithNegativeIndex()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -32,12 +26,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<NotFoundException>();
 
@@ -47,9 +41,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithEmptyName()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -62,12 +54,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<ValidationFailedException>();
 
@@ -78,9 +70,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithTooLongName()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -93,12 +83,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<ValidationFailedException>();
 
@@ -109,9 +99,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithTooLowPrice()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -124,12 +112,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<ValidationFailedException>();
 
@@ -140,9 +128,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithTooLowRating()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -155,12 +141,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<ValidationFailedException>();
 
@@ -171,9 +157,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductWithTooBigRating()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -186,12 +170,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None).ShouldThrowAsync<ValidationFailedException>();
 
@@ -202,9 +186,7 @@ public class UpdateProductCommandHandlerTests
     [Fact]
     public async Task UpdateProductName_WithValidationPassed()
     {
-        var repoMock = MockProductsRepository.GetProductsRepository_UpdateProduct();
-        var mapperMock = new Mock<IMapper>();
-        var loggerMock = new Mock<IAppLogger<CreateProductCommandHandler>>();
+        var setup = MockProductsRepository.GetProductsRepository_UpdateProductSetup();
 
         var productCommand = new UpdateProductCommand
         {
@@ -217,12 +199,12 @@ public class UpdateProductCommandHandlerTests
         var product = new Product { Id = 1, Name = "Updated Product", CategoryId = 1, Price = 1, Rating = 4.5 };
         var dto = new ProductDto { Id = 1, Name = "Updated Product", CategoryName = "Food", Price = 1, Rating = 4.5 };
 
-        mapperMock.Setup(m => m.Map<Product>(productCommand))
+        setup.Item2.Setup(m => m.Map<Product>(productCommand))
                   .Returns(product);
-        mapperMock.Setup(m => m.Map<ProductDto>(product))
+        setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
 
-        var handler = new UpdateProductCommandHandler(repoMock.Object, mapperMock.Object);
+        var handler = new UpdateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 

@@ -54,6 +54,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
 
     public async Task<Result<CartItemDto>> GetUserCartItemAsync(string userId, int cartItemId)
     {
+        _logger.LogInformation($"GetUserCartItemAsync: userId{userId}, cartItemId: {cartItemId}");
         var userCart = await GetUserCartAsync(userId);
         var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.Id == cartItemId);
 

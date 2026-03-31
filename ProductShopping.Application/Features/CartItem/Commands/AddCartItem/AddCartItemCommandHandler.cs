@@ -36,7 +36,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
 
         if(product is null)
         {
-            return Result<CartItemDto>.Failure(new Error(ErrorCodes.NotFound, $"A Product with id: {request.ProductId} does not exist"));
+            throw new NotFoundException($"A Product with id: {request.ProductId} does not exist");
         }
 
         var cartItemDtoResult = await cartsRepository.GetUserCartItemByProductIdAsync(userId, request.ProductId);
@@ -56,8 +56,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
             await cartsRepository.CreateCartItemAsync(cartItem);
         }
 
-        var savedItem = await cartsRepository.GetUserCartItemAsync(userId, cartItem.Id);
-        var outputDto = mapper.Map<CartItemDto>(savedItem.Value);
+        var outputDto = mapper.Map<CartItemDto>(cartItem);
 
         return Result<CartItemDto>.Success(outputDto);
     }

@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using AutoMapper;
+using Moq;
+using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
@@ -10,7 +12,7 @@ namespace ProductShopping.Application.UnitTests.Mocks;
 
 public class MockProductsRepository
 {
-    public static Mock<IProductsRepository> GetProductsRepository_CreateProduct()
+    public static (Mock<IProductsRepository>, Mock<IMapper>) GetProductsRepository_CreateProductSetup()
     {
         var products = new List<Product>
         {
@@ -44,6 +46,7 @@ public class MockProductsRepository
         };
 
         var mockRepo = new Mock<IProductsRepository>();
+        var mapper = new Mock<IMapper>();
 
         mockRepo.Setup(r => r.GetAsync()).ReturnsAsync(products);
 
@@ -65,10 +68,10 @@ public class MockProductsRepository
             return productsDtos.FirstOrDefault(c => c.Name == productName)!;
         });
 
-        return mockRepo;
+        return (mockRepo, mapper);
     }
 
-    public static Mock<IProductsRepository> GetProductsRepository_UpdateProduct()
+    public static (Mock<IProductsRepository>, Mock<IMapper>) GetProductsRepository_UpdateProductSetup()
     {
         var products = new List<Product>
         {
@@ -102,6 +105,7 @@ public class MockProductsRepository
         };
 
         var mockRepo = new Mock<IProductsRepository>();
+        var mapper = new Mock<IMapper>();
 
         mockRepo.Setup(r => r.UpdateAsync(It.IsAny<Product>()))
             .Returns((Product product) =>
@@ -119,10 +123,10 @@ public class MockProductsRepository
             return products.FirstOrDefault(q => q.Id == id);
         });
 
-        return mockRepo;
+        return (mockRepo, mapper);
     }
 
-    public static Mock<IProductsRepository> GetProductsRepository_DeleteProduct()
+    public static (Mock<IProductsRepository>, Mock<IMapper>) GetProductsRepository_DeleteProduct()
     {
         var products = new List<Product>
         {
@@ -156,16 +160,17 @@ public class MockProductsRepository
         };
 
         var mockRepo = new Mock<IProductsRepository>();
+        var mapper = new Mock<IMapper>();
 
         mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) =>
         {
             return products.FirstOrDefault(q => q.Id == id);
         });
 
-        return mockRepo;
+        return (mockRepo, mapper);
     }
 
-    public static Mock<IProductsRepository> GetProductsRepository_GetProducts()
+    public static (Mock<IProductsRepository>, Mock<IMapper>) GetProductsRepository_GetProductsSetup()
     {
         var products = new List<Product>
         {
@@ -288,6 +293,7 @@ public class MockProductsRepository
         };
 
         var mockRepo = new Mock<IProductsRepository>();
+        var mapper = new Mock<IMapper>();
 
         mockRepo.Setup(r => r.GetAsync()).ReturnsAsync(products);
 
@@ -311,6 +317,6 @@ public class MockProductsRepository
             return productsDtos.FirstOrDefault(c => c.Name == productName)!;
         });
 
-        return mockRepo;
+        return (mockRepo, mapper);
     }
 }

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using Moq;
-using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Logging;
-using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.Features.Product.Queries.GetProducts;
 using ProductShopping.Application.Models.Filtering;
@@ -18,7 +16,7 @@ public class GetProductListQueryHandlerTests
     public async Task GetAllProductsNoFilters()
     {
         // Arrange
-        var repoMock = MockProductsRepository.GetProductsRepository_GetProducts();
+        var setup = MockProductsRepository.GetProductsRepository_GetProductsSetup();
         var mapperMock = new Mock<IMapper>();
         var loggerMock = new Mock<IAppLogger<GetProductDetailQueryHandler>>();
 
@@ -34,7 +32,7 @@ public class GetProductListQueryHandlerTests
             }
         };
 
-        var handler = new GetProductListQueryHandler(repoMock.Object);
+        var handler = new GetProductListQueryHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 
@@ -46,7 +44,7 @@ public class GetProductListQueryHandlerTests
     public async Task GetAllProductsWithCategoryFilter()
     {
         // Arrange
-        var repoMock = MockProductsRepository.GetProductsRepository_GetProducts();
+        var setup = MockProductsRepository.GetProductsRepository_GetProductsSetup();
         var mapperMock = new Mock<IMapper>();
         var loggerMock = new Mock<IAppLogger<GetProductDetailQueryHandler>>();
 
@@ -62,7 +60,7 @@ public class GetProductListQueryHandlerTests
             }
         };
 
-        repoMock.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
+        setup.Item1.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
             .ReturnsAsync((ProductFilterParameters productFilterParameters, PaginationParameters paginationParameters) => {
                 return ([
                     new ProductDto { Name = "First"},
@@ -72,7 +70,7 @@ public class GetProductListQueryHandlerTests
                 ], 4, 1);
             });
 
-        var handler = new GetProductListQueryHandler(repoMock.Object);
+        var handler = new GetProductListQueryHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 
@@ -85,7 +83,7 @@ public class GetProductListQueryHandlerTests
     public async Task GetAllProductsWithCustomPagination()
     {
         // Arrange
-        var repoMock = MockProductsRepository.GetProductsRepository_GetProducts();
+        var setup = MockProductsRepository.GetProductsRepository_GetProductsSetup();
         var mapperMock = new Mock<IMapper>();
         var loggerMock = new Mock<IAppLogger<GetProductDetailQueryHandler>>();
 
@@ -101,14 +99,14 @@ public class GetProductListQueryHandlerTests
             }
         };
 
-        repoMock.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
+        setup.Item1.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
             .ReturnsAsync((ProductFilterParameters productFilterParameters, PaginationParameters paginationParameters) => {
                 return ([
                     new ProductDto { Name = "First"},
                 ], 4, 4);
             });
 
-        var handler = new GetProductListQueryHandler(repoMock.Object);
+        var handler = new GetProductListQueryHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 
@@ -122,7 +120,7 @@ public class GetProductListQueryHandlerTests
     public async Task GetEmptyProducts()
     {
         // Arrange
-        var repoMock = MockProductsRepository.GetProductsRepository_GetProducts();
+        var setup = MockProductsRepository.GetProductsRepository_GetProductsSetup();
         var mapperMock = new Mock<IMapper>();
         var loggerMock = new Mock<IAppLogger<GetProductDetailQueryHandler>>();
 
@@ -138,12 +136,12 @@ public class GetProductListQueryHandlerTests
             }
         };
 
-        repoMock.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
+        setup.Item1.Setup(r => r.GetFilteredRawPagedAsync(It.IsAny<ProductFilterParameters>(), It.IsAny<PaginationParameters>()))
             .ReturnsAsync((ProductFilterParameters productFilterParameters, PaginationParameters paginationParameters) => {
                 return ([], 0, 0);
             });
 
-        var handler = new GetProductListQueryHandler(repoMock.Object);
+        var handler = new GetProductListQueryHandler(setup.Item1.Object);
 
         var result = await handler.Handle(productCommand, CancellationToken.None);
 

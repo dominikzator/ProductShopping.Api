@@ -15,14 +15,12 @@ public class GetCartItemListQueryHandler(ICartsRepository cartsRepository, IUser
         var userId = usersService.GetUserId();
         var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        var cartItems = await cartsRepository.GetUserCartItemsAsync(userId);
-
-        var dtos = mapper.Map<List<CartItemDto>>(cartItems.Value);
+        var cartItemsDtos = await cartsRepository.GetUserCartItemsAsync(userId);
 
         var pagedResult = new PagedResult<CartItemDto>
         {
-            Data = PagedResult<CartItemDto>.GetData(dtos, request.PaginationParameters!),
-            Metadata = PagedResult<CartItemDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
+            Data = PagedResult<CartItemDto>.GetData(cartItemsDtos.Value, request.PaginationParameters!),
+            Metadata = PagedResult<CartItemDto>.GetPaginationMetadata(cartItemsDtos.Value, request.PaginationParameters!)
         };
 
         return Result<PagedResult<CartItemDto>>.Success(pagedResult);
