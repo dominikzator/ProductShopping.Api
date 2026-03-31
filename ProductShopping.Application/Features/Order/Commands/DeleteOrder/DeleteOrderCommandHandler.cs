@@ -3,6 +3,7 @@ using MediatR;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Order.Commands.DeleteOrder;
@@ -17,12 +18,13 @@ public class DeleteOrderCommandHandler(IOrdersRepository ordersRepository, IUser
 
         if (orderDto.Value is null)
         {
-            return Result.Failure(new Error(ErrorCodes.NotFound, $"Order '{request.Id}' was not found."));
+            throw new NotFoundException($"Order '{request.Id}' was not found.");
         }
 
         var order = mapper.Map<Domain.Models.Order>(orderDto);
+        var orderItems = mapper.Map<List<Domain.Models.OrderItem>>(orderDto.Value.OrderItems);
 
-        await ordersRepository.RemoveOrderItemsAsync(order.OrderItems);
+        await ordersRepository.RemoveOrderItemsAsync(orderItems);
         await ordersRepository.DeleteAsync(order);
 
         return Result.Success();

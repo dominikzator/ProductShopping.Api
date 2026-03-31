@@ -16,12 +16,10 @@ public class GetOrderListQueryHandler(IOrdersRepository ordersRepository, IUsers
 
         var userOrders = await ordersRepository.GetUserOrdersAsync(userId);
 
-        var dtos = mapper.Map<List<OrderDto>>(userOrders);
-
         var pagedResult = new PagedResult<OrderDto>
         {
-            Data = PagedResult<OrderDto>.GetData(dtos, request.PaginationParameters!),
-            Metadata = PagedResult<OrderDto>.GetPaginationMetadata(dtos, request.PaginationParameters!)
+            Data = PagedResult<OrderDto>.GetData(userOrders, request.PaginationParameters!),
+            Metadata = PagedResult<OrderDto>.GetPaginationMetadata(userOrders, request.PaginationParameters!)
         };
 
         return Result<PagedResult<OrderDto>>.Success(pagedResult);

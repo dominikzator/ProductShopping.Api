@@ -3,6 +3,7 @@ using MediatR;
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
+using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
 
 namespace ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
@@ -16,7 +17,7 @@ public class GetOrderDetailQueryHandler(IOrdersRepository ordersRepository, IUse
 
         if (order.Value is null)
         {
-            return Result<OrderDto>.Failure(new Error(ErrorCodes.NotFound, $"Order '{request.Id}' was not found."));
+            throw new NotFoundException($"Order '{request.Id}' was not found.");
         }
 
         var outputDto = mapper.Map<OrderDto>(order.Value);

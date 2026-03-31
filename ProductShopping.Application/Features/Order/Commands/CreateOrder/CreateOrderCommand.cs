@@ -7,5 +7,5 @@ namespace ProductShopping.Application.Features.Order.Commands.CreateOrder;
 
 public class CreateOrderCommand : IRequest<Result<OrderDto>>
 {
-    public Address Address { get; set; }
+    public required Address Address { get; set; }
 }

@@ -32,14 +32,13 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         if (userCart.Value is null)
         {
-            return Result<OrderDto>.Failure(new Error(ErrorCodes.Failure,
-                $"User '{userEmail}'" +
-                $"does not have a Cart. This should not happen. Contact developers."));
+            throw new NotFoundException($"User '{userEmail}'" +
+                $"does not have a Cart. This should not happen. Contact developers.");
         }
 
         if (userCart.Value.CartItems.Count == 0)
         {
-            return Result<OrderDto>.Failure(new Error(ErrorCodes.Failure, $"User Cart is empty"));
+            throw new BadRequestException($"User Cart is empty");
         }
 
         var orderNumber = GenerateOrderNumber();
@@ -55,11 +54,15 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         var createdOrder = await ordersRepository.GetUserOrderByOrderNumberAsync(userId, orderNumber);
 
+        Console.WriteLine($"userCart.Value: {userCart.Value}");
+        Console.WriteLine($"userCart.Value.CartItems.Count: {userCart.Value.CartItems.Count}");
+        Console.WriteLine($"createdOrder.Value: {createdOrder.Value}");
+
         foreach (var item in userCart.Value.CartItems)
         {
             var orderItem = new OrderItem
             {
-                OrderId = createdOrder.Value!.Id,
+                OrderId = createdOrder.Value.Id,
                 CustomerId = userId,
                 ProductId = item.ProductId,
                 ProductName = item.Name,
