@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
@@ -28,7 +27,7 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         var userId = usersService.GetUserId();
 
-        var userCart = await cartsRepository.GetUserCartAsync(userId);
+        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
         if (userCart.Value is null)
         {
@@ -52,7 +51,7 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         await ordersRepository.CreateAsync(order);
 
-        var createdOrder = await ordersRepository.GetUserOrderByOrderNumberAsync(userId, orderNumber);
+        var createdOrder = await ordersRepository.GetUserOrderDtoByOrderNumberAsync(userId, orderNumber);
 
         Console.WriteLine($"userCart.Value: {userCart.Value}");
         Console.WriteLine($"userCart.Value.CartItems.Count: {userCart.Value.CartItems.Count}");
@@ -75,7 +74,7 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
         }
         await cartsRepository.ClearCartAsync(userId);
 
-        var orderItems = await ordersRepository.GetUserOrderItemsByOrderIdAsync(userId, createdOrder.Value!.Id.ToString());
+        var orderItems = await ordersRepository.GetUserOrderItemsDtosByOrderIdAsync(userId, createdOrder.Value!.Id);
 
         string domainName = config["Constants:DomainName"]!;
 

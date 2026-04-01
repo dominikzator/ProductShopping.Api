@@ -13,9 +13,9 @@ public class GetCartItemListQueryHandler(ICartsRepository cartsRepository, IUser
     public async Task<Result<PagedResult<CartItemDto>>> Handle(GetCartItemListQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
-        var userCart = await cartsRepository.GetUserCartAsync(userId);
+        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
-        var cartItemsDtos = await cartsRepository.GetUserCartItemsAsync(userId);
+        var cartItemsDtos = await cartsRepository.GetUserCartItemsDtosAsync(userId);
 
         var pagedResult = new PagedResult<CartItemDto>
         {

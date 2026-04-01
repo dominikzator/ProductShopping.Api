@@ -14,7 +14,7 @@ public class GetOrderListQueryHandler(IOrdersRepository ordersRepository, IUsers
     {
         var userId = usersService.GetUserId();
 
-        var userOrders = await ordersRepository.GetUserOrdersAsync(userId);
+        var userOrders = await ordersRepository.GetUserOrdersDtosAsync(userId);
 
         var pagedResult = new PagedResult<OrderDto>
         {

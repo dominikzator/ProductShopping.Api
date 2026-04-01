@@ -107,11 +107,18 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
         return productCategoryDto;
     }
 
-    public async Task<ProductDto?> GetProductByNameAsync(string name)
+    public async Task<ProductDto?> GetProductDtoByNameAsync(string name)
     {
         var product = await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
         var productDto = _mapper.Map<ProductDto>(product);
 
         return productDto;
+    }
+
+    public async Task<Product?> GetProductByNameAsync(string name)
+    {
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
+
+        return product;
     }
 }

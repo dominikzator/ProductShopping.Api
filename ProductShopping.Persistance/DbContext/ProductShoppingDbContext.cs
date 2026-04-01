@@ -1,14 +1,18 @@
-﻿using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductShopping.Api.Contracts;
+using ProductShopping.Domain.Common;
 using ProductShopping.Domain.Models;
+using System.Reflection;
 
 namespace ProductShopping.Persistence.DatabaseContext;
 
 public class ProductShoppingDbContext : DbContext
 {
-    public ProductShoppingDbContext(DbContextOptions<ProductShoppingDbContext> options) : base(options)
-    {
+    private readonly IUsersService _userService;
 
+    public ProductShoppingDbContext(DbContextOptions<ProductShoppingDbContext> options, IUsersService userService) : base(options)
+    {
+        _userService = userService;
     }
 
     public DbSet<Product> Products { get; set; }
@@ -88,5 +92,20 @@ public class ProductShoppingDbContext : DbContext
             new { Id = 35, Name = "Home Security" },
             new { Id = 36, Name = "Accessories" }
         );
+    }
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in base.ChangeTracker.Entries<BaseEntity>().Where(q => q.State == EntityState.Added || q.State == EntityState.Modified))
+        {
+            entry.Entity.DateModified = DateTime.UtcNow;
+            entry.Entity.ModifiedBy = _userService.GetUserId();
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.DateCreated = DateTime.UtcNow;
+                entry.Entity.CreatedBy = _userService.GetUserId();
+            }
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

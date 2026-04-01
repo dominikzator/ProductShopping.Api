@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Application.Constants;
-using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
@@ -15,16 +14,14 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
 {
     private readonly ProductShoppingDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IAppLogger<CartsRepository> _logger;
 
-    public CartsRepository(ProductShoppingDbContext context, IMapper mapper, IAppLogger<CartsRepository> logger) : base(context)
+    public CartsRepository(ProductShoppingDbContext context, IMapper mapper) : base(context)
     {
         _context = context;
         _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task<Result<CartDto>> GetUserCartAsync(string userId)
+    public async Task<Result<CartDto>> GetUserCartDtoAsync(string userId)
     {
         var userCart = await _context.Carts
             .Include(c => c.CartItems)
@@ -43,27 +40,56 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
         return Result<CartDto>.Success(userCartDto);
     }
 
-    public async Task<Result<List<CartItemDto>>> GetUserCartItemsAsync(string userId)
+    public async Task<Cart> GetUserCartAsync(string userId)
     {
-        var userCart = await GetUserCartAsync(userId);
-        _logger.LogInformation($"GetUserCartItemsAsync userCart items count: {userCart.Value.CartItems.Count}");
+        var userCart = await _context.Carts
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Product)
+            .ThenInclude(p => p.Category)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cart => cart.UserId == userId);
+
+        return userCart;
+    }
+
+    public async Task<Result<List<CartItemDto>>> GetUserCartItemsDtosAsync(string userId)
+    {
+        var userCart = await GetUserCartDtoAsync(userId);
         var cartItems = userCart.Value!.CartItems.ToList();
 
         return Result<List<CartItemDto>>.Success(cartItems);
     }
 
-    public async Task<Result<CartItemDto>> GetUserCartItemAsync(string userId, int cartItemId)
+    public async Task<List<CartItem>> GetUserCartItemsAsync(string userId)
     {
-        _logger.LogInformation($"GetUserCartItemAsync: userId{userId}, cartItemId: {cartItemId}");
         var userCart = await GetUserCartAsync(userId);
+        var cartItems = userCart.CartItems.ToList();
+        Console.WriteLine($"{userCart.CartItems.Count}");
+
+        return cartItems;
+    }
+
+    public async Task<Result<CartItemDto>> GetUserCartItemDtoAsync(string userId, int cartItemId)
+    {
+        var userCart = await GetUserCartDtoAsync(userId);
         var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.Id == cartItemId);
 
         return Result<CartItemDto>.Success(cartItem!);
     }
 
-    public async Task<Result<CartItemDto>> GetUserCartItemByProductIdAsync(string userId, int productId)
+    public async Task<CartItem> GetUserCartItemAsync(string userId, int cartItemId)
     {
         var userCart = await GetUserCartAsync(userId);
+        Console.WriteLine($"{userCart.UserId}");
+        var cartItem = userCart.CartItems.FirstOrDefault(c => c.Id == cartItemId);
+        Console.WriteLine($"{userCart.CartItems.Count}");
+
+        return cartItem;
+    }
+
+    public async Task<Result<CartItemDto>> GetUserCartItemDtoByProductIdAsync(string userId, int productId)
+    {
+        var userCart = await GetUserCartDtoAsync(userId);
         var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.ProductId == productId);
 
         return Result<CartItemDto>.Success(cartItem!);
@@ -93,9 +119,22 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
         return Result<bool>.Success(true);
     }
 
+    public async Task DeleteCartItemAsync(string userId, int cartItemId)
+    {
+        var cartItem = await _context.CartItems
+            .Include(ci => ci.Cart)
+            .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.Cart.UserId == userId);
+
+        if (cartItem is null)
+            return;
+
+        _context.CartItems.Remove(cartItem);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<Result<bool>> ClearCartAsync(string userId)
     {
-        var cartItemsDtos = await GetUserCartItemsAsync(userId);
+        var cartItemsDtos = await GetUserCartItemsDtosAsync(userId);
         var cartItems = _mapper.Map<List<CartItem>>(cartItemsDtos.Value);
 
         _context.CartItems.RemoveRange(cartItems);

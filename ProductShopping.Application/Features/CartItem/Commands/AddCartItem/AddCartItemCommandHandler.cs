@@ -23,7 +23,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
         var userId = usersService.GetUserId();
         var userEmail = usersService.GetUserEmail();
 
-        var userCart = await cartsRepository.GetUserCartAsync(userId);
+        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
         if (userCart.Value == null)
         {
@@ -39,7 +39,7 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
             throw new NotFoundException($"A Product with id: {request.ProductId} does not exist");
         }
 
-        var cartItemDtoResult = await cartsRepository.GetUserCartItemByProductIdAsync(userId, request.ProductId);
+        var cartItemDtoResult = await cartsRepository.GetUserCartItemDtoByProductIdAsync(userId, request.ProductId);
         var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
 
         if (cartItem != null)

@@ -24,7 +24,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
     }
     private async Task<bool> ProductWithNameMustNotExist(string name, CancellationToken cancellationToken)
     {
-        var product = await _productsRepository.GetProductByNameAsync(name);
+        var product = await _productsRepository.GetProductDtoByNameAsync(name);
 
         return product == null;
     }

@@ -55,8 +55,8 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
         var session = await service.CreateAsync(options);
 
 
-        var order = await ordersRepository.GetUserOrderAsync(userId, paymentRequest.OrderId.ToString());
-        var orderItems = await ordersRepository.GetUserOrderItemsByOrderIdAsync(userId, paymentRequest.OrderId.ToString());
+        var order = await ordersRepository.GetUserOrderDtoAsync(userId, paymentRequest.OrderId);
+        var orderItems = await ordersRepository.GetUserOrderItemsDtosByOrderIdAsync(userId, paymentRequest.OrderId);
 
         var outputDto = mapper.Map<OrderDto>(order.Value);
         outputDto.PaymentUrl = session.Url;

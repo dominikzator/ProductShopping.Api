@@ -14,7 +14,7 @@ public class RemoveCartItemsCommandHandler(ICartsRepository cartsRepository, IUs
     {
         var userId = usersService.GetUserId();
         var userEmail = usersService.GetUserEmail();
-        var userCart = await cartsRepository.GetUserCartAsync(userId);
+        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
         if (userCart.Value == null)
         {

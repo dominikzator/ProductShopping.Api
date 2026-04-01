@@ -63,7 +63,7 @@ public class MockProductsRepository
             return categoriesDtos.FirstOrDefault(c => c.Name == categoryName)!;
         });
 
-        mockRepo.Setup(r => r.GetProductByNameAsync(It.IsAny<string>())).ReturnsAsync((string productName) =>
+        mockRepo.Setup(r => r.GetProductDtoByNameAsync(It.IsAny<string>())).ReturnsAsync((string productName) =>
         {
             return productsDtos.FirstOrDefault(c => c.Name == productName)!;
         });
@@ -312,7 +312,7 @@ public class MockProductsRepository
             return categoriesDtos.FirstOrDefault(c => c.Name == categoryName)!;
         });
 
-        mockRepo.Setup(r => r.GetProductByNameAsync(It.IsAny<string>())).ReturnsAsync((string productName) =>
+        mockRepo.Setup(r => r.GetProductDtoByNameAsync(It.IsAny<string>())).ReturnsAsync((string productName) =>
         {
             return productsDtos.FirstOrDefault(c => c.Name == productName)!;
         });

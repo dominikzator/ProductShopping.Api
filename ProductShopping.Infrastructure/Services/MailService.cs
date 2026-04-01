@@ -89,7 +89,7 @@ public class MailService(IOrdersRepository ordersRepository, IIdentityUserServic
 
     private async Task<Result> SendPaymentConfirmationEmail(int orderId, string userEmail, string userId)
     {
-        var orderDto = await ordersRepository.GetUserOrderAsync(userId, orderId.ToString());
+        var orderDto = await ordersRepository.GetUserOrderDtoAsync(userId, orderId);
 
         var subject = $"Hello, we have received your payment for order: {orderDto.Value!.OrderNumber}";
         var message = GetItemListings(orderDto.Value.OrderItems);

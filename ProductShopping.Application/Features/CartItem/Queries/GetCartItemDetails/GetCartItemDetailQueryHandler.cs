@@ -12,9 +12,9 @@ public class GetCartItemDetailQueryHandler(ICartsRepository cartsRepository, IUs
     public async Task<Result<CartItemDto>> Handle(GetCartItemDetailQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
-        var userCart = await cartsRepository.GetUserCartAsync(userId);
+        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
-        var cartItem = cartsRepository.GetUserCartItemAsync(userId, request.Id);
+        var cartItem = cartsRepository.GetUserCartItemDtoAsync(userId, request.Id);
 
         if (cartItem.Result.Value is null)
         {

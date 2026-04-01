@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
@@ -14,7 +13,7 @@ public class DeleteOrderCommandHandler(IOrdersRepository ordersRepository, IUser
     {
         var userId = usersService.GetUserId();
 
-        var orderDto = await ordersRepository.GetUserOrderAsync(userId, request.Id.ToString());
+        var orderDto = await ordersRepository.GetUserOrderDtoAsync(userId, request.Id);
 
         if (orderDto.Value is null)
         {

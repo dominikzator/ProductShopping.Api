@@ -141,19 +141,19 @@ namespace ProductShopping.Application.UnitTests.Mocks
             var mapperMock = new Mock<IMapper>();
             var cartsMock = new Mock<ICartsRepository>();
 
-            cartsMock.Setup(r => r.GetUserCartAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
+            cartsMock.Setup(r => r.GetUserCartDtoAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
             {
                 return (userId == cart.UserId) ? Result<CartDto>.Success(cartDto) : Result<CartDto>.Failure();
             });
 
             mockUsersService.Setup(r => r.GetUserId()).Returns("1");
 
-            mockRepo.Setup(r => r.GetUserOrderAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((string userId, string orderId) =>
+            mockRepo.Setup(r => r.GetUserOrderDtoAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int orderId) =>
             {
-                var orderDto = ordersDtos.FirstOrDefault(p => p.Id.ToString() == orderId);
+                var orderDto = ordersDtos.FirstOrDefault(p => p.Id == orderId);
                 return (orderDto != null) ? Result<OrderDto>.Success(orderDto) : Result<OrderDto>.Failure();
             });
-            mockRepo.Setup(r => r.GetUserOrderByOrderNumberAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((string userId, string orderNumber) =>
+            mockRepo.Setup(r => r.GetUserOrderDtoByOrderNumberAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((string userId, string orderNumber) =>
             {
                 return Result<OrderDto>.Success(ordersDtos[0]);
             });
@@ -189,7 +189,7 @@ namespace ProductShopping.Application.UnitTests.Mocks
                 };
             });
 
-            mockRepo.Setup(r => r.GetUserOrdersAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
+            mockRepo.Setup(r => r.GetUserOrdersDtosAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
             {
                 return ordersDtos;
             });

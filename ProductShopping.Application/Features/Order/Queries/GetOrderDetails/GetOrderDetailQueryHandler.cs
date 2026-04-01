@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using ProductShopping.Api.Contracts;
-using ProductShopping.Application.Constants;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Exceptions;
 using ProductShopping.Application.Results;
@@ -13,7 +12,7 @@ public class GetOrderDetailQueryHandler(IOrdersRepository ordersRepository, IUse
     public async Task<Result<OrderDto>> Handle(GetOrderDetailQuery request, CancellationToken cancellationToken)
     {
         var userId = usersService.GetUserId();
-        var order = await ordersRepository.GetUserOrderAsync(userId, request.Id.ToString());
+        var order = await ordersRepository.GetUserOrderDtoAsync(userId, request.Id);
 
         if (order.Value is null)
         {

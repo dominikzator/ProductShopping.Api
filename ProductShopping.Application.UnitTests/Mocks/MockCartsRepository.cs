@@ -81,13 +81,13 @@ namespace ProductShopping.Application.UnitTests.Mocks
             var mockUsersService = new Mock<IUsersService>();
             var mapperMock = new Mock<IMapper>();
 
-            mockRepo.Setup(r => r.GetUserCartAsync(It.IsAny<string>())).ReturnsAsync((string userId) => Result<CartDto>.Success(cartDto));
-            mockRepo.Setup(r => r.GetUserCartItemAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int cartItemId) =>
+            mockRepo.Setup(r => r.GetUserCartDtoAsync(It.IsAny<string>())).ReturnsAsync((string userId) => Result<CartDto>.Success(cartDto));
+            mockRepo.Setup(r => r.GetUserCartItemDtoAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int cartItemId) =>
             {
                 var cartItemDto = cartItemsDtos.FirstOrDefault(p => p.Id == cartItemId);
                 return (cartItemDto == null) ? Result<CartItemDto>.Failure() : Result<CartItemDto>.Success(cartItemDto);
             });
-            mockRepo.Setup(r => r.GetUserCartItemsAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
+            mockRepo.Setup(r => r.GetUserCartItemsDtosAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
             {
                 return Result<List<CartItemDto>>.Success(cartItemsDtos);
             });
@@ -109,14 +109,17 @@ namespace ProductShopping.Application.UnitTests.Mocks
                 new Product
                 {
                     Id = 3333,
+                    CategoryId = 1,
                 },
                 new Product
                 {
                     Id = 3334,
+                    CategoryId = 1,
                 },
                 new Product
                 {
                     Id = 3335,
+                    CategoryId = 1,
                 },
             };
             var cartItems = new List<CartItem>
@@ -126,7 +129,7 @@ namespace ProductShopping.Application.UnitTests.Mocks
                     Id = 1,
                     CartId = 1,
                     ProductId = 3333,
-                    Quantity = 3
+                    Quantity = 3,
                 },
                 new CartItem
                 {
@@ -188,13 +191,13 @@ namespace ProductShopping.Application.UnitTests.Mocks
             var mockUsersService = new Mock<IUsersService>();
             var mapperMock = new Mock<IMapper>();
 
-            cartsRepo.Setup(r => r.GetUserCartAsync(It.IsAny<string>())).ReturnsAsync((string userId) => Result<CartDto>.Success(cartDto));
-            cartsRepo.Setup(r => r.GetUserCartItemAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int cartItemId) =>
+            cartsRepo.Setup(r => r.GetUserCartDtoAsync(It.IsAny<string>())).ReturnsAsync((string userId) => Result<CartDto>.Success(cartDto));
+            cartsRepo.Setup(r => r.GetUserCartItemDtoAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int cartItemId) =>
             {
                 var cartItemDto = cartItemsDtos.FirstOrDefault(p => p.Id == cartItemId);
                 return (cartItemDto == null) ? Result<CartItemDto>.Failure() : Result<CartItemDto>.Success(cartItemDto);
             });
-            cartsRepo.Setup(r => r.GetUserCartItemsAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
+            cartsRepo.Setup(r => r.GetUserCartItemsDtosAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
             {
                 return Result<List<CartItemDto>>.Success(cartItemsDtos);
             });
@@ -205,7 +208,7 @@ namespace ProductShopping.Application.UnitTests.Mocks
                 return products.FirstOrDefault(p => p.Id == id);
             });
 
-            cartsRepo.Setup(r => r.GetUserCartItemByProductIdAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int productId) =>
+            cartsRepo.Setup(r => r.GetUserCartItemDtoByProductIdAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int productId) =>
             {
                 var cartItemDto = cartItemsDtos.FirstOrDefault(p => p.ProductId == productId);
                 return (cartItemDto == null) ? Result<CartItemDto>.Failure() : Result<CartItemDto>.Success(cartItemDto);
