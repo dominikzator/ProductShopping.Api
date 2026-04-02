@@ -2,11 +2,11 @@
 using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
+using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItems;
 using ProductShopping.Application.IntegrationTests.Helpers;
 using ProductShopping.Application.IntegrationTests.Mocks;
-using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.Repositories;
 using Shouldly;
 
@@ -361,5 +361,28 @@ public class CartItemsHandlersIntegrationTests
 
         cartItems = await cartsRepo.GetUserCartItemsAsync("1");
         cartItems.Count.ShouldBe(2);
+    }
+    [Fact]
+    public async Task CartItemsHandlersIntegrationTests_ClearCart()
+    {
+        var setup = await OrdersDbMocks.CreateInMemoryContextSetup();
+        var cartsRepo = new CartsRepository(setup.Item1, AutoMapperHelper.Create());
+        var productsRepo = new ProductsRepository(setup.Item1, AutoMapperHelper.Create());
+        var usersServiceMock = new Mock<IUsersService>();
+        usersServiceMock.Setup(r => r.GetUserId()).Returns("1");
+
+        var cartItems = await cartsRepo.GetUserCartItemsAsync("1");
+        cartItems.Count.ShouldBe(3);
+
+        var removeCartItemsCommand = new RemoveCartItemsCommand
+        {
+            
+        };
+
+        var handler = new RemoveCartItemsCommandHandler(cartsRepo, usersServiceMock.Object);
+        var result = await handler.Handle(removeCartItemsCommand, CancellationToken.None);
+
+        cartItems = await cartsRepo.GetUserCartItemsAsync("1");
+        cartItems.Count.ShouldBe(0);
     }
 }
