@@ -30,9 +30,10 @@ namespace ProductShopping.Persistence.Repositories
             return await _context.Set<T>().AsNoTracking().ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int? id)
+        public async Task<T?> GetByIdAsync(int? id, bool tracking = false)
         {
-            return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(q => q.Id == id);
+            return (tracking) ? await _context.Set<T>().FirstOrDefaultAsync(q => q.Id == id) 
+                : await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(q => q.Id == id);
         }
 
         public async Task UpdateAsync(T entity)
@@ -40,6 +41,16 @@ namespace ProductShopping.Persistence.Repositories
             _context.Update(entity);
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public void SetEntityAsModified<TEntity>(TEntity entity) where TEntity : class
+        {
+            _context.Entry(entity).State = EntityState.Modified;
         }
     }
 }

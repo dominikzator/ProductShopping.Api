@@ -9,7 +9,9 @@ namespace ProductShopping.Application.Contracts.Persistence
         Task CreateAsync(T entity);
         Task DeleteAsync(T entity);
         Task<IReadOnlyList<T>> GetAsync();
-        Task<T?> GetByIdAsync(int? id);
+        Task<T?> GetByIdAsync(int? id, bool tracking = false);
+        Task SaveChangesAsync();
+        void SetEntityAsModified<TEntity>(TEntity entity) where TEntity : class;
         Task UpdateAsync(T entity);
     }
 }

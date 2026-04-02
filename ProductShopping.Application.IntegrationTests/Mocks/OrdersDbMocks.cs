@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ProductShopping.Api.Contracts;
+using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.DatabaseContext;
@@ -17,6 +18,7 @@ public class OrdersDbMocks
             .Options;
 
         var userServiceMock = new Mock<IUsersService>();
+        userServiceMock.Setup(r => r.GetUserId()).Returns("1");
         var context = new ProductShoppingDbContext(options, userServiceMock.Object);
         var mapperMock = new Mock<IMapper>();
 
@@ -27,50 +29,58 @@ public class OrdersDbMocks
                 Id = 1,
                 Name = "Little Canoli",
                 CategoryId = 1,
-                Price = (decimal)2.49
+                Price = (decimal)2.49,
+                Rating = 3.5
             },
             new Product
             {
                 Id = 2,
                 Name = "Car Cleaner",
                 CategoryId = 3,
-                Price = (decimal)49.99
+                Price = (decimal)49.99,
+                Rating = 3.8
             },
             new Product
             {
                 Id = 3,
                 Name = "Car Wheel",
                 CategoryId = 3,
-                Price = (decimal)39.99
+                Price = (decimal)39.99,
+                Rating = 3.2
             },
             new Product
             {
                 Id = 4,
                 Name = "Bananas",
                 CategoryId = 1,
-                Price = (decimal)2.99
+                Price = (decimal)2.99,
+                Rating = 4.3
             },
             new Product
             {
                 Id = 5,
                 Name = "Milk",
                 CategoryId = 1,
-                Price = (decimal)1.99
+                Price = (decimal)1.99,
+                Rating = 4.8
             },
             new Product
             {
                 Id = 6,
                 Name = "Vacuum Cleaner",
                 CategoryId = 3,
-                Price = (decimal)69.99
+                Price = (decimal)69.99,
+                Rating = 4
             },
             new Product
             {
                 Id = 7,
                 Name = "Birthday Cake",
                 CategoryId = 1,
-                Price = (decimal)29.99
-            }}.ToList();
+                Price = (decimal)29.99,
+                Rating = 3.9
+            }
+        }.ToList();
 
         var productsDtos = new[]
         {
@@ -79,49 +89,56 @@ public class OrdersDbMocks
                 Id = 1,
                 Name = "Little Canoli",
                 CategoryName = "Food",
-                Price = (decimal)2.49
+                Price = (decimal)2.49,
+                Rating = 3.5
             },
             new ProductDto
             {
                 Id = 2,
                 Name = "Car Cleaner",
                 CategoryName = "Automotive",
-                Price = (decimal)49.99
+                Price = (decimal)49.99,
+                Rating = 3.8
             },
             new ProductDto
             {
                 Id = 3,
                 Name = "Car Wheel",
                 CategoryName = "Automotive",
-                Price = (decimal)39.99
+                Price = (decimal)39.99,
+                Rating = 3.2
             },
             new ProductDto
             {
                 Id = 4,
                 Name = "Bananas",
                 CategoryName = "Food",
-                Price = (decimal)2.99
+                Price = (decimal)2.99,
+                Rating = 4.3
             },
             new ProductDto
             {
                 Id = 5,
                 Name = "Milk",
                 CategoryName = "Food",
-                Price = (decimal)1.99
+                Price = (decimal)1.99,
+                Rating = 4.8
             },
             new ProductDto
             {
                 Id = 6,
                 Name = "Vacuum Cleaner",
                 CategoryName = "Automotive",
-                Price = (decimal)69.99
+                Price = (decimal)69.99,
+                Rating = 4
             },
             new ProductDto
             {
                 Id = 7,
                 Name = "Birthday Cake",
                 CategoryName = "Food",
-                Price = (decimal)29.99
+                Price = (decimal)29.99,
+                Rating = 3.9
             },
         }.ToList();
 
@@ -240,6 +257,17 @@ public class OrdersDbMocks
         .Returns((Product product) =>
         {
             return productsDtos.FirstOrDefault(p => p.Id == product.Id);
+        });
+
+        mapperMock.Setup(m => m.Map<List<Product>>(It.IsAny<List<ProductDto>>()))
+        .Returns((List<ProductDto> productDtos) =>
+        {
+            return products.Where(p => productDtos.Select(q => q.Id).Contains(p.Id)).ToList();
+        });
+        mapperMock.Setup(m => m.Map<List<ProductDto>>(It.IsAny<List<Product>>()))
+        .Returns((List<Product> products) =>
+        {
+            return productsDtos.Where(p => products.Select(q => q.Id).Contains(p.Id)).ToList();
         });
 
         await context.ProductCategories.AddAsync(foodCategory);

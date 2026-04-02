@@ -14,14 +14,14 @@ public class GetCartItemDetailQueryHandler(ICartsRepository cartsRepository, IUs
         var userId = usersService.GetUserId();
         var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
 
-        var cartItem = cartsRepository.GetUserCartItemDtoAsync(userId, request.Id);
+        var cartItem = await cartsRepository.GetUserCartItemDtoAsync(userId, request.Id);
 
-        if (cartItem.Result.Value is null)
+        if (cartItem.Value is null)
         {
             throw new NotFoundException($"CartItem '{request.Id}' was not found.");
         }
 
-        var outputDto = mapper.Map<CartItemDto>(cartItem);
+        var outputDto = mapper.Map<CartItemDto>(cartItem.Value);
 
         return Result<CartItemDto>.Success(outputDto);
     }

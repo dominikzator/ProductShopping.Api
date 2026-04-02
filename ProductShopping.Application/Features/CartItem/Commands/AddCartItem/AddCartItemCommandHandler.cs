@@ -23,9 +23,9 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
         var userId = usersService.GetUserId();
         var userEmail = usersService.GetUserEmail();
 
-        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
+        var userCart = await cartsRepository.GetUserCartAsync(userId);
 
-        if (userCart.Value == null)
+        if (userCart == null)
         {
             return Result<CartItemDto>.Failure(new Error(ErrorCodes.Failure,
                 $"User '{userEmail}' " +
@@ -39,24 +39,29 @@ public class AddCartItemCommandHandler(ICartsRepository cartsRepository, IProduc
             throw new NotFoundException($"A Product with id: {request.ProductId} does not exist");
         }
 
-        var cartItemDtoResult = await cartsRepository.GetUserCartItemDtoByProductIdAsync(userId, request.ProductId);
-        var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
+        var cartItem = await cartsRepository.GetUserCartItemByProductIdAsync(userId, request.ProductId);
 
         if (cartItem != null)
         {
             cartItem.Quantity += request.Quantity;
 
-            await cartsRepository.UpdateCartItemAsync(cartItem);
+            await cartsRepository.SaveChangesAsync();
         }
         else
         {
-            cartItem = mapper.Map<Domain.Models.CartItem>(request);
-            cartItem.CartId = userCart.Value.Id;
+            cartItem = new Domain.Models.CartItem
+            {
+                ProductId = request.ProductId,
+                CartId = userCart.Id,
+                Quantity = request.Quantity,
+            };
 
             await cartsRepository.CreateCartItemAsync(cartItem);
         }
 
-        var outputDto = mapper.Map<CartItemDto>(cartItem);
+        var changedCartItem = await cartsRepository.GetUserCartItemAsync(userId, cartItem.Id);
+
+        var outputDto = mapper.Map<CartItemDto>(changedCartItem);
 
         return Result<CartItemDto>.Success(outputDto);
     }

@@ -76,19 +76,24 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
         return Result<List<OrderItemDto>>.Success(orderItemsDtos);
     }
 
-    public async Task<List<Order>> GetUserOrdersAsync(string userId)
+    public async Task<List<Order>> GetUserOrdersAsync(string userId, bool tracking = false)
     {
-        var orders = await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).AsNoTracking().ToListAsync();
-
-        return orders;
+        return (tracking) ? 
+            await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).ToListAsync()
+            : await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).AsNoTracking().ToListAsync();
     }
 
-    public async Task<Order> GetUserOrderAsync(string userId, int orderId)
+    public async Task<Order?> GetUserOrderAsync(string userId, int orderId, bool tracking = false)
     {
-        var userOrders = await GetUserOrdersAsync(userId);
-        var userOrder = userOrders.FirstOrDefault(o => o.Id == orderId);
+        IQueryable<Order> query = _context.Orders
+            .Include(o => o.OrderItems);
 
-        return userOrder;
+        if (!tracking)
+        {
+            query = query.AsNoTracking();
+        }
+
+        return await query.FirstOrDefaultAsync(o => o.CustomerId == userId && o.Id == orderId);
     }
 
     public async Task<Order> GetUserOrderByOrderNumberAsync(string userId, string orderNumber)

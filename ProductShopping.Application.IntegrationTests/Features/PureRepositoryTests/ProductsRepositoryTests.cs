@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using Moq;
-using ProductShopping.Application.IntegrationTests.Mocks;
+﻿using ProductShopping.Application.IntegrationTests.Mocks;
 using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.Repositories;
 using Shouldly;
 
-namespace ProductShopping.Application.IntegrationTests.Features;
+namespace ProductShopping.Application.IntegrationTests.Features.PureRepositoryTests;
 
 public class ProductsRepositoryTests
 {

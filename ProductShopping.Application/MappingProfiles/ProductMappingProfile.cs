@@ -2,6 +2,7 @@
 using ProductShopping.Application.DTOs;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
+using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Features.Product.Commands.CreateProduct;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
@@ -39,6 +40,10 @@ public class ProductMappingProfile : Profile
             dest.PhoneNumber = src.Address.PhoneNumber;
             dest.OrderStatus = src.OrderStatus;
         }).ReverseMap();
+
+        CreateMap<CreateProductCommand, Product>().ReverseMap();
+        CreateMap<ProductCategory, ProductCategoryDto>().ReverseMap();
+        CreateMap<Order, UpdateOrderCommand>().ReverseMap();
 
         CreateMap<OrderItem, OrderItemDto>().ReverseMap();
     }

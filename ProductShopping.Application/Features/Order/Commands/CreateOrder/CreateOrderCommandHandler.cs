@@ -53,10 +53,6 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         var createdOrder = await ordersRepository.GetUserOrderDtoByOrderNumberAsync(userId, orderNumber);
 
-        Console.WriteLine($"userCart.Value: {userCart.Value}");
-        Console.WriteLine($"userCart.Value.CartItems.Count: {userCart.Value.CartItems.Count}");
-        Console.WriteLine($"createdOrder.Value: {createdOrder.Value}");
-
         foreach (var item in userCart.Value.CartItems)
         {
             var orderItem = new OrderItem

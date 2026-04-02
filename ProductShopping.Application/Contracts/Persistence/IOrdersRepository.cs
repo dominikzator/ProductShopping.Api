@@ -17,5 +17,7 @@ namespace ProductShopping.Application.Contracts.Persistence
         Task<Result<bool>> RemoveOrderItemsAsync(List<OrderItem> orderItems);
         Task<Result<bool>> UpdateOrderItemAsync(OrderItem orderItem);
         Task<Result<bool>> SetUserOrderPayedAsync(string userId, int orderId);
+        Task<List<Order>> GetUserOrdersAsync(string userId, bool tracking = false);
+        Task<Order> GetUserOrderAsync(string userId, int orderId, bool tracking = false);
     }
 }

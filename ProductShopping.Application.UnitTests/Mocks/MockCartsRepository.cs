@@ -190,12 +190,18 @@ namespace ProductShopping.Application.UnitTests.Mocks
             var productsRepo = new Mock<IProductsRepository>();
             var mockUsersService = new Mock<IUsersService>();
             var mapperMock = new Mock<IMapper>();
-
+            cartsRepo.Setup(r => r.GetUserCartAsync(It.IsAny<string>())).ReturnsAsync((string userId) => cart);
+            cartsRepo.Setup(r => r.GetUserCartNoTrackingAsync(It.IsAny<string>())).ReturnsAsync((string userId) => cart);
             cartsRepo.Setup(r => r.GetUserCartDtoAsync(It.IsAny<string>())).ReturnsAsync((string userId) => Result<CartDto>.Success(cartDto));
             cartsRepo.Setup(r => r.GetUserCartItemDtoAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int cartItemId) =>
             {
                 var cartItemDto = cartItemsDtos.FirstOrDefault(p => p.Id == cartItemId);
                 return (cartItemDto == null) ? Result<CartItemDto>.Failure() : Result<CartItemDto>.Success(cartItemDto);
+            });
+            cartsRepo.Setup(r => r.GetUserCartItemAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((string userId, int cartItemId, bool tracking) =>
+            {
+                var cartItem = cartItems.FirstOrDefault(p => p.Id == cartItemId);
+                return cartItem;
             });
             cartsRepo.Setup(r => r.GetUserCartItemsDtosAsync(It.IsAny<string>())).ReturnsAsync((string userId) =>
             {
@@ -203,11 +209,16 @@ namespace ProductShopping.Application.UnitTests.Mocks
             });
             mockUsersService.Setup(r => r.GetUserId()).Returns("1");
 
-            productsRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) =>
+            productsRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((int id, bool tracking) =>
             {
                 return products.FirstOrDefault(p => p.Id == id);
             });
 
+            cartsRepo.Setup(r => r.GetUserCartItemByProductIdAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int productId) =>
+            {
+                var cartItem = cartItems.FirstOrDefault(p => p.ProductId == productId);
+                return cartItem;
+            });
             cartsRepo.Setup(r => r.GetUserCartItemDtoByProductIdAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int productId) =>
             {
                 var cartItemDto = cartItemsDtos.FirstOrDefault(p => p.ProductId == productId);

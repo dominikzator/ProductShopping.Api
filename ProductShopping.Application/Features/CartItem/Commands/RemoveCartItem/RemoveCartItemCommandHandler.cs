@@ -16,23 +16,16 @@ public class RemoveCartItemCommandHandler(ICartsRepository cartsRepository, IUse
     {
         var userId = usersService.GetUserId();
         var userEmail = usersService.GetUserEmail();
-        var userCart = await cartsRepository.GetUserCartDtoAsync(userId);
+        var userCart = await cartsRepository.GetUserCartNoTrackingAsync(userId);
 
-        if (userCart.Value == null)
+        if (userCart == null)
         {
             return Result.Failure(new Error(ErrorCodes.Failure,
                 $"User '{userEmail}' " +
                 $"does not have a Cart. This should not happen. Contact developers."));
         }
 
-        var cartItemDtoResult = await cartsRepository.GetUserCartItemDtoAsync(userId, request.CartItemId);
-
-        if(cartItemDtoResult.Value == null)
-        {
-            throw new NotFoundException($"CartItem with id: {request.CartItemId} not found");
-        }
-
-        var cartItem = mapper.Map<Domain.Models.CartItem>(cartItemDtoResult.Value);
+        var cartItem = await cartsRepository.GetUserCartItemAsync(userId, request.CartItemId, true);
 
         if (cartItem == null)
         {
@@ -47,7 +40,7 @@ public class RemoveCartItemCommandHandler(ICartsRepository cartsRepository, IUse
         {
             cartItem.Quantity -= request.Quantity;
 
-            await cartsRepository.UpdateCartItemAsync(cartItem);
+            await cartsRepository.SaveChangesAsync();
         }
         else
         {

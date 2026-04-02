@@ -118,7 +118,7 @@ public class MockProductsRepository
             return categoriesDtos.FirstOrDefault(c => c.Name == categoryName)!;
         });
 
-        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) =>
+        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((int id, bool tracking) =>
         {
             return products.FirstOrDefault(q => q.Id == id);
         });
@@ -162,7 +162,7 @@ public class MockProductsRepository
         var mockRepo = new Mock<IProductsRepository>();
         var mapper = new Mock<IMapper>();
 
-        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) =>
+        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((int id, bool tracking) =>
         {
             return products.FirstOrDefault(q => q.Id == id);
         });
@@ -302,7 +302,7 @@ public class MockProductsRepository
             return (productsDtos, 7, 1);
         });
 
-        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) =>
+        mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((int id, bool tracking) =>
         {
             return products.FirstOrDefault(q => q.Id == id);
         });

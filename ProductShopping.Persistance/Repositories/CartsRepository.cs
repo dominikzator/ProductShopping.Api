@@ -40,13 +40,24 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
         return Result<CartDto>.Success(userCartDto);
     }
 
-    public async Task<Cart> GetUserCartAsync(string userId)
+    public async Task<Cart> GetUserCartNoTrackingAsync(string userId)
     {
         var userCart = await _context.Carts
             .Include(c => c.CartItems)
             .ThenInclude(ci => ci.Product)
             .ThenInclude(p => p.Category)
             .AsNoTracking()
+            .FirstOrDefaultAsync(cart => cart.UserId == userId);
+
+        return userCart;
+    }
+
+    public async Task<Cart> GetUserCartAsync(string userId)
+    {
+        var userCart = await _context.Carts
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Product)
+            .ThenInclude(p => p.Category)
             .FirstOrDefaultAsync(cart => cart.UserId == userId);
 
         return userCart;
@@ -62,7 +73,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
 
     public async Task<List<CartItem>> GetUserCartItemsAsync(string userId)
     {
-        var userCart = await GetUserCartAsync(userId);
+        var userCart = await GetUserCartNoTrackingAsync(userId);
         var cartItems = userCart.CartItems.ToList();
         Console.WriteLine($"{userCart.CartItems.Count}");
 
@@ -77,12 +88,10 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
         return Result<CartItemDto>.Success(cartItem!);
     }
 
-    public async Task<CartItem> GetUserCartItemAsync(string userId, int cartItemId)
+    public async Task<CartItem> GetUserCartItemAsync(string userId, int cartItemId, bool tracking = false)
     {
-        var userCart = await GetUserCartAsync(userId);
-        Console.WriteLine($"{userCart.UserId}");
+        var userCart = (tracking) ? await GetUserCartAsync(userId) : await GetUserCartNoTrackingAsync(userId);
         var cartItem = userCart.CartItems.FirstOrDefault(c => c.Id == cartItemId);
-        Console.WriteLine($"{userCart.CartItems.Count}");
 
         return cartItem;
     }
@@ -93,6 +102,22 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
         var cartItem = userCart.Value!.CartItems.FirstOrDefault(c => c.ProductId == productId);
 
         return Result<CartItemDto>.Success(cartItem!);
+    }
+
+    public async Task<CartItem> GetUserCartItemByProductIdNoTrackingAsync(string userId, int productId)
+    {
+        var userCart = await GetUserCartNoTrackingAsync(userId);
+        var cartItem = userCart.CartItems.FirstOrDefault(c => c.ProductId == productId);
+
+        return cartItem;
+    }
+
+    public async Task<CartItem> GetUserCartItemByProductIdAsync(string userId, int productId)
+    {
+        var userCart = await GetUserCartAsync(userId);
+        var cartItem = userCart.CartItems.FirstOrDefault(c => c.ProductId == productId);
+
+        return cartItem;
     }
 
     public async Task<Result<bool>> CreateCartItemAsync(CartItem cartItem)

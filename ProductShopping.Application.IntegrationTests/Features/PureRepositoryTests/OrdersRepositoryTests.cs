@@ -3,7 +3,7 @@ using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.Repositories;
 using Shouldly;
 
-namespace ProductShopping.Application.IntegrationTests.Features;
+namespace ProductShopping.Application.IntegrationTests.Features.PureRepositoryTests;
 
 public class OrdersRepositoryTests
 {

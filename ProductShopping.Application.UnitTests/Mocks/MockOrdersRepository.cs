@@ -147,6 +147,11 @@ namespace ProductShopping.Application.UnitTests.Mocks
             });
 
             mockUsersService.Setup(r => r.GetUserId()).Returns("1");
+            mockRepo.Setup(r => r.GetUserOrderAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((string userId, int orderId, bool tracking) =>
+            {
+                var order = orders.FirstOrDefault(p => p.Id == orderId);
+                return order;
+            });
 
             mockRepo.Setup(r => r.GetUserOrderDtoAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((string userId, int orderId) =>
             {
@@ -157,14 +162,11 @@ namespace ProductShopping.Application.UnitTests.Mocks
             {
                 return Result<OrderDto>.Success(ordersDtos[0]);
             });
-            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int orderId) =>
+            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync((int orderId, bool tracking) =>
             {
                 var order = orders.FirstOrDefault(orders => orders.Id == orderId);
                 return order;
             });
-
-            //mapperMock.Setup(m => m.Map<OrderDto>(order)).Returns(orderDto);
-            //mapperMock.Setup(m => m.Map<Order>(orderDto)).Returns(order);
 
             mapperMock.Setup(m => m.Map<List<OrderDto>>(orders)).Returns(ordersDtos);
             mapperMock.Setup(m => m.Map<List<Order>>(ordersDtos)).Returns(orders);
