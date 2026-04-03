@@ -408,7 +408,7 @@ public class CreateProductCommandHandlerTests
             Rating = 4.5
         };
         var product = new Product { Id = 1, Name = "A new product Name", CategoryId = 1, Price = 1, Rating = 4.5};
-        var dto = new ProductDto { Id = 1, Name = "A new product Namet", CategoryName = "Food", Price = 1, Rating = 4.5};
+        var dto = new ProductDto { Id = 1, Name = "A new product Name", CategoryName = "Food", Price = 1, Rating = 4.5};
 
         setup.Item1
             .Setup(r => r.CreateAsync(It.IsAny<Product>()))
@@ -418,6 +418,12 @@ public class CreateProductCommandHandlerTests
                   .Returns(product);
         setup.Item2.Setup(m => m.Map<ProductDto>(product))
                   .Returns(dto);
+
+        //for success validation with checking duplicate name
+        setup.Item1.Setup(r => r.GetProductByNameAsync(It.IsAny<string>())).ReturnsAsync((string productName) =>
+        {
+            return null;
+        });
 
         var handler = new CreateProductCommandHandler(setup.Item1.Object, setup.Item2.Object);
 

@@ -1,27 +1,21 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Moq;
+﻿using EmptyFiles;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.DatabaseContext;
 
-namespace ProductShopping.Application.IntegrationTests.Mocks;
+namespace ProductShopping.Api.EndToEndTests.Seeders;
 
-public class OrdersDbMocks
+public static class TestDataSeeder
 {
-    public async static Task<(ProductShoppingDbContext, Mock<IMapper>)> CreateInMemoryContextSetup()
+    public static async Task Seed(ProductShoppingDbContext context)
     {
-        var options = new DbContextOptionsBuilder<ProductShoppingDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // osobna baza per test
-            .Options;
-
-        var httpContextAccessor = HttpContextAccessorMock.BuildHttpContextAccessorWithUserId();
-        var context = new ProductShoppingDbContext(options, httpContextAccessor);
-        var mapperMock = new Mock<IMapper>();
+        if (context.Products.Any())
+        {
+            return;
+        }
 
         var products = new[]
-        {
+{
             new Product
             {
                 Id = 1,
@@ -172,18 +166,6 @@ public class OrdersDbMocks
             },
         }.ToList();
 
-        var foodCategory = new ProductCategory
-        {
-            Id = 1,
-            Name = "Food"
-        };
-
-        var automotiveCategory = new ProductCategory
-        {
-            Id = 3,
-            Name = "Automotive"
-        };
-
         var orderItems = new OrderItem[]
         {
             new OrderItem
@@ -246,38 +228,11 @@ public class OrdersDbMocks
             }
         }.ToList();
 
-        mapperMock.Setup(m => m.Map<Product>(It.IsAny<ProductDto>()))
-        .Returns((ProductDto productDto) =>
-        {
-            return products.FirstOrDefault(p => p.Id == productDto.Id);
-        });
-        mapperMock.Setup(m => m.Map<ProductDto>(It.IsAny<Product>()))
-        .Returns((Product product) =>
-        {
-            return productsDtos.FirstOrDefault(p => p.Id == product.Id);
-        });
-
-        mapperMock.Setup(m => m.Map<List<Product>>(It.IsAny<List<ProductDto>>()))
-        .Returns((List<ProductDto> productDtos) =>
-        {
-            return products.Where(p => productDtos.Select(q => q.Id).Contains(p.Id)).ToList();
-        });
-        mapperMock.Setup(m => m.Map<List<ProductDto>>(It.IsAny<List<Product>>()))
-        .Returns((List<Product> products) =>
-        {
-            return productsDtos.Where(p => products.Select(q => q.Id).Contains(p.Id)).ToList();
-        });
-
-        await context.ProductCategories.AddAsync(foodCategory);
-        await context.ProductCategories.AddAsync(automotiveCategory);
         await context.Products.AddRangeAsync(products);
         await context.Carts.AddAsync(cart);
         await context.CartItems.AddRangeAsync(cartItems);
         await context.Orders.AddRangeAsync(orders);
         await context.OrderItems.AddRangeAsync(orderItems);
         await context.SaveChangesAsync();
-        context.ChangeTracker.Clear();
-
-        return (context, mapperMock);
     }
 }

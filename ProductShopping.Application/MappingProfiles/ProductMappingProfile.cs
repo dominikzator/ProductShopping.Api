@@ -5,6 +5,7 @@ using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Features.Product.Commands.CreateProduct;
+using ProductShopping.Application.Features.Product.Commands.UpdateProduct;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 
@@ -42,6 +43,9 @@ public class ProductMappingProfile : Profile
         }).ReverseMap();
 
         CreateMap<CreateProductCommand, Product>().ReverseMap();
+        CreateMap<UpdateProductCommand, Product>().AfterMap((src, dest) =>
+        {
+        }).ReverseMap();
         CreateMap<ProductCategory, ProductCategoryDto>().ReverseMap();
         CreateMap<Order, UpdateOrderCommand>().ReverseMap();
 

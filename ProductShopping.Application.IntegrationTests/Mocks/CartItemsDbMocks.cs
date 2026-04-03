@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using ProductShopping.Api.Contracts;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.DatabaseContext;
@@ -16,8 +16,8 @@ public class CartItemsDbMocks
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // osobna baza per test
             .Options;
 
-        var userServiceMock = new Mock<IUsersService>();
-        var context = new ProductShoppingDbContext(options, userServiceMock.Object);
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var context = new ProductShoppingDbContext(options, httpContextAccessor.Object);
         var mapperMock = new Mock<IMapper>();
 
         var products = new[]

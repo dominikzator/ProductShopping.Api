@@ -99,6 +99,19 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
         return (finalItemsDtos, totalCount, totalPages);
     }
 
+    public async Task<Product?> GetByIdAsync(int id, bool tracking = false)
+    {
+        var product = tracking ? await _context.Products
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync(p => p.Id == id)
+            : await _context.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        return product;
+    }
+
     public ProductCategoryDto? GetCategoryFromName(string categoryName)
     {
         var productCategory = _context.GetProductCategoriesAsNoTracking().Result.FirstOrDefault(p => p.Name == categoryName);
@@ -109,7 +122,7 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
 
     public async Task<ProductDto?> GetProductDtoByNameAsync(string name)
     {
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Name == name);
+        var product = await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Name == name);
         var productDto = _mapper.Map<ProductDto>(product);
 
         return productDto;

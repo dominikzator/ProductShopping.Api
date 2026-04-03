@@ -44,7 +44,7 @@ namespace ProductShopping.Api.Controllers
         {
             var productResult = await mediator.Send(new GetProductDetailQuery { Id = id });
             
-            return Ok(productResult);
+            return ToActionResult(productResult);
         }
 
         /// <summary>

@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Application
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Application.IntegrationTests", "ProductShopping.Application.IntegrationTests\ProductShopping.Application.IntegrationTests.csproj", "{AF18642E-E560-41CB-8F15-C0073E808053}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Api.EndToEndTests", "ProductShopping.Api.EndToEndTests\ProductShopping.Api.EndToEndTests.csproj", "{DD144F9E-AEDF-4689-8A5E-787050D19AF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{AF18642E-E560-41CB-8F15-C0073E808053}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF18642E-E560-41CB-8F15-C0073E808053}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF18642E-E560-41CB-8F15-C0073E808053}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD144F9E-AEDF-4689-8A5E-787050D19AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD144F9E-AEDF-4689-8A5E-787050D19AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD144F9E-AEDF-4689-8A5E-787050D19AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD144F9E-AEDF-4689-8A5E-787050D19AF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +92,7 @@ Global
 		{BF4654AC-1709-4EA8-9346-CD87C1688762} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{27441CB7-215A-4CDC-A3C6-45F7FC684E30} = {1D969955-EE8D-49E4-9199-1D50FE3F3857}
 		{AF18642E-E560-41CB-8F15-C0073E808053} = {1D969955-EE8D-49E4-9199-1D50FE3F3857}
+		{DD144F9E-AEDF-4689-8A5E-787050D19AF7} = {1D969955-EE8D-49E4-9199-1D50FE3F3857}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {47039777-FC2E-46DD-AD0C-F547F4FA092B}

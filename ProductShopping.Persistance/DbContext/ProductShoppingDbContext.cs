@@ -1,18 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProductShopping.Api.Contracts;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using ProductShopping.Domain.Common;
 using ProductShopping.Domain.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace ProductShopping.Persistence.DatabaseContext;
 
 public class ProductShoppingDbContext : DbContext
 {
-    private readonly IUsersService _userService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ProductShoppingDbContext(DbContextOptions<ProductShoppingDbContext> options, IUsersService userService) : base(options)
+    public ProductShoppingDbContext(DbContextOptions<ProductShoppingDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
     {
-        _userService = userService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public DbSet<Product> Products { get; set; }
@@ -98,14 +100,24 @@ public class ProductShoppingDbContext : DbContext
         foreach (var entry in base.ChangeTracker.Entries<BaseEntity>().Where(q => q.State == EntityState.Added || q.State == EntityState.Modified))
         {
             entry.Entity.DateModified = DateTime.UtcNow;
-            entry.Entity.ModifiedBy = _userService.GetUserId();
+            entry.Entity.ModifiedBy = GetUserId();
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.DateCreated = DateTime.UtcNow;
-                entry.Entity.CreatedBy = _userService.GetUserId();
+                entry.Entity.CreatedBy = GetUserId();
             }
         }
 
         return base.SaveChangesAsync(cancellationToken);
     }
+
+    public string GetUserId() => _httpContextAccessor?
+        .HttpContext?
+        .User?
+        .FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+    ?? _httpContextAccessor?
+        .HttpContext?
+        .User?
+        .FindFirst(ClaimTypes.NameIdentifier)?.Value
+    ?? string.Empty;
 }

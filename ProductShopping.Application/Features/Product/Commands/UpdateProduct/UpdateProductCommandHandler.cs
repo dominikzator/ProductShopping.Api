@@ -30,7 +30,10 @@ public class UpdateProductCommandHandler(IProductsRepository productsRepository,
             throw new NotFoundException($"Category Name: {request.CategoryName} has not been found");
         }
 
+
         mapper.Map(request, product);
+        product.Category = null;
+        product.CategoryId = category.Id;
         await productsRepository.UpdateAsync(product);
 
         return Result.Success();
