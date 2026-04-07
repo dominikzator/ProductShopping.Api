@@ -75,7 +75,6 @@ builder.Services.AddSwaggerGen(options =>
         + "📧 If You will register with your real email, You will get a Confirmation Email and after creating an order and successfull testing payment You will get an order/payment confirmation email. <br />"
         + "🔐 After logging in You will get a JWT Token as a response. Copy it and place it in Authorize Section, value in a field should be: Bearer [space] [yourToken] and click Authorize. <br />"
         + "🛍️ You can browse Products with Filters and/or with PaginationParameters with Products Get endpoint. This endpoint doesn't need a token authorization. <br />"
-        + "🛍️ Products in database have id range from 3009 to 4008. <br />"
         + "🛒 Now You can add some Products to Cart. You need to specify product ID and Amount. You can add/remove multiple Products to Cart.<br />"
         + "🛒 You can check current Cart content by Cart Get endpoint. <br />"
         + "📦 When Your Cart is not empty, You can make an Order with Order Post endpoint. You need to specify some Address informations. <br />"

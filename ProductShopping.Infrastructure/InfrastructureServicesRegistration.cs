@@ -28,9 +28,7 @@ public static class InfrastructureServicesRegistration
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 
         StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
-
-        Console.WriteLine("StripeConfiguration.ApiKey: " + StripeConfiguration.ApiKey);
-
+        
         return services;
     }
 }

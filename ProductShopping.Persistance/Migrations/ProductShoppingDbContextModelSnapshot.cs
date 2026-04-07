@@ -17,6 +17,7 @@ namespace ProductShopping.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("domain")
                 .HasAnnotation("ProductVersion", "8.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -48,7 +49,7 @@ namespace ProductShopping.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", "domain");
                 });
 
             modelBuilder.Entity("ProductShopping.Domain.Models.CartItem", b =>
@@ -86,7 +87,7 @@ namespace ProductShopping.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", "domain");
                 });
 
             modelBuilder.Entity("ProductShopping.Domain.Models.Order", b =>
@@ -128,7 +129,7 @@ namespace ProductShopping.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", "domain");
                 });
 
             modelBuilder.Entity("ProductShopping.Domain.Models.OrderItem", b =>
@@ -182,7 +183,7 @@ namespace ProductShopping.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", "domain");
                 });
 
             modelBuilder.Entity("ProductShopping.Domain.Models.Product", b =>
@@ -222,7 +223,7 @@ namespace ProductShopping.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", "domain");
                 });
 
             modelBuilder.Entity("ProductShopping.Domain.Models.ProductCategory", b =>
@@ -242,7 +243,7 @@ namespace ProductShopping.Persistence.Migrations
                     b.HasIndex("Name")
                         .HasDatabaseName("IX_Countries_Name");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", "domain");
 
                     b.HasData(
                         new
@@ -487,7 +488,7 @@ namespace ProductShopping.Persistence.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Orders", "domain");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");

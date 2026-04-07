@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Persistence.DatabaseContext;
 using ProductShopping.Persistence.Repositories;
@@ -24,11 +25,11 @@ public static class PersistenceServicesRegistration
                     errorNumbersToAdd: null
                 );
             });
-/*            if (builder.Environment.IsDevelopment())
+            if (builder.Environment.IsDevelopment())
             {
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
-            }*/
+            }
 
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.EnableSensitiveDataLogging();

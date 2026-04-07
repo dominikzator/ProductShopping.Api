@@ -4,6 +4,7 @@ using ProductShopping.Domain.Common;
 using ProductShopping.Domain.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Security.Claims;
 
 namespace ProductShopping.Persistence.DatabaseContext;
@@ -31,6 +32,9 @@ public class ProductShoppingDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.HasDefaultSchema("domain");
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.Entity<Order>().OwnsOne(typeof(Address), "Address");
