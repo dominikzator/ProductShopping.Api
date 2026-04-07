@@ -39,7 +39,7 @@ public class ProductMappingProfile : Profile
             dest.PostalCode = src.Address.PostalCode;
             dest.Country = src.Address.Country;
             dest.PhoneNumber = src.Address.PhoneNumber;
-            dest.OrderStatus = src.OrderStatus;
+            dest.OrderStatus = src.OrderStatus.ToString();
         }).ReverseMap();
 
         CreateMap<CreateProductCommand, Product>().ReverseMap();

@@ -17,6 +17,6 @@ public class OrderDto
     public string PostalCode { get; set; }
     public string Country { get; set; }
     public string? PhoneNumber { get; set; }
-    public OrderStatus OrderStatus { get; set; }
+    public string OrderStatus { get; set; }
     public string PaymentUrl { get; set; }
 }

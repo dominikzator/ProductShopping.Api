@@ -20,5 +20,5 @@ public class OrderItemDto
 
     public string? ProductName { get; set; }
 
-    public OrderStatus OrderStatus { get; set; } = 0;
+    public string OrderStatus { get; set; } = "Pending";
 }
