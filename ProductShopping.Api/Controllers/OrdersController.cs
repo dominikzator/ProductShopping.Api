@@ -37,9 +37,12 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpGet("{orderId}")]
     [Authorize(Roles = RoleNames.User)]
-    public async Task<ActionResult<OrderDto>> GetOrder(GetOrderDetailQuery order)
+    public async Task<ActionResult<OrderDto>> GetOrder(int orderId)
     {
-        var orderResult = await mediator.Send(order);
+        var orderResult = await mediator.Send(new GetOrderDetailQuery
+        {
+            Id = orderId
+        });
 
         return ToActionResult(orderResult);
     }
@@ -79,9 +82,12 @@ public class OrdersController(IMediator mediator) : BaseApiController
     /// <returns></returns>
     [HttpDelete("{orderId}")]
     [Authorize(Roles = RoleNames.Administrator)]
-    public async Task<ActionResult> DeleteOrder(DeleteOrderCommand order)
+    public async Task<ActionResult> DeleteOrder(int orderId)
     {
-        var deleteOrderResult = await mediator.Send(order);
+        var deleteOrderResult = await mediator.Send(new DeleteOrderCommand
+        {
+            Id = orderId
+        });
 
         return ToActionResult(deleteOrderResult);
     }

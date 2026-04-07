@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ using ProductShopping.Api.EndToEndTests.Handlers;
 using ProductShopping.Api.EndToEndTests.Seeders;
 using ProductShopping.Identity.DbContext;
 using ProductShopping.Persistence.DatabaseContext;
+using Stripe;
 using System.Security.Claims;
 using System.Text;
 
@@ -20,8 +22,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Testing");
 
-        builder.ConfigureServices(services =>
+        builder.ConfigureAppConfiguration((context, config) =>
         {
+            config.AddUserSecrets<Program>(optional: true);
+        });
+
+        builder.ConfigureServices((context, services) =>
+        {
+            var stripeSecretKey = context.Configuration["Stripe:SecretKey"];
+            StripeConfiguration.ApiKey = stripeSecretKey;
+
             services.RemoveAll<DbContextOptions<ProductShoppingDbContext>>();
             services.RemoveAll<ProductShoppingDbContext>();
 

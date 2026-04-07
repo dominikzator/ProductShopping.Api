@@ -1,6 +1,5 @@
 ﻿using ProductShopping.Api.EndToEndTests.Extensions;
 using ProductShopping.Application.Features.Product.Commands.CreateProduct;
-using ProductShopping.Application.Features.Product.Commands.DeleteProduct;
 using ProductShopping.Application.Features.Product.Commands.UpdateProduct;
 using ProductShopping.Application.Features.Product.Queries.GetProductDetails;
 using ProductShopping.Application.Models.Paging;

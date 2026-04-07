@@ -72,15 +72,21 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
 
         var orderItems = await ordersRepository.GetUserOrderItemsDtosByOrderIdAsync(userId, createdOrder.Value!.Id);
 
+        createdOrder = await ordersRepository.GetUserOrderDtoByOrderNumberAsync(userId, orderNumber);
+
         string domainName = config["Constants:DomainName"]!;
+
+        var items = orderItems.Value;
+
+        decimal totalPrice = ordersRepository.GetOrderItemsTotalPrice(orderItems.Value!).Value;
 
         var outputDto = await paymentsService.CreatePaymentSessionAsync(new DTOs.Payment.PaymentRequestDto
         {
             OrderId = createdOrder.Value.Id,
             Domain = domainName,
             OrderNumber = createdOrder.Value.OrderNumber,
-            Items = mapper.Map<List<OrderItemDto>>(orderItems.Value),
-            TotalPrice = ordersRepository.GetOrderItemsTotalPrice(orderItems.Value!).Value,
+            Items = items,
+            TotalPrice = totalPrice,
             UserEmail = userEmail
         });
 

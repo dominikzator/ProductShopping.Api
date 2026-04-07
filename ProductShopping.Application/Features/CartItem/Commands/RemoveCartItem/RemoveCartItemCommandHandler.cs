@@ -34,7 +34,7 @@ public class RemoveCartItemCommandHandler(ICartsRepository cartsRepository, IUse
 
         if (request.Quantity > cartItem.Quantity)
         {
-            throw new NotFoundException($"You are trying to remove more items than You have in your Cart. This should not happen. Please specify different Quantity");
+            throw new BadRequestException($"You are trying to remove more items than You have in your Cart. This should not happen. Please specify different Quantity");
         }
         else if (request.Quantity < cartItem.Quantity)
         {

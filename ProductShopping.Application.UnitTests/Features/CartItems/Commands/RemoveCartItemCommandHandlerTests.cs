@@ -79,9 +79,9 @@ public class RemoveCartItemCommandHandlerTests
 
         var handler = new RemoveCartItemCommandHandler(setup.Item1.Object, setup.Item3.Object, setup.Item4.Object);
 
-        var result = await handler.Handle(cartsCommand, CancellationToken.None).ShouldThrowAsync<NotFoundException>();
+        var result = await handler.Handle(cartsCommand, CancellationToken.None).ShouldThrowAsync<BadRequestException>();
 
-        result.ErrorCode.ShouldBe(ErrorCodes.NotFound.ToString());
+        result.ErrorCode.ShouldBe(ErrorCodes.BadRequest.ToString());
     }
     [Fact]
     public async Task RemoveCartItemWithValidId()

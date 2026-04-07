@@ -51,8 +51,17 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
         };
 
         var service = new SessionService();
-
-        var session = await service.CreateAsync(options);
+        Session session = null;
+        try
+        {
+            session = await service.CreateAsync(options);
+        }
+        catch (Exception ex)
+        {
+            var message = ex.Message;
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine(message);
+        }
 
 
         var order = await ordersRepository.GetUserOrderDtoAsync(userId, paymentRequest.OrderId);
