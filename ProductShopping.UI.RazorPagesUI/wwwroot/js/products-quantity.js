@@ -28,44 +28,146 @@
             input.value = value;
         });
     });
-    const dropdowns = document.querySelectorAll("[data-dropdown]");
+
+    const dropdowns = document.querySelectorAll('[data-dropdown]');
 
     dropdowns.forEach(dropdown => {
-        const trigger = dropdown.querySelector("[data-dropdown-trigger]");
-        const menu = dropdown.querySelector("[data-dropdown-menu]");
+        const trigger = dropdown.querySelector('[data-dropdown-trigger]');
+        const menu = dropdown.querySelector('[data-dropdown-menu]');
 
         if (!trigger || !menu) return;
 
-        trigger.addEventListener("click", function (e) {
+        trigger.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
-            const isOpen = dropdown.classList.contains("is-open");
+            const isOpen = dropdown.classList.contains('is-open');
 
-            dropdowns.forEach(d => d.classList.remove("is-open"));
+            dropdowns.forEach(d => d.classList.remove('is-open'));
 
             if (!isOpen) {
-                dropdown.classList.add("is-open");
+                dropdown.classList.add('is-open');
             }
         });
 
-        menu.addEventListener("click", function (e) {
+        menu.addEventListener('click', function (e) {
             e.stopPropagation();
         });
     });
 
-    document.addEventListener("click", function (e) {
+    document.addEventListener('click', function (e) {
         dropdowns.forEach(dropdown => {
             if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove("is-open");
+                dropdown.classList.remove('is-open');
             }
         });
     });
 
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            dropdowns.forEach(dropdown => dropdown.classList.remove("is-open"));
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            dropdowns.forEach(dropdown => dropdown.classList.remove('is-open'));
         }
     });
+
+    const existingAlert = document.querySelector("[data-auto-dismiss='true']");
+    if (existingAlert) {
+        const closeButton = existingAlert.querySelector('[data-alert-close]');
+
+        const hideAlert = () => {
+            existingAlert.classList.add('is-hiding');
+            setTimeout(() => {
+                existingAlert.remove();
+            }, 450);
+        };
+
+        const autoHideTimeout = setTimeout(hideAlert, 2000);
+
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
+                clearTimeout(autoHideTimeout);
+                hideAlert();
+            });
+        }
+    }
+
+    const addToCartForms = document.querySelectorAll('.js-add-to-cart-form');
+    const alertLayer = document.getElementById('pageAlertLayer');
+
+    function showFloatingAlert(type, message) {
+        let layer = alertLayer;
+
+        if (!layer) {
+            layer = document.createElement('div');
+            layer.id = 'pageAlertLayer';
+            layer.className = 'page-alert-layer';
+            document.body.appendChild(layer);
+        }
+
+        layer.innerHTML = `
+            <div class="page-alert page-alert--${type}" data-auto-dismiss="true" role="alert">
+                <span class="page-alert-text">${message}</span>
+                <button type="button" class="page-alert-close" data-alert-close aria-label="Zamknij komunikat">×</button>
+            </div>
+        `;
+
+        const alert = layer.querySelector('.page-alert');
+        const closeButton = layer.querySelector('[data-alert-close]');
+
+        const hideAlert = () => {
+            if (!alert) return;
+            alert.classList.add('is-hiding');
+            setTimeout(() => {
+                layer.innerHTML = '';
+            }, 450);
+        };
+
+        const autoHideTimeout = setTimeout(hideAlert, type === 'error' ? 3000 : 2000);
+
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
+                clearTimeout(autoHideTimeout);
+                hideAlert();
+            });
+        }
+    }
+
+    addToCartForms.forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitButton = form.querySelector('.add-to-cart-btn');
+            const formData = new FormData(form);
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const result = await response.json();
+
+                showFloatingAlert(
+                    result.type ?? (result.success ? 'success' : 'error'),
+                    result.message ?? 'Wystąpił problem podczas dodawania produktu do koszyka.'
+                );
+            } catch (error) {
+                showFloatingAlert('error', 'Nie udało się dodać produktu do koszyka.');
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
+        });
+    });
 });
-console.log("Siemanko!");

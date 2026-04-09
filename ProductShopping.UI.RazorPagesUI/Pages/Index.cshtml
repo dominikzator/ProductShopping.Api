@@ -1,6 +1,16 @@
 ﻿@page
 @model IndexModel
 
+<div class="page-alert-layer" id="pageAlertLayer">
+    @if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
+    {
+        <div class="page-alert page-alert--@(Model.FlashMessageType ?? "info")" data-auto-dismiss="true" role="alert">
+            <span class="page-alert-text">@Model.FlashMessage</span>
+            <button type="button" class="page-alert-close" data-alert-close aria-label="Zamknij komunikat">×</button>
+        </div>
+    }
+</div>
+
 <section class="products-page">
     <header class="products-header">
         <div>
@@ -189,14 +199,13 @@
                                     <strong class="product-price">@product.Price.ToString("0.00") zł</strong>
                                 </div>
 
-                                <form method="post" asp-page-handler="AddToCart" class="product-form">
+                                <form method="post" asp-page-handler="AddToCart" class="product-form js-add-to-cart-form">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@product.Id" />
 
                                     <div class="quantity-row">
                                         <div class="quantity-control">
-                                            <button type="button" class="qty-btn qty-btn--minus" aria-label="Decrease quantity">
-                                                –
-                                            </button>
+                                            <button type="button" class="qty-btn qty-btn--minus" aria-label="Decrease quantity">–</button>
 
                                             <input type="number"
                                                    name="quantity"
@@ -206,9 +215,7 @@
                                                    max="999"
                                                    inputmode="numeric" />
 
-                                            <button type="button" class="qty-btn qty-btn--plus" aria-label="Increase quantity">
-                                                +
-                                            </button>
+                                            <button type="button" class="qty-btn qty-btn--plus" aria-label="Increase quantity">+</button>
                                         </div>
 
                                         <button type="submit" class="add-to-cart-btn">

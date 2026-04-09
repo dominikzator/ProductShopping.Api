@@ -25,6 +25,12 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
 
         public List<string> CategoryOptions { get; private set; }
 
+        [TempData]
+        public string? FlashMessage { get; set; }
+
+        [TempData]
+        public string? FlashMessageType { get; set; }
+
         public async Task OnGetAsync(CancellationToken ct)
         {
             Console.WriteLine("Query.CategoryName" + Query.CategoryName);
@@ -45,16 +51,26 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
             CurrentRouteValues["Query.SortDescending"] = Query.SortDescending.ToString().ToLowerInvariant();
         }
 
-        public async Task<IActionResult> OnPostAddToCartAsync(int productId, int quantity, int pageNumber = 1)
+        public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity, CancellationToken ct)
         {
-            Console.WriteLine($"productId: {productId}, quantity: {quantity}, pageNumber: {pageNumber}");
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    type = "error",
+                    message = "Nie jesteœ zalogowany. Zaloguj siê, aby dodaæ produkt do koszyka."
+                });
+            }
 
-            if (quantity < 1) quantity = 1;
-            if (quantity > 999) quantity = 999;
+            //await _productsApiClient.addAddToCartAsync(productId, quantity, ct);
 
-            // add to cart
-
-            return RedirectToPage("./Index", new { pageNumber });
+            return new JsonResult(new
+            {
+                success = true,
+                type = "success",
+                message = "Produkt zosta³ dodany do koszyka."
+            });
         }
     }
 }
