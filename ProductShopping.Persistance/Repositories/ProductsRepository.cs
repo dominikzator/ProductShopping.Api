@@ -48,6 +48,7 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
 
     public async Task<(List<ProductDto> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters)
     {
+        Console.WriteLine("filters.CategoryName: " + filters.CategoryName);
         var products = _context.Products.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filters.Search))
@@ -137,4 +138,6 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
 
         return product;
     }
+
+    public async Task<List<string>> GetCategoryNamesAsync() => _context.ProductCategories.Select(p => p.Name).ToList();
 }

@@ -12,6 +12,7 @@ namespace ProductShopping.Application.Contracts.Persistence
     {
         Task<Product?> GetByIdAsync(int id, bool tracking = false);
         ProductCategoryDto? GetCategoryFromName(string categoryName);
+        Task<List<string>> GetCategoryNamesAsync();
         Task<(List<ProductDto> products, int TotalCount, int TotalPages)> GetFilteredRawPagedAsync(ProductFilterParameters filters, PaginationParameters paginationParameters);
         Task<Product?> GetProductByNameAsync(string name);
         Task<ProductDto> GetProductDtoByNameAsync(string name);

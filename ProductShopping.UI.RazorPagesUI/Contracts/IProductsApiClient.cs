@@ -5,5 +5,8 @@ namespace ProductShopping.UI.RazorPagesUI.Contracts;
 
 public interface IProductsApiClient
 {
-    Task<PagedResultDto<ProductListItemDto>> GetProductsAsync(CancellationToken ct = default);
+    Task<List<string>> GetCategoryNamesAsync(CancellationToken ct = default);
+    Task<PagedResultDto<ProductListItemDto>> GetProductsAsync(
+        ProductsQueryDto query,
+        CancellationToken ct = default);
 }

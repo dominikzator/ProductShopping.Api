@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
+using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Features.Product.Commands.CreateProduct;
 using ProductShopping.Application.Features.Product.Commands.DeleteProduct;
 using ProductShopping.Application.Features.Product.Commands.UpdateProduct;
@@ -18,7 +19,7 @@ namespace ProductShopping.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController(IMediator mediator) : BaseApiController
+    public class ProductsController(IMediator mediator, IProductsRepository productsRepository) : BaseApiController
     {
         /// <summary>
         /// Returns all Products in database paged by PaginationParameters and filtered by ProductFilterParameters. Can be called without authentication.
@@ -45,6 +46,14 @@ namespace ProductShopping.Api.Controllers
             var productResult = await mediator.Send(new GetProductDetailQuery { Id = id });
             
             return ToActionResult(productResult);
+        }
+
+        [HttpGet("categories")]
+        public async Task<ActionResult<List<string>>> GetCategories()
+        {
+            var categories = await productsRepository.GetCategoryNamesAsync();
+
+            return Ok(categories);
         }
 
         /// <summary>

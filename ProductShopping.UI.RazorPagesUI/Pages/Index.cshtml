@@ -17,6 +17,141 @@
         </div>
     </header>
 
+    <form method="get" class="filters-toolbar">
+        <input type="hidden" name="Query.PageNumber" value="1" />
+
+        <div class="filters-search">
+            <input type="text"
+                   name="Query.Search"
+                   value="@Model.Query.Search"
+                   class="filters-search-input"
+                   placeholder="Search products..." />
+        </div>
+
+        <div class="filters-actions">
+            <div class="filter-dropdown" data-dropdown>
+                <button type="button" class="filter-chip" data-dropdown-trigger>
+                    Sort
+                    <span class="filter-caret">⌄</span>
+                </button>
+
+                <div class="filter-menu filter-menu--form" data-dropdown-menu>
+                    <label class="filter-label">Sort by</label>
+                    <div class="filter-select-wrap">
+                        <select name="Query.SortBy" class="filter-select">
+                            <option value="Name" selected="@(Model.Query.SortBy == "Name")">Name</option>
+                            <option value="Price" selected="@(Model.Query.SortBy == "Price")">Price</option>
+                            <option value="Rating" selected="@(Model.Query.SortBy == "Rating")">Rating</option>
+                            <option value="Category" selected="@(Model.Query.SortBy == "Category")">Category</option>
+                        </select>
+                    </div>
+
+                    <label class="filter-checkbox">
+                        <input asp-for="Query.SortDescending" type="checkbox" />
+                        <span>Descending</span>
+                    </label>
+
+                    <button type="submit" class="filter-apply">Apply</button>
+                </div>
+            </div>
+
+            <div class="filter-dropdown" data-dropdown>
+                <button type="button" class="filter-chip" data-dropdown-trigger>
+                    Category
+                    <span class="filter-caret">⌄</span>
+                </button>
+
+                <div class="filter-menu filter-menu--form" data-dropdown-menu>
+                    <label class="filter-label">Category</label>
+                    <div class="filter-select-wrap">
+                        <select asp-for="Query.CategoryName" class="filter-select">
+                            <option value="">All categories</option>
+                            @foreach (var category in Model.CategoryOptions)
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="filter-apply">Apply</button>
+                </div>
+            </div>
+
+            <div class="filter-dropdown" data-dropdown>
+                <button type="button" class="filter-chip" data-dropdown-trigger>
+                    Price
+                    <span class="filter-caret">⌄</span>
+                </button>
+
+                <div class="filter-menu filter-menu--form" data-dropdown-menu>
+                    <label class="filter-label">Min price</label>
+                    <input type="text"
+                           name="Query.MinPrice"
+                           value="@Model.Query.MinPrice"
+                           class="filter-input"
+                           placeholder="0" />
+
+                    <label class="filter-label">Max price</label>
+                    <input type="text"
+                           name="Query.MaxPrice"
+                           value="@Model.Query.MaxPrice"
+                           class="filter-input"
+                           placeholder="9999" />
+
+                    <button type="submit" class="filter-apply">Apply</button>
+                </div>
+            </div>
+
+            <div class="filter-dropdown" data-dropdown>
+                <button type="button" class="filter-chip" data-dropdown-trigger>
+                    Rating
+                    <span class="filter-caret">⌄</span>
+                </button>
+
+                <div class="filter-menu filter-menu--form" data-dropdown-menu>
+                    <label class="filter-label">Min rating</label>
+                    <input type="text"
+                           name="Query.MinRating"
+                           value="@Model.Query.MinRating"
+                           class="filter-input"
+                           placeholder="0.0" />
+
+                    <label class="filter-label">Max rating</label>
+                    <input type="text"
+                           name="Query.MaxRating"
+                           value="@Model.Query.MaxRating"
+                           class="filter-input"
+                           placeholder="5.0" />
+
+                    <button type="submit" class="filter-apply">Apply</button>
+                </div>
+            </div>
+
+            <div class="filter-dropdown" data-dropdown>
+                <button type="button" class="filter-chip" data-dropdown-trigger>
+                    Page size
+                    <span class="filter-caret">⌄</span>
+                </button>
+
+                <div class="filter-menu filter-menu--form" data-dropdown-menu>
+                    <label class="filter-label">Items per page</label>
+                    <div class="filter-select-wrap">
+                        <select name="Query.PageSize" class="filter-select">
+                            <option value="10" selected="@(Model.Query.PageSize == 10)">10</option>
+                            <option value="20" selected="@(Model.Query.PageSize == 20)">20</option>
+                            <option value="30" selected="@(Model.Query.PageSize == 30)">30</option>
+                            <option value="50" selected="@(Model.Query.PageSize == 50)">50</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="filter-apply">Apply</button>
+                </div>
+            </div>
+
+            <a asp-page="./Index" class="filter-chip filter-chip--clear">Reset</a>
+        </div>
+    </form>
+
     @if (Model.Products?.Data == null || !Model.Products.Data.Any())
     {
         <section class="empty-state">
@@ -90,10 +225,16 @@
 
         @if (Model.Products.Metadata is not null && Model.Products.Metadata.TotalPages > 1)
         {
+            var previousRoute = new Dictionary<string, string?>(Model.CurrentRouteValues, StringComparer.OrdinalIgnoreCase);
+            previousRoute["Query.PageNumber"] = (Model.Products.Metadata.CurrentPage - 1).ToString();
+
+            var nextRoute = new Dictionary<string, string?>(Model.CurrentRouteValues, StringComparer.OrdinalIgnoreCase);
+            nextRoute["Query.PageNumber"] = (Model.Products.Metadata.CurrentPage + 1).ToString();
+
             <nav class="pagination" aria-label="Products pagination">
                 <a class="pagination-link @(Model.Products.Metadata.HasPrevious ? "" : "is-disabled")"
                    asp-page="./Index"
-                   asp-route-pageNumber="@(Model.Products.Metadata.CurrentPage - 1)"
+                   asp-all-route-data="previousRoute"
                    aria-disabled="@(!Model.Products.Metadata.HasPrevious)">
                     Previous
                 </a>
@@ -105,7 +246,7 @@
 
                 <a class="pagination-link @(Model.Products.Metadata.HasNext ? "" : "is-disabled")"
                    asp-page="./Index"
-                   asp-route-pageNumber="@(Model.Products.Metadata.CurrentPage + 1)"
+                   asp-all-route-data="nextRoute"
                    aria-disabled="@(!Model.Products.Metadata.HasNext)">
                     Next
                 </a>
