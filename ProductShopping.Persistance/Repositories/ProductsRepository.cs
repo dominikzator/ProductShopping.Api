@@ -18,10 +18,13 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
     private readonly ProductShoppingDbContext _context;
     private readonly IMapper _mapper;
 
+    public List<Product> Products;
+
     public ProductsRepository(ProductShoppingDbContext context, IMapper mapper) : base(context)
     {
         _context = context;
         _mapper = mapper;
+        Products = _context.Products.ToList();
     }
 
     public async Task<Result<bool>> ValidateProductAsync(CreateProductCommand productDto)

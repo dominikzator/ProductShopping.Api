@@ -1,10 +1,12 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs;
+using ProductShopping.Domain.Models;
 using System.Text;
 using System.Text.Json;
 
@@ -61,6 +63,86 @@ public class ProductImageGeneratorService : IProductImageGeneratorService
             GeneratedAt = DateTime.UtcNow
         };
     }
+    public async Task<List<GeneratedImageDto>> GenerateImagesForFirstProductsAsync(int count)
+    {
+        if (count <= 0)
+            return new List<GeneratedImageDto>();
+
+        const int batchSize = 5;
+
+        var products = await _productsRepository.GetTableAsQuery().AsTracking()
+            .Where(p => p.ImageUrl == null || p.ImageUrl == "")
+            .OrderBy(p => p.Id)
+            .Take(count)
+            .ToListAsync();
+
+        var results = new List<GeneratedImageDto>();
+        var processedInBatch = 0;
+
+        foreach (var product in products)
+        {
+            var result = await GenerateAndUploadImageAsync(product);
+
+            product.ImageUrl = result.ImageUrl;
+
+            results.Add(result);
+            processedInBatch++;
+
+            if (processedInBatch == batchSize)
+            {
+                await _productsRepository.SaveChangesAsync();
+                processedInBatch = 0;
+            }
+        }
+
+        if (processedInBatch > 0)
+        {
+            await _productsRepository.SaveChangesAsync();
+        }
+
+        _logger.LogInformation("Generated and assigned images for {Count} products", results.Count);
+
+        return results;
+    }
+    private async Task<GeneratedImageDto> GenerateAndUploadImageAsync(Product product)
+    {
+        var prompt = $"Product Name: {product.Name}";
+
+        _logger.LogInformation(
+            "Generating image for Product {ProductId}: {Prompt}",
+            product.Id,
+            prompt);
+
+        var imageBytes = await GenerateImageRawAsync(prompt);
+
+        var productSuffix = product.Name.ToLower().Replace(' ', '_');
+        var blobName = $"products/{product.Id}-{productSuffix}.jpg";
+
+        var blobClient = _blobClient.GetBlobClient(blobName);
+
+        await blobClient.UploadAsync(
+            new BinaryData(imageBytes),
+            new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/jpeg"
+                }
+            });
+
+        var imageUrl = blobClient.Uri.ToString();
+
+        _logger.LogInformation("Image saved for product {ProductId}: {ImageUrl}", product.Id, imageUrl);
+
+        return new GeneratedImageDto
+        {
+            ProductId = product.Id,
+            ImageUrl = imageUrl,
+            Prompt = prompt,
+            BlobName = blobName,
+            GeneratedAt = DateTime.UtcNow
+        };
+    }
     private async Task<byte[]> GenerateImageRawAsync(string prompt)
     {
         using var client = new HttpClient();
@@ -77,7 +159,7 @@ public class ProductImageGeneratorService : IProductImageGeneratorService
             height = 1024,
             width = 1024,
             samples = 1,
-            steps = 15,
+            steps = 10,
             sampler = "K_EULER"
         };
 

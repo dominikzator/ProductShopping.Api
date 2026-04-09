@@ -23,6 +23,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IMailService, MailService>();
         services.AddScoped<IUsersService, UsersService>();
         services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
+        services.AddScoped<IProductDuplicateCleanupService, ProductDuplicateCleanupService>();
 
         builder.Services.AddSingleton(x =>
     new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));

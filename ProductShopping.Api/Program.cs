@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using ProductShopping.Api.Contracts;
 using ProductShopping.Api.Middleware;
 using ProductShopping.Application;
+using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Models.Identity;
 using ProductShopping.Identity;
 using ProductShopping.Identity.Models;
@@ -183,6 +185,22 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+
+/*using (var scope = app.Services.CreateScope())
+{
+    var cleaner = scope.ServiceProvider.GetRequiredService<IProductDuplicateCleanupService>();
+
+    var duplicates = await cleaner.GetDuplicateProductsToRemoveAsync();
+
+    if (duplicates.Count > 0)
+    {
+        await cleaner.RemoveDuplicatesAsync();
+    }
+
+    var imageGenerator = scope.ServiceProvider.GetRequiredService<IProductImageGeneratorService>();
+
+    await imageGenerator.GenerateImagesForFirstProductsAsync(1);
+}*/
 
 app.Run();
 

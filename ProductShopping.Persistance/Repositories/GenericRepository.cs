@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Domain.Common;
+using ProductShopping.Domain.Models;
 using ProductShopping.Persistence.DatabaseContext;
 
 namespace ProductShopping.Persistence.Repositories
@@ -13,6 +14,12 @@ namespace ProductShopping.Persistence.Repositories
         {
             _context = context;
         }
+
+        public IQueryable<T> GetTableAsQuery()
+        {
+            return _context.Set<T>().AsQueryable();
+        }
+
         public async Task CreateAsync(T entity)
         {
             await _context.AddAsync(entity);
@@ -38,6 +45,12 @@ namespace ProductShopping.Persistence.Repositories
 
         public async Task UpdateAsync(T entity)
         {
+            var local = _context.Products.Local.FirstOrDefault(x => x.Id == entity.Id);
+            if (local is not null)
+            {
+                _context.Entry(local).State = EntityState.Detached;
+            }
+
             _context.Update(entity);
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -52,5 +65,7 @@ namespace ProductShopping.Persistence.Repositories
         {
             _context.Entry(entity).State = EntityState.Modified;
         }
+
+        public void ClearTracker() => _context.ChangeTracker.Clear();
     }
 }

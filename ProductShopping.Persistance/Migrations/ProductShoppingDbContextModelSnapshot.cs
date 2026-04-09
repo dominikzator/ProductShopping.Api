@@ -206,6 +206,10 @@ namespace ProductShopping.Persistence.Migrations
                     b.Property<DateTime?>("DateModified")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 

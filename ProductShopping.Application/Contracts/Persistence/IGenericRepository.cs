@@ -6,6 +6,7 @@ namespace ProductShopping.Application.Contracts.Persistence
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
+        public IQueryable<T> GetTableAsQuery();
         Task CreateAsync(T entity);
         Task DeleteAsync(T entity);
         Task<IReadOnlyList<T>> GetAsync();
@@ -13,5 +14,6 @@ namespace ProductShopping.Application.Contracts.Persistence
         Task SaveChangesAsync();
         void SetEntityAsModified<TEntity>(TEntity entity) where TEntity : class;
         Task UpdateAsync(T entity);
+        void ClearTracker();
     }
 }

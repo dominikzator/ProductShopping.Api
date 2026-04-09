@@ -1,0 +1,118 @@
+﻿@page
+@model IndexModel
+
+<section class="products-page">
+    <header class="products-header">
+        <div>
+            <p class="products-eyebrow">Catalog</p>
+            <h1 class="products-title">Products</h1>
+            <p class="products-subtitle">
+                Browse available items and add them to your cart.
+            </p>
+        </div>
+
+        <div class="products-summary">
+            <span class="summary-label">Items on page</span>
+            <strong>@(Model.Products?.Data?.Count() ?? 0)</strong>
+        </div>
+    </header>
+
+    @if (Model.Products?.Data == null || !Model.Products.Data.Any())
+    {
+        <section class="empty-state">
+            <h2>No products found</h2>
+            <p>There are no products available for the selected criteria.</p>
+        </section>
+    }
+    else
+    {
+        <div class="product-list">
+            @foreach (var product in Model.Products.Data)
+            {
+                <article class="product-card">
+                    <div class="product-media" aria-hidden="true">
+                        <img src="@product.ImageUrl"
+                             alt="@product.Name"
+                             class="product-media-image"
+                             loading="lazy"
+                             width="120"
+                             height="120" />
+                    </div>
+
+                    <div class="product-main">
+                        <div class="product-content">
+                            <div class="product-topline">
+                                <span class="product-category">@product.CategoryName</span>
+                                <span class="product-rating">★ @product.Rating.ToString("0.0")</span>
+                            </div>
+
+                            <h2 class="product-name">@product.Name</h2>
+
+                            <div class="product-bottom">
+                                <div class="product-price-block">
+                                    <span class="meta-label">Price</span>
+                                    <strong class="product-price">@product.Price.ToString("0.00") zł</strong>
+                                </div>
+
+                                <form method="post" asp-page-handler="AddToCart" class="product-form">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+
+                                    <div class="quantity-row">
+                                        <div class="quantity-control">
+                                            <button type="button" class="qty-btn qty-btn--minus" aria-label="Decrease quantity">
+                                                –
+                                            </button>
+
+                                            <input type="number"
+                                                   name="quantity"
+                                                   class="qty-input"
+                                                   value="1"
+                                                   min="1"
+                                                   max="999"
+                                                   inputmode="numeric" />
+
+                                            <button type="button" class="qty-btn qty-btn--plus" aria-label="Increase quantity">
+                                                +
+                                            </button>
+                                        </div>
+
+                                        <button type="submit" class="add-to-cart-btn">
+                                            Add to cart
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+
+        @if (Model.Products.Metadata is not null && Model.Products.Metadata.TotalPages > 1)
+        {
+            <nav class="pagination" aria-label="Products pagination">
+                <a class="pagination-link @(Model.Products.Metadata.HasPrevious ? "" : "is-disabled")"
+                   asp-page="./Index"
+                   asp-route-pageNumber="@(Model.Products.Metadata.CurrentPage - 1)"
+                   aria-disabled="@(!Model.Products.Metadata.HasPrevious)">
+                    Previous
+                </a>
+
+                <div class="pagination-status">
+                    Page <strong>@Model.Products.Metadata.CurrentPage</strong>
+                    of <strong>@Model.Products.Metadata.TotalPages</strong>
+                </div>
+
+                <a class="pagination-link @(Model.Products.Metadata.HasNext ? "" : "is-disabled")"
+                   asp-page="./Index"
+                   asp-route-pageNumber="@(Model.Products.Metadata.CurrentPage + 1)"
+                   aria-disabled="@(!Model.Products.Metadata.HasNext)">
+                    Next
+                </a>
+            </nav>
+        }
+    }
+</section>
+@section Scripts {
+    <script src="~/js/products-quantity.js" asp-append-version="true"></script>
+}
