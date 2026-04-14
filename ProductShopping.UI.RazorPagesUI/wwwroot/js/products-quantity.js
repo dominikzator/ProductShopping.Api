@@ -131,42 +131,38 @@
         }
     }
 
+    const cartCountValue = document.getElementById("cart-count-value");
+
     addToCartForms.forEach(form => {
-        form.addEventListener('submit', async function (e) {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const submitButton = form.querySelector('.add-to-cart-btn');
             const formData = new FormData(form);
-
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
 
             try {
                 const response = await fetch(form.action, {
-                    method: 'POST',
+                    method: "POST",
                     body: formData,
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                        "X-Requested-With": "XMLHttpRequest"
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error('Request failed');
-                }
-
                 const result = await response.json();
 
-                showFloatingAlert(
-                    result.type ?? (result.success ? 'success' : 'error'),
-                    result.message ?? 'Wystąpił problem podczas dodawania produktu do koszyka.'
-                );
-            } catch (error) {
-                showFloatingAlert('error', 'Nie udało się dodać produktu do koszyka.');
-            } finally {
-                if (submitButton) {
-                    submitButton.disabled = false;
+                if (!response.ok || !result.success) {
+                    showFloatingAlert("error", result.message ?? "Failed to add product to cart.");
+                    return;
                 }
+
+                if (cartCountValue && typeof result.cartItemsCount !== "undefined") {
+                    cartCountValue.textContent = result.cartItemsCount;
+                }
+
+                showFloatingAlert("success", result.message ?? "Product added to cart.");
+            } catch (error) {
+                console.error(error);
+                showFloatingAlert("error", "Unexpected error while adding product to cart.");
             }
         });
     });

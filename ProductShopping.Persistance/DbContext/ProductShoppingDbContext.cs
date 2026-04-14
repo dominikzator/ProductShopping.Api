@@ -46,6 +46,7 @@ public class ProductShoppingDbContext : DbContext
         builder.Entity<Product>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(p => p.ImageUrl).IsRequired(false);
         });
         builder.Entity<Cart>(entity =>
         {
@@ -59,6 +60,8 @@ public class ProductShoppingDbContext : DbContext
             .HasMany(c => c.CartItems)
             .WithOne(ci => ci.Cart)
             .HasForeignKey(ci => ci.CartId);
+
+        
 
         builder.Entity<ProductCategory>().HasData(
             new { Id = 1, Name = "Food" },

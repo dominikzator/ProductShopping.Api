@@ -27,6 +27,7 @@ public class ProductMappingProfile : Profile
             dest.Rating = src.Product.Rating;
             dest.UnitPrice = src.Product.Price;
             dest.OverallPrice = dest.Quantity * src.Product.Price;
+            dest.ImageUrl = src.Product.ImageUrl;
         }).ReverseMap();
 
         CreateMap<Order, OrderDto>().AfterMap((src, dest) =>

@@ -1,5 +1,5 @@
 ﻿@page
-@model IndexModel
+@model ProductsModel
 
 <div class="page-alert-layer" id="pageAlertLayer">
     @if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
@@ -158,7 +158,7 @@
                 </div>
             </div>
 
-            <a asp-page="./Index" class="filter-chip filter-chip--clear">Reset</a>
+            <a asp-page="./Products" class="filter-chip filter-chip--clear">Reset</a>
         </div>
     </form>
 
@@ -240,7 +240,7 @@
 
             <nav class="pagination" aria-label="Products pagination">
                 <a class="pagination-link @(Model.Products.Metadata.HasPrevious ? "" : "is-disabled")"
-                   asp-page="./Index"
+                   asp-page="./Products"
                    asp-all-route-data="previousRoute"
                    aria-disabled="@(!Model.Products.Metadata.HasPrevious)">
                     Previous
@@ -252,7 +252,7 @@
                 </div>
 
                 <a class="pagination-link @(Model.Products.Metadata.HasNext ? "" : "is-disabled")"
-                   asp-page="./Index"
+                   asp-page="./Products"
                    asp-all-route-data="nextRoute"
                    aria-disabled="@(!Model.Products.Metadata.HasNext)">
                     Next

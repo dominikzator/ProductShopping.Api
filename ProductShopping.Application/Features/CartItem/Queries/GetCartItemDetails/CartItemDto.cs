@@ -11,4 +11,5 @@ public class CartItemDto
     public decimal OverallPrice { get; set; }
     public double Rating { get; set; }
     public int Quantity { get; set; }
+    public string ImageUrl { get; set; }
 }

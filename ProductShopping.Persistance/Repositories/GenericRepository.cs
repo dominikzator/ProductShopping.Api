@@ -28,7 +28,17 @@ namespace ProductShopping.Persistence.Repositories
 
         public async Task DeleteAsync(T entity)
         {
-            _context.Remove(entity);
+            var localEntity = _context.Set<T>().Local.FirstOrDefault(x => x.Id == entity.Id);
+
+            if (localEntity is not null)
+            {
+                _context.Entry(localEntity).State = EntityState.Deleted;
+            }
+            else
+            {
+                _context.Entry(entity).State = EntityState.Deleted;
+            }
+
             await _context.SaveChangesAsync();
         }
 
@@ -45,7 +55,7 @@ namespace ProductShopping.Persistence.Repositories
 
         public async Task UpdateAsync(T entity)
         {
-            var local = _context.Products.Local.FirstOrDefault(x => x.Id == entity.Id);
+            var local = _context.Set<T>().Local.FirstOrDefault(x => x.Id == entity.Id);
             if (local is not null)
             {
                 _context.Entry(local).State = EntityState.Detached;

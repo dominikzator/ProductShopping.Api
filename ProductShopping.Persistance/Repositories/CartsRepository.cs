@@ -58,6 +58,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
             .Include(c => c.CartItems)
             .ThenInclude(ci => ci.Product)
             .ThenInclude(p => p.Category)
+            .AsTracking()
             .FirstOrDefaultAsync(cart => cart.UserId == userId);
 
         return userCart;
@@ -115,7 +116,7 @@ public class CartsRepository : GenericRepository<Cart>, ICartsRepository
     public async Task<CartItem> GetUserCartItemByProductIdAsync(string userId, int productId)
     {
         var userCart = await GetUserCartAsync(userId);
-        var cartItem = userCart.CartItems.FirstOrDefault(c => c.ProductId == productId);
+        var cartItem = userCart.CartItems.AsQueryable().AsTracking().FirstOrDefault(c => c.ProductId == productId);
 
         return cartItem;
     }

@@ -129,6 +129,44 @@ public class CartControllerTests
         result.Data.Any(x => x.ProductId == 4 && x.Quantity == 2).ShouldBeTrue();
     }
     [Fact]
+    public async Task Post_ShouldIncreaseQuantity_WhenAddingSameProductTwice_AndTotalQuantityShouldMatch()
+    {
+        await ResetStateAsync();
+        _client.AuthenticateAsUser();
+
+        var firstCommand = new AddCartItemCommand
+        {
+            ProductId = 4,
+            Quantity = 2
+        };
+
+        var secondCommand = new AddCartItemCommand
+        {
+            ProductId = 4,
+            Quantity = 3
+        };
+
+        var firstResponse = await _client.PostAsJsonAsync("/api/cart", firstCommand);
+        firstResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var secondResponse = await _client.PostAsJsonAsync("/api/cart", secondCommand);
+        secondResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var getAllResponse = await _client.GetAsync("/api/cart");
+        getAllResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var result = await getAllResponse.Content.ReadFromJsonAsync<PagedResult<CartItemDto>>();
+
+        result.ShouldNotBeNull();
+        result.Data.ShouldNotBeNull();
+
+        var item = result.Data.Single(x => x.ProductId == 4);
+        item.Quantity.ShouldBe(5);
+
+        var totalQuantity = result.Data.Sum(x => x.Quantity);
+        totalQuantity.ShouldBe(result.Data.Where(x => x.ProductId != 4).Sum(x => x.Quantity) + 5);
+    }
+    [Fact]
     public async Task Remove_ShouldDecreaseCartItemQuantity_WhenRemovingLessThanExistingQuantity()
     {
         await ResetStateAsync();

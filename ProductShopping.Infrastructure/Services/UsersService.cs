@@ -28,6 +28,8 @@ public class UsersService(ICartsRepository cartsRepository
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
+        Console.WriteLine("RegisterAsync API");
+
         var user = new ApplicationUser
         {
             Email = registerUserDto.Email,
@@ -85,6 +87,7 @@ public class UsersService(ICartsRepository cartsRepository
 
     public async Task<Result<string>> LoginAsync(LoginUserDto dto)
     {
+        Console.WriteLine("LoginAsync API");
         var user = await userManager.FindByEmailAsync(dto.Email);
         if (user is null)
         {
@@ -109,6 +112,43 @@ public class UsersService(ICartsRepository cartsRepository
 
         return Result<string>.Success(token);
     }
+
+/*    public async Task<Result<string>> LogoutAsync()
+    {
+        var httpContext = httpContextAccessor.HttpContext;
+
+        if (httpContext is null)
+        {
+            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "HttpContext is not available."));
+        }
+
+        var user = httpContext.User;
+
+        var jti = user.FindFirst(JwtRegisteredClaimNames.Jti)?.Value
+                  ?? user.FindFirst("jti")?.Value;
+
+        if (string.IsNullOrWhiteSpace(jti))
+        {
+            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Token JTI not found."));
+        }
+
+        var expClaim = user.FindFirst(JwtRegisteredClaimNames.Exp)?.Value
+                       ?? user.FindFirst("exp")?.Value;
+
+        DateTime expiresAtUtc = DateTime.UtcNow.AddHours(1);
+
+        if (!string.IsNullOrWhiteSpace(expClaim) && long.TryParse(expClaim, out var expUnix))
+        {
+            expiresAtUtc = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
+        }
+
+        await revokedTokenStore.RevokeAsync(jti, expiresAtUtc);
+
+        logger.LogInformation("Token revoked. JTI: {Jti}, UserId: {UserId}, Email: {Email}",
+            jti, GetUserId(), GetUserEmail());
+
+        return Result<string>.Success("Logged out successfully.");
+    }*/
 
     public string GetUserId() => httpContextAccessor?
             .HttpContext?

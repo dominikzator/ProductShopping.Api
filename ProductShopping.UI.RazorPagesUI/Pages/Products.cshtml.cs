@@ -1,21 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
+using ProductShopping.Application.Models.Paging;
 using ProductShopping.UI.RazorPagesUI.Clients;
 using ProductShopping.UI.RazorPagesUI.Contracts;
 using ProductShopping.UI.RazorPagesUI.DTOs.Products;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages
 {
-    public class IndexModel : PageModel
+    public class ProductsModel(IProductsApiClient productsApiClient, ICartsApiClient cartsApiClient) : PageModel
     {
-        private readonly IProductsApiClient _productsApiClient;
-
-        public IndexModel(IProductsApiClient productsApiClient)
-        {
-            _productsApiClient = productsApiClient;
-        }
-
         public PagedResultDto<ProductListItemDto> Products { get; private set; }
 
         [BindProperty(SupportsGet = true)]
@@ -38,9 +33,9 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
             Query.PageNumber = Query.PageNumber <= 0 ? 1 : Query.PageNumber;
             Query.PageSize = Query.PageSize <= 0 ? 10 : Query.PageSize;
 
-            Products = await _productsApiClient.GetProductsAsync(Query, ct);
+            Products = await productsApiClient.GetProductsAsync(Query, ct);
 
-            CategoryOptions = await _productsApiClient.GetCategoryNamesAsync();
+            CategoryOptions = await productsApiClient.GetCategoryNamesAsync();
 
             CurrentRouteValues = Request.Query
                 .ToDictionary(
@@ -51,7 +46,7 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
             CurrentRouteValues["Query.SortDescending"] = Query.SortDescending.ToString().ToLowerInvariant();
         }
 
-        public async Task<IActionResult> OnPostAddToCartAsync(Guid productId, int quantity, CancellationToken ct)
+        public async Task<IActionResult> OnPostAddToCartAsync(int productId, int quantity, CancellationToken ct)
         {
             if (User.Identity?.IsAuthenticated != true)
             {
@@ -63,13 +58,38 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
                 });
             }
 
-            //await _productsApiClient.addAddToCartAsync(productId, quantity, ct);
+            var token = User.FindFirst("access_token")?.Value;
 
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    type = "error",
+                    message = "Brak tokena u¿ytkownika."
+                });
+            }
+
+            await cartsApiClient.AddCartItemAsync(token, new AddCartItemCommand
+            {
+                ProductId = productId,
+                Quantity = quantity
+            }, ct);
+
+            var getCartItemsResult = await cartsApiClient.GetCartItemsAsync(token, new PaginationParameters
+            {
+                PageNumber = 1,
+                PageSize = 1000
+            }, ct);
+
+            var cartItemsCount = getCartItemsResult?.Data?.Sum(p => p.Quantity) ?? 0;
+            Console.WriteLine($"AFTER ADD -> count = {cartItemsCount}");
             return new JsonResult(new
             {
                 success = true,
                 type = "success",
-                message = "Produkt zosta³ dodany do koszyka."
+                message = "Produkt zosta³ dodany do koszyka.",
+                cartItemsCount = cartItemsCount
             });
         }
     }

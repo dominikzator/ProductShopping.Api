@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.WebUtilities;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using ProductShopping.UI.RazorPagesUI.Contracts;
 using ProductShopping.UI.RazorPagesUI.DTOs.Products;
-using System;
 using System.Globalization;
 
 namespace ProductShopping.UI.RazorPagesUI.Clients;
@@ -78,4 +76,3 @@ public class ProductsApiClient : IProductsApiClient
         return result ?? new List<string>();
     }
 }
-
