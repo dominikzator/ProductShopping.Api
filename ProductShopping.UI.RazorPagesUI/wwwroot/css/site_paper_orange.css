@@ -991,7 +991,8 @@ body {
 
 .cart-summary-panel {
     position: sticky;
-    top: 6.5rem;
+    top: 2rem;
+    height: 100vh;
 }
 
 .cart-summary-box {
@@ -1000,6 +1001,8 @@ body {
     border-radius: 20px;
     background: #fffdf8;
     box-shadow: 0 14px 30px rgba(72, 41, 21, 0.08);
+    position: sticky;
+    top: calc(72px + 86px);
 }
 
 .cart-summary-line {

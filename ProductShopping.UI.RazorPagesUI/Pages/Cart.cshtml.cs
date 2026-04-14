@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.UI.RazorPagesUI.Contracts;
 
@@ -27,35 +28,95 @@ public class CartModel(ICartsApiClient cartsApiClient) : PageModel
         }
 
         await LoadCartAsync(ct);
+
         return Page();
+    }
+
+    private bool IsAjaxRequest()
+    => string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+    public async Task<IActionResult> OnGetContentAsync(CancellationToken ct)
+    {
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            return new ContentResult
+            {
+                StatusCode = 401,
+                Content = string.Empty
+            };
+        }
+
+        await LoadCartAsync(ct);
+
+        return new PartialViewResult
+        {
+            ViewName = "_CartContent",
+            ViewData = new ViewDataDictionary<CartModel>(ViewData, this)
+        };
     }
 
     public async Task<IActionResult> OnPostIncreaseQuantityAsync(int cartItemId, CancellationToken ct)
     {
         if (!await TryLoadCartOrRedirectAsync(ct))
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "You need to sign in first." })
+                {
+                    StatusCode = 401
+                };
+            }
+
             return RedirectToPage();
         }
 
         var item = Items.FirstOrDefault(x => x.CartItemId == cartItemId);
         if (item is null)
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "Cart item not found." })
+                {
+                    StatusCode = 404
+                };
+            }
+
             SetError("Cart item not found.");
             return RedirectToPage();
         }
 
         if (item.Quantity >= item.MaxQuantity)
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "You cannot add more items than are currently available." })
+                {
+                    StatusCode = 400
+                };
+            }
+
             SetError("You cannot add more items than are currently available.");
             return RedirectToPage();
         }
 
         var token = GetAccessToken();
-        await cartsApiClient.AddCartItemAsync(token!, new Application.Features.CartItem.Commands.AddCartItem.AddCartItemCommand
+        await cartsApiClient.AddCartItemAsync(token!, new AddCartItemCommand
         {
             ProductId = item.ProductId,
             Quantity = 1
         }, ct);
+
+        await LoadCartAsync(ct);
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = "",
+                cartItemsCount = TotalQuantity
+            });
+        }
 
         return RedirectToPage();
     }
@@ -64,12 +125,28 @@ public class CartModel(ICartsApiClient cartsApiClient) : PageModel
     {
         if (!await TryLoadCartOrRedirectAsync(ct))
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "You need to sign in first." })
+                {
+                    StatusCode = 401
+                };
+            }
+
             return RedirectToPage();
         }
 
         var item = Items.FirstOrDefault(x => x.CartItemId == cartItemId);
         if (item is null)
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "Cart item not found." })
+                {
+                    StatusCode = 404
+                };
+            }
+
             SetError("Cart item not found.");
             return RedirectToPage();
         }
@@ -82,6 +159,18 @@ public class CartModel(ICartsApiClient cartsApiClient) : PageModel
             Quantity = 1
         }, ct);
 
+        await LoadCartAsync(ct);
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = "",
+                cartItemsCount = TotalQuantity
+            });
+        }
+
         return RedirectToPage();
     }
 
@@ -90,6 +179,14 @@ public class CartModel(ICartsApiClient cartsApiClient) : PageModel
         var token = GetAccessToken();
         if (string.IsNullOrWhiteSpace(token))
         {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "You need to sign in first." })
+                {
+                    StatusCode = 401
+                };
+            }
+
             SetError("You need to sign in first.");
             return RedirectToPage();
         }
@@ -101,12 +198,37 @@ public class CartModel(ICartsApiClient cartsApiClient) : PageModel
         }, ct);
 
         var item = result.Data.FirstOrDefault(x => x.Id == cartItemId);
+        if (item is null)
+        {
+            if (IsAjaxRequest())
+            {
+                return new JsonResult(new { success = false, message = "Cart item not found." })
+                {
+                    StatusCode = 404
+                };
+            }
+
+            SetError("Cart item not found.");
+            return RedirectToPage();
+        }
 
         await cartsApiClient.RemoveCartItemAsync(token, new RemoveCartItemCommand
         {
             CartItemId = cartItemId,
             Quantity = item.Quantity
         }, ct);
+
+        await LoadCartAsync(ct);
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = "Item removed from cart.",
+                cartItemsCount = TotalQuantity
+            });
+        }
 
         return RedirectToPage();
     }

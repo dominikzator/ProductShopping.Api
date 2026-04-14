@@ -1,4 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
+
     document.querySelectorAll('.quantity-control').forEach(function (wrapper) {
         const input = wrapper.querySelector('.qty-input');
         const minus = wrapper.querySelector('.qty-btn--minus');
@@ -30,6 +31,7 @@
     });
 
     const dropdowns = document.querySelectorAll('[data-dropdown]');
+    const cartCountValue = document.getElementById('cart-count-value');
 
     dropdowns.forEach(dropdown => {
         const trigger = dropdown.querySelector('[data-dropdown-trigger]');
@@ -42,7 +44,6 @@
             e.stopPropagation();
 
             const isOpen = dropdown.classList.contains('is-open');
-
             dropdowns.forEach(d => d.classList.remove('is-open'));
 
             if (!isOpen) {
@@ -91,6 +92,7 @@
     }
 
     const addToCartForms = document.querySelectorAll('.js-add-to-cart-form');
+
     const alertLayer = document.getElementById('pageAlertLayer');
 
     function showFloatingAlert(type, message) {
@@ -131,38 +133,34 @@
         }
     }
 
-    const cartCountValue = document.getElementById("cart-count-value");
-
     addToCartForms.forEach(form => {
-        form.addEventListener("submit", async (e) => {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
-
-            const formData = new FormData(form);
 
             try {
                 const response = await fetch(form.action, {
-                    method: "POST",
-                    body: formData,
+                    method: 'POST',
+                    body: new FormData(form),
                     headers: {
-                        "X-Requested-With": "XMLHttpRequest"
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
-                const result = await response.json();
+                const result = await readJsonSafely(response);
 
                 if (!response.ok || !result.success) {
-                    showFloatingAlert("error", result.message ?? "Failed to add product to cart.");
+                    showFloatingAlert('error', result.message ?? 'Failed to add product to cart.');
                     return;
                 }
 
-                if (cartCountValue && typeof result.cartItemsCount !== "undefined") {
+                if (cartCountValue && typeof result.cartItemsCount !== 'undefined') {
                     cartCountValue.textContent = result.cartItemsCount;
                 }
 
-                showFloatingAlert("success", result.message ?? "Product added to cart.");
+                showFloatingAlert('success', result.message ?? 'Product added to cart.');
             } catch (error) {
-                console.error(error);
-                showFloatingAlert("error", "Unexpected error while adding product to cart.");
+                console.error('Add to cart error:', error);
+                showFloatingAlert('error', 'Unexpected error while adding product to cart.');
             }
         });
     });

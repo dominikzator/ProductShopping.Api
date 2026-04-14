@@ -1,0 +1,137 @@
+﻿@model ProductShopping.UI.RazorPagesUI.Pages.Cart.CartModel
+
+<header class="products-header">
+    <div>
+        <p class="products-eyebrow">Shopping cart</p>
+        <h1 class="products-title">Your cart</h1>
+        <p class="products-subtitle">
+            Review your products, change quantities, or remove items before placing the order.
+        </p>
+    </div>
+</header>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="page-alert-layer" style="position: static; padding: 0; margin-bottom: 1rem;">
+        <div class="page-alert @(Model.IsError ? "page-alert--error" : "page-alert--success")" role="alert">
+            <span class="page-alert-text">@Model.StatusMessage</span>
+        </div>
+    </div>
+}
+
+@if (!Model.Items.Any())
+{
+    <section class="empty-state">
+        <h2>Your cart is empty</h2>
+        <p>Add some products and come back here to review your order.</p>
+    </section>
+}
+else
+{
+    <div class="cart-layout">
+        <section class="cart-list">
+            @foreach (var item in Model.Items)
+            {
+                <article class="product-card cart-card">
+                    <div class="product-media">
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.ProductName" class="cart-image" />
+                        }
+                        else
+                        {
+                            <span>@item.ProductName.Substring(0, 1)</span>
+                        }
+                    </div>
+
+                    <div class="product-main">
+                        <div class="product-content">
+                            <div class="product-topline">
+                                <span class="product-category">@item.CategoryName</span>
+                                <strong class="product-price">@item.LineTotal.ToString("0.00") zł</strong>
+                            </div>
+
+                            <h2 class="product-name">@item.ProductName</h2>
+
+                            <div class="cart-meta">
+                                <div>
+                                    <span class="meta-label">Unit price</span>
+                                    <strong>@item.UnitPrice.ToString("0.00") zł</strong>
+                                </div>
+
+                                <div>
+                                    <span class="meta-label">Available</span>
+                                    <strong>@item.MaxQuantity</strong>
+                                </div>
+                            </div>
+
+                            <div class="cart-actions-row">
+                                <div class="quantity-control">
+                                    <form method="post" asp-page-handler="DecreaseQuantity" class="cart-inline-form js-cart-action-form">
+                                        <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                        <button type="submit" class="qty-btn qty-btn--minus" aria-label="Decrease quantity">−</button>
+                                    </form>
+
+                                    <input type="number"
+                                           value="@item.Quantity"
+                                           min="1"
+                                           max="@item.MaxQuantity"
+                                           class="qty-input cart-qty-input"
+                                           readonly
+                                           aria-label="Quantity for @item.ProductName" />
+
+                                    <form method="post" asp-page-handler="IncreaseQuantity" class="cart-inline-form js-cart-action-form">
+                                        <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                        <button type="submit" class="qty-btn qty-btn--plus" aria-label="Increase quantity">+</button>
+                                    </form>
+                                </div>
+
+                                <form method="post" asp-page-handler="RemoveItem" class="cart-inline-form cart-remove-form js-cart-action-form">
+                                    <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                    <button type="submit" class="cart-remove-btn" aria-label="Remove @item.ProductName from cart">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" class="cart-remove-icon">
+                                            <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm-1 12h12a2 2 0 0 0 2-2V7H4v12a2 2 0 0 0 2 2z"
+                                                  fill="currentColor" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            }
+        </section>
+
+        <aside class="cart-summary-panel">
+            <div class="cart-summary-box">
+                <h2 class="products-title" style="font-size: 1.35rem;">Order summary</h2>
+
+                <div class="cart-summary-line">
+                    <span>Total Items</span>
+                    <strong>@Model.TotalQuantity</strong>
+                </div>
+
+                <div class="cart-summary-line">
+                    <span>Subtotal</span>
+                    <strong>@Model.Subtotal.ToString("0.00") zł</strong>
+                </div>
+
+                <div class="cart-summary-line">
+                    <span>Shipping</span>
+                    <strong>0.00 zł</strong>
+                </div>
+
+                <div class="cart-summary-line cart-summary-line--total">
+                    <span>Total</span>
+                    <strong>@Model.Subtotal.ToString("0.00") zł</strong>
+                </div>
+
+                <form method="post" asp-page-handler="Checkout">
+                    <button type="submit" class="add-to-cart-btn cart-checkout-btn">
+                        Place order
+                    </button>
+                </form>
+            </div>
+        </aside>
+    </div>
+}
