@@ -1,10 +1,10 @@
 ﻿document.addEventListener('submit', async function (e) {
+
     const cartCountValue = document.getElementById('cart-count-value');
 
     const form = e.target.closest('.js-cart-action-form');
     if (!form) return;
 
-    console.log("INTERCEPTED", form.action);
     e.preventDefault();
 
     try {

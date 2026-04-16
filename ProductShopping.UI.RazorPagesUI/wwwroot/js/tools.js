@@ -1,4 +1,5 @@
-﻿function showFloatingAlert(type, message) {
+﻿function showFloatingAlert(type, message, closeOnTime = true) {
+    console.log("showFloatingAlert");
     let layer = document.getElementById('pageAlertLayer');
 
     if (!layer) {
@@ -8,10 +9,15 @@
         document.body.appendChild(layer);
     }
 
-    layer.innerHTML = `
+    layer.innerHTML = closeOnTime ? `
             <div class="page-alert page-alert--${type}" data-auto-dismiss="true" role="alert">
                 <span class="page-alert-text">${message}</span>
                 <button type="button" class="page-alert-close" data-alert-close aria-label="Zamknij komunikat">×</button>
+            </div>
+        ` : 
+        `
+            <div class="page-alert page-alert--${type}" data-auto-dismiss="true" role="alert">
+                <span class="page-alert-text">${message}</span>
             </div>
         `;
 
@@ -21,18 +27,21 @@
     const hideAlert = () => {
         if (!alert) return;
         alert.classList.add('is-hiding');
-        setTimeout(() => {
-            layer.innerHTML = '';
-        }, 450);
+        if (closeOnTime) {
+            setTimeout(() => {
+                layer.innerHTML = '';
+            }, 450);
+        }
     };
+    if (closeOnTime) {
+        const autoHideTimeout = setTimeout(hideAlert, type === 'error' ? 3000 : 2000);
 
-    const autoHideTimeout = setTimeout(hideAlert, type === 'error' ? 3000 : 2000);
-
-    if (closeButton) {
-        closeButton.addEventListener('click', function () {
-            clearTimeout(autoHideTimeout);
-            hideAlert();
-        });
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
+                clearTimeout(autoHideTimeout);
+                hideAlert();
+            });
+        }
     }
 }
 

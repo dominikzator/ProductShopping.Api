@@ -1,0 +1,160 @@
+﻿@page "/CreateOrder"
+@model ProductShopping.UI.RazorPagesUI.Pages.CreateOrderModel
+@{
+    ViewData["Title"] = "Create order";
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-order.js" asp-append-version="true"></script>
+}
+
+<section class="products-page checkout-page">
+    <header class="products-header">
+        <div>
+            <p class="products-eyebrow">Checkout</p>
+            <h1 class="products-title">Create order</h1>
+            <p class="products-subtitle">
+                Provide your delivery details and review your cart before placing the order.
+            </p>
+        </div>
+
+        <div class="products-summary">
+            <span class="summary-label">Total items</span>
+            <strong>@Model.TotalQuantity</strong>
+        </div>
+    </header>
+
+    @if (!Model.Items.Any())
+    {
+        <section class="empty-state">
+            <h2>Your cart is empty</h2>
+            <p>Add some products before creating an order.</p>
+        </section>
+    }
+    else
+    {
+        <div class="checkout-layout">
+            <section class="checkout-form-panel">
+                <div class="cart-summary-box checkout-form-box">
+                    <h2 class="products-title" style="font-size: 1.35rem;">Delivery address</h2>
+
+                    <form method="post" class="checkout-form js-create-order-form">
+                        <div asp-validation-summary="ModelOnly" class="text-danger validation-summary"></div>
+
+                        <div class="checkout-grid">
+                            <div class="checkout-field checkout-field--wide">
+                                <label asp-for="Address.Street"></label>
+                                <input asp-for="Address.Street" class="form-input" />
+                                <span asp-validation-for="Address.Street" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.BuildingNumber"></label>
+                                <input asp-for="Address.BuildingNumber" class="form-input" />
+                                <span asp-validation-for="Address.BuildingNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.ApartmentNumber"></label>
+                                <input asp-for="Address.ApartmentNumber" class="form-input" />
+                                <span asp-validation-for="Address.ApartmentNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.City"></label>
+                                <input asp-for="Address.City" class="form-input" />
+                                <span asp-validation-for="Address.City" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.PostalCode"></label>
+                                <input asp-for="Address.PostalCode" class="form-input" />
+                                <span asp-validation-for="Address.PostalCode" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.Country"></label>
+                                <input asp-for="Address.Country" class="form-input" />
+                                <span asp-validation-for="Address.Country" class="text-danger"></span>
+                            </div>
+
+                            <div class="checkout-field">
+                                <label asp-for="Address.PhoneNumber"></label>
+                                <input asp-for="Address.PhoneNumber" class="form-input" />
+                                <span asp-validation-for="Address.PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="checkout-actions">
+                            <button type="submit" class="add-to-cart-btn cart-checkout-btn js-create-order-btn">
+                                <span class="js-create-order-btn-text">Place order</span>
+                                <span class="js-create-order-btn-spinner" style="display:none;">
+                                    Processing…
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <aside class="checkout-summary-panel">
+                <div class="cart-summary-box checkout-summary-box">
+                    <h2 class="products-title" style="font-size: 1.35rem;">Order summary</h2>
+
+                    <div class="checkout-items">
+                        @foreach (var item in Model.Items)
+                        {
+                            <article class="checkout-item">
+                                <div class="checkout-item-media">
+                                    @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.ProductName" class="checkout-item-image" />
+                                    }
+                                    else
+                                    {
+                                        <span class="checkout-item-placeholder">@item.ProductName.Substring(0, 1)</span>
+                                    }
+                                </div>
+
+                                <div class="checkout-item-body">
+                                    <div class="checkout-item-top">
+                                        <h3 class="checkout-item-name">@item.ProductName</h3>
+                                        <strong class="checkout-item-total">@item.LineTotal.ToString("0.00") zł</strong>
+                                    </div>
+
+                                    <p class="checkout-item-category">@item.CategoryName</p>
+
+                                    <div class="checkout-item-meta">
+                                        <span>@item.UnitPrice.ToString("0.00") zł / szt.</span>
+                                        <span>Ilość: @item.Quantity</span>
+                                    </div>
+                                </div>
+                            </article>
+                        }
+                    </div>
+
+                    <div class="cart-summary-line">
+                        <span>Total Items</span>
+                        <strong>@Model.TotalQuantity</strong>
+                    </div>
+
+                    <div class="cart-summary-line">
+                        <span>Subtotal</span>
+                        <strong>@Model.Subtotal.ToString("0.00") zł</strong>
+                    </div>
+
+                    <div class="cart-summary-line">
+                        <span>Shipping</span>
+                        <strong>0.00 zł</strong>
+                    </div>
+
+                    <div class="cart-summary-line cart-summary-line--total">
+                        <span>Total</span>
+                        <strong>@Model.Subtotal.ToString("0.00") zł</strong>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    }
+</section>

@@ -10,15 +10,6 @@
     </div>
 </header>
 
-@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-{
-    <div class="page-alert-layer" style="position: static; padding: 0; margin-bottom: 1rem;">
-        <div class="page-alert @(Model.IsError ? "page-alert--error" : "page-alert--success")" role="alert">
-            <span class="page-alert-text">@Model.StatusMessage</span>
-        </div>
-    </div>
-}
-
 @if (!Model.Items.Any())
 {
     <section class="empty-state">
@@ -126,7 +117,7 @@ else
                     <strong>@Model.Subtotal.ToString("0.00") zł</strong>
                 </div>
 
-                <form method="post" asp-page-handler="Checkout">
+                <form method="get" asp-page="/CreateOrder">
                     <button type="submit" class="add-to-cart-btn cart-checkout-btn">
                         Place order
                     </button>

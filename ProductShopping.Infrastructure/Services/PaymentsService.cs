@@ -64,10 +64,10 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
         }
 
 
-        var order = await ordersRepository.GetUserOrderDtoAsync(userId, paymentRequest.OrderId);
+        var orderDto = await ordersRepository.GetUserOrderDtoAsync(userId, paymentRequest.OrderId);
         var orderItems = await ordersRepository.GetUserOrderItemsDtosByOrderIdAsync(userId, paymentRequest.OrderId);
 
-        var outputDto = mapper.Map<OrderDto>(order.Value);
+        var outputDto = mapper.Map<OrderDto>(orderDto.Value);
         outputDto.PaymentUrl = session.Url;
         outputDto.OrderItems = mapper.Map<List<OrderItemDto>>(orderItems.Value);
 

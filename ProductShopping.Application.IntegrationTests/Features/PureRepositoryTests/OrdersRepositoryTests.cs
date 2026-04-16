@@ -78,7 +78,7 @@ public class OrdersRepositoryTests
             {
 
             },
-            OrderNumber = testingOrderNumber
+            OrderNumber = testingOrderNumber,
         });
 
         orders = await ordersRepo.GetUserOrdersAsync("1");

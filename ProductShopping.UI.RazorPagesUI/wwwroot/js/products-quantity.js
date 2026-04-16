@@ -95,7 +95,7 @@
 
     const alertLayer = document.getElementById('pageAlertLayer');
 
-    function showFloatingAlert(type, message) {
+/*    function showFloatingAlert(type, message) {
         let layer = alertLayer;
 
         if (!layer) {
@@ -131,7 +131,7 @@
                 hideAlert();
             });
         }
-    }
+    }*/
 
     addToCartForms.forEach(form => {
         form.addEventListener('submit', async function (e) {

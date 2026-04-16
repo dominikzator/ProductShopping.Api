@@ -102,10 +102,13 @@ public class PaymentsController(IPaymentsService paymentsService,
 
             return Ok(new
             {
-                Message = "Payment successfull!!!",
-                Status = session.PaymentStatus,
-                SessionId = session.Id,
-                Amount = session.AmountTotal / 100m
+                success = true,
+                sessionId = session.Id,
+                status = session.Status,
+                paymentStatus = session.PaymentStatus,
+                amount = session.AmountTotal!.Value / 100m,
+                currency = session.Currency,
+                orderId = session.Metadata.TryGetValue("orderId", out var orderId) ? orderId : null
             });
         }
         catch (Exception ex)

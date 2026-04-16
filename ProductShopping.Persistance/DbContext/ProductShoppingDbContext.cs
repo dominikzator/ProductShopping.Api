@@ -37,7 +37,10 @@ public class ProductShoppingDbContext : DbContext
 
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        builder.Entity<Order>().OwnsOne(typeof(Address), "Address");
+        builder.Entity<Order>(entity =>
+        {
+            entity.OwnsOne(typeof(Address), "Address");
+        });
 
         builder.Entity<ProductCategory>()
             .HasIndex(c => c.Name)

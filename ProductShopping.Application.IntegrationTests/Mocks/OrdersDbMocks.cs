@@ -222,7 +222,7 @@ public class OrdersDbMocks
                 Address = new Address
                 {
 
-                }
+                },
             },
             new Order
             {
@@ -232,7 +232,7 @@ public class OrdersDbMocks
                 Address = new Address
                 {
 
-                }
+                },
             },
             new Order
             {
@@ -242,7 +242,7 @@ public class OrdersDbMocks
                 Address = new Address
                 {
 
-                }
+                },      
             }
         }.ToList();
 
