@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.UI.RazorPagesUI.Clients;
@@ -30,10 +31,26 @@ namespace ProductShopping.UI.RazorPagesUI.Pages
         {
             Console.WriteLine("Query.CategoryName" + Query.CategoryName);
 
+            await LoadProductsAsync(ct);
+        }
+
+        public async Task<IActionResult> OnGetProductsListAsync()
+        {
+            await LoadProductsAsync(CancellationToken.None);
+
+            return new PartialViewResult
+            {
+                ViewName = "_ProductsListPartial",
+                ViewData = new ViewDataDictionary<ProductsModel>(ViewData, this)
+            };
+        }
+
+        private async Task LoadProductsAsync(CancellationToken cancellationToken)
+        {
             Query.PageNumber = Query.PageNumber <= 0 ? 1 : Query.PageNumber;
             Query.PageSize = Query.PageSize <= 0 ? 10 : Query.PageSize;
 
-            Products = await productsApiClient.GetProductsAsync(Query, ct);
+            Products = await productsApiClient.GetProductsAsync(Query, cancellationToken);
 
             CategoryOptions = await productsApiClient.GetCategoryNamesAsync();
 

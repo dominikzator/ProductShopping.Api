@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.UI.RazorPagesUI.Contracts;
@@ -25,6 +26,56 @@ public class OrdersModel(IOrdersApiClient ordersApiClient) : PageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
+        var authRedirect = EnsureAuthenticated();
+        if (authRedirect is not null)
+        {
+            return authRedirect;
+        }
+
+        await LoadOrdersAsync(ct);
+        return Page();
+    }
+
+    public async Task<IActionResult> OnGetOrdersListAsync(CancellationToken ct)
+    {
+        var authRedirect = EnsureAuthenticated();
+        if (authRedirect is not null)
+        {
+            return authRedirect;
+        }
+
+        await LoadOrdersAsync(ct);
+
+        return new PartialViewResult
+        {
+            ViewName = "_OrdersListPartial",
+            ViewData = new ViewDataDictionary<OrdersModel>(ViewData, this)
+        };
+    }
+
+    public IActionResult OnPostCompletePayment(Guid orderId)
+    {
+        Console.WriteLine("OnPostCompletePayment Frontend");
+        return RedirectToPage("/Orders");
+    }
+
+    private async Task LoadOrdersAsync(CancellationToken ct)
+    {
+        var token = GetAccessToken();
+
+        var result = await _ordersApiClient.GetOrdersAsync(token!, new PaginationParameters
+        {
+            PageNumber = PageNumber,
+            PageSize = PageSize
+        }, ct);
+
+        Orders = result.Data.ToList() ?? [];
+        TotalCount = result.Metadata.TotalCount;
+        TotalPages = result.Metadata.TotalPages;
+    }
+
+    private IActionResult? EnsureAuthenticated()
+    {
         if (!User.Identity?.IsAuthenticated ?? true)
         {
             return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -37,22 +88,7 @@ public class OrdersModel(IOrdersApiClient ordersApiClient) : PageModel
             return RedirectToPage("/Account/Login", new { area = "Identity" });
         }
 
-        var result = await _ordersApiClient.GetOrdersAsync(token, new PaginationParameters
-        {
-            PageNumber = PageNumber,
-            PageSize = PageSize
-        }, ct);
-
-        Orders = result.Data.ToList() ?? [];
-        TotalCount = result.Metadata.TotalCount;
-        TotalPages = result.Metadata.TotalPages;
-
-        return Page();
-    }
-    public IActionResult OnPostCompletePayment(Guid orderId)
-    {
-        Console.WriteLine("OnPostCompletePayment Frontend");
-        return RedirectToPage("/Orders");
+        return null;
     }
 
     public IEnumerable<int> GetVisiblePages()
@@ -76,7 +112,7 @@ public class OrdersModel(IOrdersApiClient ordersApiClient) : PageModel
 
     public string GetStatusCssClass(string? status)
     {
-        return status?.ToLowerInvariant() switch
+        return status?.Trim().ToLowerInvariant() switch
         {
             "pending" => "order-status-badge--pending",
             "paid" => "order-status-badge--paid",
