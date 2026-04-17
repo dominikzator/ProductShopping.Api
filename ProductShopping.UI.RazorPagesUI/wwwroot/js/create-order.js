@@ -42,7 +42,6 @@
             if (cartCountValue && typeof result.cartItemsCount !== 'undefined') {
                 cartCountValue.textContent = result.cartItemsCount;
             }
-
             // redirect po krótkim czasie
             if (result.redirectUrl) {
                 setTimeout(() => {

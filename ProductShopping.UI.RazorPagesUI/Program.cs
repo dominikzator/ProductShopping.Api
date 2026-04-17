@@ -4,6 +4,7 @@ using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
 using ProductShopping.UI.RazorPagesUI.Clients;
 using ProductShopping.UI.RazorPagesUI.Contracts;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,8 @@ builder.Services
     {
         options.Conventions.AddPageRoute("/Products", "");
     });
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var connectionString = builder.Configuration.GetConnectionString("ProductShoppingDbConnectionString");
 

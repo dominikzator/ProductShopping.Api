@@ -1,0 +1,88 @@
+﻿@page "/OrderPayment/cancel"
+@model ProductShopping.UI.RazorPagesUI.Pages.OrderPaymentCancelModel
+@{
+    ViewData["Title"] = "Payment not completed";
+}
+
+<section class="order-failed-page">
+    <div class="order-failed-hero">
+        <div class="order-failed-icon">!</div>
+        <div>
+            <h1 class="order-failed-title">Payment was not completed</h1>
+
+            @if (Model.Order is not null)
+            {
+                <p class="order-failed-subtitle">
+                    The payment for order <strong>@Model.Order.OrderNumber</strong> was not completed.
+                    You can try again at any time from your orders page.
+                </p>
+            }
+            else
+            {
+                <p class="order-failed-subtitle">
+                    Your payment was not completed. You can return to your orders and try again.
+                </p>
+            }
+        </div>
+    </div>
+
+    @if (Model.Order is not null)
+    {
+        <div class="order-failed-grid">
+            <div class="order-failed-card">
+                <h2>Order summary</h2>
+                <div class="order-failed-meta">
+                    <div class="meta-row">
+                        <span>Order number</span>
+                        <strong>@Model.Order.OrderNumber</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span>Payment status</span>
+                        <strong class="text-failed">Not completed</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span>Total</span>
+                        <strong>@Model.Order.OrderItems.Sum(x => x.TotalPrice).ToString("0.00") zł</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-failed-card">
+                <h2>What can you do now?</h2>
+                <div class="order-next-steps">
+                    <p>Try paying again from your order history.</p>
+                    <p>Check your card details or use a different payment method if needed.</p>
+                    <p>If the issue continues, contact support.</p>
+                </div>
+
+                <div class="order-failed-actions">
+                    <a href="/Orders" class="order-failed-btn order-failed-btn--primary">
+                        Go to my orders
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-failed-card order-failed-items">
+            <h2>Ordered items</h2>
+
+            <div class="order-items-list">
+                @foreach (var item in Model.Order.OrderItems)
+                {
+                    <div class="order-item-row">
+                        <div class="order-item-main">
+                            <div class="order-item-name">@item.ProductName</div>
+                            <div class="order-item-details">
+                                Quantity: @item.Quantity
+                            </div>
+                        </div>
+                        <div class="order-item-pricing">
+                            <div>@item.UnitPrice.ToString("0.00") zł</div>
+                            <strong>@item.TotalPrice.ToString("0.00") zł</strong>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</section>

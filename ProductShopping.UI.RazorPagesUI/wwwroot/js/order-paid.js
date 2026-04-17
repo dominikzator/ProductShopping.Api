@@ -1,4 +1,8 @@
-﻿document.addEventListener('DOMContentLoaded', async function () {
+﻿console.log('ORDER-PAID JS FILE VERSION 123');
+
+async function initOrderPaidPage() {
+    console.log('initOrderPaidPage start');
+
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
 
@@ -34,6 +38,7 @@
     } catch (error) {
         console.error('Order paid page error:', error);
     }
-});
+}
 
+initOrderPaidPage();
 console.log("Order Paid Loaded!");

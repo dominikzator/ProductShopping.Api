@@ -35,18 +35,21 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
         }
         var userId = usersService.GetUserId();
 
+        var orderId = paymentRequest.OrderId.ToString();
+
         var options = new SessionCreateOptions
         {
-            SuccessUrl = $"{paymentRequest.Domain}/api/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
-            CancelUrl = $"{paymentRequest.Domain}/api/payments/cancel",
+            SuccessUrl = $"{paymentRequest.Domain}/OrderPayment/success?session_id={{CHECKOUT_SESSION_ID}}",
+            CancelUrl = $"{paymentRequest.Domain}/OrderPayment/cancel?session_id={{CHECKOUT_SESSION_ID}}",
             PaymentMethodTypes = new List<string> { "card" },
             LineItems = lineItems,
-            ClientReferenceId = paymentRequest.OrderId.ToString(),
+            ClientReferenceId = orderId,
             Mode = "payment",
             Metadata = new Dictionary<string, string>
             {
                 {"userEmail", paymentRequest.UserEmail},
-                {"userId", userId}
+                {"userId", userId},
+                {"orderId", orderId }
             }
         };
 

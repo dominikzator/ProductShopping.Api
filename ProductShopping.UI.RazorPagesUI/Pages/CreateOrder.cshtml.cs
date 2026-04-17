@@ -1,14 +1,15 @@
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Contracts;
 using ProductShopping.Application.Features.Order.Commands.CreateOrder;
+using ProductShopping.Application.Models.Paging;
 using ProductShopping.Domain.Models;
+using ProductShopping.UI.RazorPagesUI.Contracts;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages;
 
-public class CreateOrderModel(ICartsApiClient cartsApiClient, IOrdersApiClient ordersApiClient) : PageModel
+public class CreateOrderModel(ICartsApiClient cartsApiClient, IOrdersApiClient ordersApiClient, IHttpContextAccessor httpContextAccessor) : PageModel
 {
     public List<CartLineVm> Items { get; private set; } = [];
     public int TotalQuantity => Items.Sum(x => x.Quantity);
@@ -77,6 +78,10 @@ public class CreateOrderModel(ICartsApiClient cartsApiClient, IOrdersApiClient o
 
         var token = GetAccessToken();
 
+        var request = httpContextAccessor.HttpContext?.Request;
+        var baseUrl = $"{request?.Scheme}://{request?.Host}{request?.PathBase}";
+        Console.WriteLine("baseUrl: " + baseUrl);
+
         var order = await ordersApiClient.CreateOrderAsync(token!, new CreateOrderCommand
         {
             Address = new Address
@@ -88,7 +93,8 @@ public class CreateOrderModel(ICartsApiClient cartsApiClient, IOrdersApiClient o
                 Country = Address.Country,
                 PostalCode = Address.PostalCode,
                 Street = Address.Street
-            }
+            },
+            DomainName = baseUrl
         }, ct);
 
         if (order is null || string.IsNullOrWhiteSpace(order.PaymentUrl))

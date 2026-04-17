@@ -83,7 +83,7 @@ public class CreateOrderCommandHandler(IOrdersRepository ordersRepository, ICart
         var outputDto = await paymentsService.CreatePaymentSessionAsync(new DTOs.Payment.PaymentRequestDto
         {
             OrderId = createdOrder.Value.Id,
-            Domain = domainName,
+            Domain =string.IsNullOrEmpty(request.DomainName) ? domainName : request.DomainName,
             OrderNumber = createdOrder.Value.OrderNumber,
             Items = items,
             TotalPrice = totalPrice,

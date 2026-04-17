@@ -8,4 +8,5 @@ namespace ProductShopping.Application.Features.Order.Commands.CreateOrder;
 public class CreateOrderCommand : IRequest<Result<OrderDto>>
 {
     public required Address Address { get; set; }
+    public string DomainName { get; set; } = string.Empty;
 }
