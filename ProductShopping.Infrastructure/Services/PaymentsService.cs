@@ -35,7 +35,11 @@ public class PaymentsService(IOrdersRepository ordersRepository, IUsersService u
         }
         var userId = usersService.GetUserId();
 
+        Console.WriteLine("userId: " + userId);
+
         var orderId = paymentRequest.OrderId.ToString();
+
+        Console.WriteLine("orderId: " + orderId);
 
         var options = new SessionCreateOptions
         {

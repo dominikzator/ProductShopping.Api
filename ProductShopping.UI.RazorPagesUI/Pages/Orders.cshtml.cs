@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Models.Paging;
+using ProductShopping.UI.RazorPagesUI.Clients;
 using ProductShopping.UI.RazorPagesUI.Contracts;
+using System.Security.Claims;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages;
 
-public class OrdersModel(IOrdersApiClient ordersApiClient) : PageModel
+public class OrdersModel(IOrdersApiClient ordersApiClient, IPaymentsApiClient paymentsApiClient) : PageModel
 {
-    private readonly IOrdersApiClient _ordersApiClient = ordersApiClient;
-
     public IReadOnlyList<OrderDto> Orders { get; private set; } = [];
 
     [BindProperty(SupportsGet = true)]
@@ -53,17 +54,41 @@ public class OrdersModel(IOrdersApiClient ordersApiClient) : PageModel
         };
     }
 
-    public IActionResult OnPostCompletePayment(Guid orderId)
+    public async Task<IActionResult> OnPostCompletePayment(int orderId, CancellationToken ct)
     {
-        Console.WriteLine("OnPostCompletePayment Frontend");
-        return RedirectToPage("/Orders");
+        var token = GetAccessToken();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
+        }
+
+        var order = await ordersApiClient.GetOrderAsync(token, orderId, ct);
+
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+        Console.WriteLine(baseUrl);
+
+        var paymentRequestDto = new PaymentRequestDto
+        {
+            OrderId = order.Id,
+            OrderNumber = order.OrderNumber,
+            UserEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty,
+            Domain = baseUrl,
+            Items = order.OrderItems,
+            TotalPrice = order.OrderItems.Sum(x => x.TotalPrice)
+        };
+
+        var result = await paymentsApiClient.CreatePaymentSessionAsync(token, paymentRequestDto, ct);
+
+        return Redirect(result.PaymentUrl);
     }
 
     private async Task LoadOrdersAsync(CancellationToken ct)
     {
         var token = GetAccessToken();
 
-        var result = await _ordersApiClient.GetOrdersAsync(token!, new PaginationParameters
+        var result = await ordersApiClient.GetOrdersAsync(token!, new PaginationParameters
         {
             PageNumber = PageNumber,
             PageSize = PageSize

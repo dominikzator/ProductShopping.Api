@@ -57,7 +57,10 @@
                     </div>
 
                     <label class="filter-checkbox">
-                        <input asp-for="Query.SortDescending" type="checkbox" />
+                        <input type="checkbox"
+                               name="Query.SortDescending"
+                               value="true"
+                               @(Model.Query.SortDescending ? "checked" : null) />
                         <span>Descending</span>
                     </label>
 

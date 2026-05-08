@@ -112,26 +112,62 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
                 Password = Input.Password
             };
 
-            string jwtToken;
+            string rawResponse;
 
             try
             {
-                jwtToken = await _authApiClient.Login(loginUserDto);
+                rawResponse = await _authApiClient.Login(loginUserDto);
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Login service is unavailable for {Email}", Input.Email);
                 ModelState.AddModelError(string.Empty, "Login service is currently unavailable.");
                 return Page();
             }
-
-            if (string.IsNullOrWhiteSpace(jwtToken))
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error during login for {Email}", Input.Email);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred during login.");
+                return Page();
+            }
+
+            if (string.IsNullOrWhiteSpace(rawResponse))
+            {
+                _logger.LogWarning("Login returned empty response for {Email}", Input.Email);
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return Page();
             }
 
+            _logger.LogInformation("Raw login response: {RawResponse}", rawResponse);
+
+            var jwtToken = rawResponse.Trim();
+
+            if (jwtToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                jwtToken = jwtToken["Bearer ".Length..].Trim();
+            }
+
             var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(jwtToken);
+
+            if (!handler.CanReadToken(jwtToken))
+            {
+                _logger.LogWarning("Login returned non-JWT response for {Email}. Response: {RawResponse}", Input.Email, rawResponse);
+                ModelState.AddModelError(string.Empty, "Login failed. API did not return a valid token.");
+                return Page();
+            }
+
+            JwtSecurityToken jwt;
+
+            try
+            {
+                jwt = handler.ReadJwtToken(jwtToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse JWT for {Email}. Token: {Token}", Input.Email, jwtToken);
+                ModelState.AddModelError(string.Empty, "Login failed. Invalid token format.");
+                return Page();
+            }
 
             var claims = new List<Claim>();
 
@@ -166,15 +202,14 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
                     : null
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims,
-                IdentityConstants.ApplicationScheme);
+            var claimsIdentity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
 
             await HttpContext.SignInAsync(
                 IdentityConstants.ApplicationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            _logger.LogInformation("User logged in through API.");
+            _logger.LogInformation("User logged in through API for {Email}", Input.Email);
 
             return LocalRedirect(returnUrl);
         }

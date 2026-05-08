@@ -771,6 +771,7 @@ body {
 /* Kontener topbara – lewa/prawa strona */
 .topbar-inner {
     max-width: 1180px;
+    max-height: 100px;
     margin: 0 auto;
     padding: 0.9rem 1rem;
     display: flex;

@@ -39,6 +39,13 @@ builder.Services.AddHttpClient<IOrdersApiClient, OrdersApiClient>(client =>
     client.BaseAddress = new Uri(apiUri);
 });
 
+builder.Services.AddScoped<IPaymentsApiClient, PaymentsApiClient>();
+builder.Services.AddHttpClient<IPaymentsApiClient, PaymentsApiClient>(client =>
+{
+    var apiUri = builder.Configuration["Api:BaseUrl"]!;
+    client.BaseAddress = new Uri(apiUri);
+});
+
 builder.Services
     .AddRazorPages()
     .AddRazorPagesOptions(options =>

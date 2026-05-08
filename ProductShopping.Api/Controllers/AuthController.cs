@@ -36,9 +36,25 @@ namespace ProductShopping.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(LoginUserDto loginUserDto)
         {
-            var result = await usersService.LoginAsync(loginUserDto);
+            logger.LogInformation("Login endpoint hit. Email={Email}", loginUserDto?.Email);
 
-            return ToActionResult(result);
+            if (!ModelState.IsValid)
+            {
+                logger.LogWarning("Login ModelState invalid");
+                return ValidationProblem(ModelState);
+            }
+
+            try
+            {
+                var result = await usersService.LoginAsync(loginUserDto);
+                logger.LogInformation("Login completed for {Email}", loginUserDto.Email);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.ToString(), "Login failed for {Email}", loginUserDto?.Email);
+                throw;
+            }
         }
 
         /// <summary>

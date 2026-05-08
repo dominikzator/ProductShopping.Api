@@ -59,7 +59,13 @@
             </div>
 
             <nav class="topbar-auth-nav" aria-label="User">
-                <!-- Cart button -->
+                <a asp-page="/Orders"
+                   class="topbar-cart-link"
+                   aria-label="Orders history">
+                    <span class="me-1">📦</span>
+                    <span class="topbar-cart-label">My Orders</span>
+                </a>
+
                 <a asp-page="/Cart"
                    class="topbar-cart-link"
                    aria-label="Shopping cart">
@@ -115,7 +121,7 @@
     <script defer src="~/lib/jquery/dist/jquery.min.js"></script>
     <script defer src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script defer src="~/js/site.js" asp-append-version="true"></script>
-    <script defer src="~/js/tools.js"></script>
+    <script defer src="~/js/tools.js"asp-append-version="true" ></script>
     <script defer src="~/js/order-paid.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Logging;
+using ProductShopping.Application.DTOs.Payment;
+using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
+using ProductShopping.Identity.Constants;
 using Stripe;
 using Stripe.Checkout;
 
@@ -117,5 +120,18 @@ public class PaymentsController(IPaymentsService paymentsService,
 
             return StatusCode(500, "Redirection Error");
         }
+    }
+
+    [HttpPost("session")]
+    [Authorize(Roles = RoleNames.User)]
+    public async Task<ActionResult<OrderDto>> CreateSession( [FromBody] PaymentRequestDto request, CancellationToken cancellationToken)
+    {
+        if (request is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        var result = await paymentsService.CreatePaymentSessionAsync(request);
+        return Ok(result);
     }
 }

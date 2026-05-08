@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using ProductShopping.UI.RazorPagesUI.Contracts;
 using ProductShopping.UI.RazorPagesUI.DTOs.Products;
 using System.Globalization;
@@ -24,10 +25,12 @@ public sealed class PaginationMetadataDto
 public class ProductsApiClient : IProductsApiClient
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<ProductsApiClient> _logger;
 
-    public ProductsApiClient(HttpClient httpClient)
+    public ProductsApiClient(HttpClient httpClient, ILogger<ProductsApiClient> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<PagedResultDto<ProductListItemDto>> GetProductsAsync(
@@ -71,7 +74,12 @@ public class ProductsApiClient : IProductsApiClient
 
     public async Task<List<string>> GetCategoryNamesAsync(CancellationToken ct = default)
     {
-        Console.WriteLine("GetCategoryNamesAsync");
+        _logger.LogInformation("GetCategoryNamesAsync");
+        var relativeUrl = "api/products/categories";
+        var finalUrl = new Uri(_httpClient.BaseAddress!, relativeUrl);
+        _logger.LogInformation($"BaseAddress: {_httpClient.BaseAddress}");
+        _logger.LogInformation($"Final URL: {finalUrl}");
+
         var result = await _httpClient.GetFromJsonAsync<List<string>>("api/products/categories", ct);
         return result ?? new List<string>();
     }

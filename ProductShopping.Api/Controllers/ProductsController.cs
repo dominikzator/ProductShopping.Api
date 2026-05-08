@@ -40,7 +40,7 @@ namespace ProductShopping.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var productResult = await mediator.Send(new GetProductDetailQuery { Id = id });
