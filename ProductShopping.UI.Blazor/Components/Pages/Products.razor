@@ -1,0 +1,38 @@
+﻿@page "/products"
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Blazor.DTOs.Products
+@using ProductShopping.UI.Blazor.Services.Api
+@inject IProductsApiClient ProductsApiClient
+@inject ILogger<Products> Logger
+
+<PageTitle>Products</PageTitle>
+
+<h3>Products</h3>
+<p>Na razie dane lecą tylko do logów.</p>
+
+@code {
+    private PagedResultDto<ProductListItemDto> _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _products = await ProductsApiClient.GetProductsAsync();
+
+            Logger.LogInformation("Pobrano {Count} produktów.", _products.Data.Count());
+
+            foreach (var product in _products.Data)
+            {
+                Logger.LogInformation(
+                    "Produkt: Id={Id}, Name={Name}, Price={Price}, Category={Category}",
+                    product.Id,
+                    product.Name,
+                    product.Price, product.CategoryName);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Błąd podczas pobierania produktów.");
+        }
+    }
+}

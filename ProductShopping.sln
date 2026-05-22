@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.Api.EndToEn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.UI.RazorPagesUI", "ProductShopping.UI.RazorPagesUI\ProductShopping.UI.RazorPagesUI.csproj", "{44885E98-8BF6-4553-AD3C-209C0DAE71A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductShopping.UI.Blazor", "ProductShopping.UI.Blazor\ProductShopping.UI.Blazor.csproj", "{FB4BE4BC-A11B-41AD-94C1-D8376014426C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{44885E98-8BF6-4553-AD3C-209C0DAE71A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44885E98-8BF6-4553-AD3C-209C0DAE71A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44885E98-8BF6-4553-AD3C-209C0DAE71A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB4BE4BC-A11B-41AD-94C1-D8376014426C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB4BE4BC-A11B-41AD-94C1-D8376014426C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB4BE4BC-A11B-41AD-94C1-D8376014426C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB4BE4BC-A11B-41AD-94C1-D8376014426C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,6 +106,7 @@ Global
 		{AF18642E-E560-41CB-8F15-C0073E808053} = {1D969955-EE8D-49E4-9199-1D50FE3F3857}
 		{DD144F9E-AEDF-4689-8A5E-787050D19AF7} = {1D969955-EE8D-49E4-9199-1D50FE3F3857}
 		{44885E98-8BF6-4553-AD3C-209C0DAE71A0} = {BF4654AC-1709-4EA8-9346-CD87C1688762}
+		{FB4BE4BC-A11B-41AD-94C1-D8376014426C} = {BF4654AC-1709-4EA8-9346-CD87C1688762}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {47039777-FC2E-46DD-AD0C-F547F4FA092B}
