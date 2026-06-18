@@ -21,8 +21,6 @@ namespace ProductShopping.UI.Blazor.Services.Api
 
     public sealed class ProductsApiClient : IProductsApiClient
     {
-        public PagedResultDto<ProductListItemDto> Products { get; private set; }
-
         private readonly HttpClient _httpClient;
 
         public ProductsApiClient(HttpClient httpClient)
@@ -30,15 +28,16 @@ namespace ProductShopping.UI.Blazor.Services.Api
             _httpClient = httpClient;
         }
 
-        public async Task<PagedResultDto<ProductListItemDto>> GetProductsAsync(CancellationToken cancellationToken = default)
+        public async Task<PagedResultDto<ProductListItemDto>> GetProductsAsync(
+            int pageNumber,
+            int pageSize,
+            CancellationToken cancellationToken = default)
         {
-            Products = await _httpClient.GetFromJsonAsync<PagedResultDto<ProductListItemDto>>(
-                "api/products",
+            var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ProductListItemDto>>(
+                $"api/products?pageNumber={pageNumber}&pageSize={pageSize}",
                 cancellationToken);
 
-            return Products ?? new PagedResultDto<ProductListItemDto> { 
-                
-            };
+            return result ?? new PagedResultDto<ProductListItemDto>();
         }
     }
 }

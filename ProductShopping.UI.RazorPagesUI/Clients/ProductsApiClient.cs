@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using ProductShopping.UI.RazorPagesUI.Contracts;
 using ProductShopping.UI.RazorPagesUI.DTOs.Products;
 using System.Globalization;

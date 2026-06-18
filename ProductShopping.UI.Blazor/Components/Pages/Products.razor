@@ -1,4 +1,5 @@
 ﻿@page "/products"
+@rendermode InteractiveServer
 @using ProductShopping.UI.Blazor.Contracts
 @using ProductShopping.UI.Blazor.DTOs.Products
 @using ProductShopping.UI.Blazor.Services.Api
@@ -7,32 +8,141 @@
 
 <PageTitle>Products</PageTitle>
 
-<h3>Products</h3>
-<p>Na razie dane lecą tylko do logów.</p>
+<div class="products-page">
+    <div class="products-header">
+        <h1>Products</h1>
+        <p>Browse available products in the store.</p>
+    </div>
+
+    @if (_isLoading && _products is null)
+    {
+        <div class="products-state">
+            <p>Loading products...</p>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="products-state products-state--error">
+            <p>@_errorMessage</p>
+        </div>
+    }
+    else if (_products is null || !_products.Data.Any())
+    {
+        <div class="products-state">
+            <p>No products found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var product in _products.Data)
+            {
+                <article class="product-card" @key="product.Id">
+                    <div class="product-card__image-wrapper">
+                        <img class="product-card__image"
+                             src="@product.ImageUrl"
+                             alt="@product.Name" />
+                    </div>
+
+                    <div class="product-card__content">
+                        <span class="product-card__category">@product.CategoryName</span>
+                        <h2 class="product-card__title">@product.Name</h2>
+
+                        <div class="product-card__details">
+                            <span class="product-card__price">@product.Price.ToString("0.00") zł</span>
+                            <span class="product-card__rating">★ @product.Rating.ToString("0.0")</span>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+
+        <div class="products-pagination">
+            <button class="products-pagination__button"
+                    @onclick="LoadPreviousPageAsync"
+                    disabled="@(_isLoading || !_products.Metadata.HasPrevious)">
+                Previous
+            </button>
+
+            <div class="products-pagination__info">
+                <span>Page @_products.Metadata.CurrentPage of @_products.Metadata.TotalPages</span>
+                <span>Page size: @_products.Metadata.PageSize</span>
+                <span>Total products: @_products.Metadata.TotalCount</span>
+            </div>
+
+            <button class="products-pagination__button"
+                    @onclick="LoadNextPageAsync"
+                    disabled="@(_isLoading || !_products.Metadata.HasNext)">
+                Next
+            </button>
+        </div>
+    }
+</div>
 
 @code {
-    private PagedResultDto<ProductListItemDto> _products;
+    private const int PageSize = 12;
+
+    private PagedResultDto<ProductListItemDto>? _products;
+    private bool _isLoading;
+    private string? _errorMessage;
+    private int _currentPage = 1;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
         try
         {
-            _products = await ProductsApiClient.GetProductsAsync();
+            _isLoading = true;
+            _errorMessage = null;
 
-            Logger.LogInformation("Pobrano {Count} produktów.", _products.Data.Count());
+            _products = await ProductsApiClient.GetProductsAsync(_currentPage, PageSize);
 
-            foreach (var product in _products.Data)
+            if (_products.Metadata.CurrentPage > 0)
             {
-                Logger.LogInformation(
-                    "Produkt: Id={Id}, Name={Name}, Price={Price}, Category={Category}",
-                    product.Id,
-                    product.Name,
-                    product.Price, product.CategoryName);
+                _currentPage = _products.Metadata.CurrentPage;
             }
+
+            Logger.LogInformation(
+                "Loaded page {CurrentPage}. Requested page size: {RequestedPageSize}. API page size: {ApiPageSize}. Count: {Count}",
+                _currentPage,
+                PageSize,
+                _products.Metadata.PageSize,
+                _products.Data.Count());
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Błąd podczas pobierania produktów.");
+            Logger.LogError(ex, "Błąd podczas pobierania produktów dla strony {PageNumber}", _currentPage);
+            _errorMessage = "Something went wrong while loading products.";
         }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadPreviousPageAsync()
+    {
+        if (_products is null || !_products.Metadata.HasPrevious || _isLoading)
+        {
+            return;
+        }
+
+        _currentPage--;
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadNextPageAsync()
+    {
+        if (_products is null || !_products.Metadata.HasNext || _isLoading)
+        {
+            return;
+        }
+
+        _currentPage++;
+        await LoadProductsAsync();
     }
 }
