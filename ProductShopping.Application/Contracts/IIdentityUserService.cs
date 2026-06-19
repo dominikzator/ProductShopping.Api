@@ -1,6 +1,6 @@
 ﻿namespace ProductShopping.Application.Contracts;
 
-public interface IIdentityUserService
+public interface IApplicationUserService
 {
     Task<bool> IsEmailConfirmedAsync(string userId);
 }

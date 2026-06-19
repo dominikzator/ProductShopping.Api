@@ -4,7 +4,7 @@ using ProductShopping.Identity.Models;
 
 namespace ProductShopping.Infrastructure.Services;
 
-public class IdentityUserService(UserManager<ApplicationUser> userManager) : IIdentityUserService
+public class ApplicationUserService(UserManager<ApplicationUser> userManager) : IApplicationUserService
 {
     public async Task<bool> IsEmailConfirmedAsync(string userId)
     {

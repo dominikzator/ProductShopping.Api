@@ -1,8 +1,17 @@
 using ProductShopping.UI.Blazor.Components;
 using ProductShopping.UI.Blazor.Contracts;
 using ProductShopping.UI.Blazor.Services.Api;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using ProductShopping.Identity.DbContext;
+using ProductShopping.UI.Blazor.Components.Account;
+using ProductShopping.Identity.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ProductShoppingIdentityDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ProductShoppingIdentityDbContextConnection' not found.");;
+
+builder.Services.AddDbContext<ProductShoppingIdentityDbContext>(options => options.UseSqlServer(connectionString));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -12,6 +21,28 @@ builder.Services.AddHttpClient<IProductsApiClient, ProductsApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
 });
+
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddScoped<ApplicationUserAccessor>();
+
+builder.Services.AddScoped<IdentityRedirectManager>();
+
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
+
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<ProductShoppingIdentityDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 
@@ -30,5 +61,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapAdditionalIdentityEndpoints();;
 
 app.Run();

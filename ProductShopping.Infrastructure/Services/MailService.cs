@@ -14,7 +14,7 @@ using System.Text;
 
 namespace ProductShopping.Application.Services;
 
-public class MailService(IOrdersRepository ordersRepository, IIdentityUserService identityUserService,
+public class MailService(IOrdersRepository ordersRepository, IApplicationUserService ApplicationUserService,
     IAppLogger<MailService> logger, IHttpContextAccessor httpContextAccessor, IConfiguration config) : IMailService
 {
     public async Task<Result> SendEmailAsync(string email, string title, string description)
@@ -68,7 +68,7 @@ public class MailService(IOrdersRepository ordersRepository, IIdentityUserServic
     {
         try
         {
-            var emailConfirmed = await identityUserService.IsEmailConfirmedAsync(userId);
+            var emailConfirmed = await ApplicationUserService.IsEmailConfirmedAsync(userId);
             logger.LogInformation($"Emailconfirmed: " + emailConfirmed);
             if (emailConfirmed)
             {

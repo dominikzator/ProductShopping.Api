@@ -17,7 +17,7 @@ public static class InfrastructureServicesRegistration
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, WebApplicationBuilder builder)
     {
         services.AddScoped<IJWTService, JWTService>();
-        services.AddScoped<IIdentityUserService, IdentityUserService>();
+        services.AddScoped<IApplicationUserService, ApplicationUserService>();
         services.AddScoped<IProductImageGeneratorService, ProductImageGeneratorService>();
         services.AddScoped<IPaymentsService, PaymentsService>();
         services.AddScoped<IMailService, MailService>();

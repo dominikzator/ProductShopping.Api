@@ -1,24 +1,44 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ProductShopping.UI.Blazor</a>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <NavLink href="/" Match="NavLinkMatch.All" class="navbar-brand">
+            ProductShopping
+        </NavLink>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+            </ul>
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <div class="d-flex gap-2">
+                        <NavLink href="/Account/Login" class="btn btn-outline-light">
+                            Login
+                        </NavLink>
+
+                        <NavLink href="/Account/Register" class="btn btn-light">
+                            Register
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+
+                <Authorized>
+                    <form action="/Account/Logout" method="post" class="d-flex">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="" />
+                        <button type="submit" class="btn btn-outline-light">
+                            Logout
+                        </button>
+                    </form>
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="products">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
+</nav>
