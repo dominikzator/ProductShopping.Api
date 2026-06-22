@@ -8,7 +8,6 @@ using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Results;
-using ProductShopping.Domain.Models;
 using System.Security.Claims;
 using System.Text;
 
