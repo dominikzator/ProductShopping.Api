@@ -1,7 +1,7 @@
 ﻿using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 
-namespace ProductShopping.UI.RazorPagesUI.Contracts
+namespace ProductShopping.UI.Shared.Contracts
 {
     public interface IPaymentsApiClient
     {

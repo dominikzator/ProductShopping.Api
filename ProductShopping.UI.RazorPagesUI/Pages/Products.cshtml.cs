@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Clients;
-using ProductShopping.UI.RazorPagesUI.Contracts;
-using ProductShopping.UI.RazorPagesUI.DTOs.Products;
+using ProductShopping.UI.Shared.Contracts;
+using ProductShopping.UI.Shared.DTOs.Products;
+using ProductShopping.UI.Shared.Pagination;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages
 {

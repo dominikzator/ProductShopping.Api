@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
-using ProductShopping.UI.RazorPagesUI.Clients;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Clients;
+using ProductShopping.UI.Shared.Contracts;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);

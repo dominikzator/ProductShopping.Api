@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProductShopping.Application.DTOs.Auth;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

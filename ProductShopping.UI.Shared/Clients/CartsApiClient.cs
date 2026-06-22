@@ -6,9 +6,9 @@ using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItems;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 
-namespace ProductShopping.UI.RazorPagesUI.Clients;
+namespace ProductShopping.UI.Shared.Clients;
 
 public class CartsApiClient(HttpClient httpClient) : ICartsApiClient
 {

@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProductShopping.Application.DTOs.Auth;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account

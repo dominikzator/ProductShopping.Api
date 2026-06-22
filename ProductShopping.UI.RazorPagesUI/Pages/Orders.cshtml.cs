@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Clients;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Clients;
+using ProductShopping.UI.Shared.Contracts;
 using System.Security.Claims;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages;

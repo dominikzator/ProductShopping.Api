@@ -3,7 +3,7 @@ using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Models.Paging;
 
-namespace ProductShopping.UI.RazorPagesUI.Contracts
+namespace ProductShopping.UI.Shared.Contracts
 {
     public interface IOrdersApiClient
     {

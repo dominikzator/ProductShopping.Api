@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Identity.Models;
 
-namespace ProductShopping.Identity.DbContext;
+namespace ProductShopping.UI.Shared.Identity.DbContext;
 
 public class ProductShoppingIdentityDbContext : IdentityDbContext<ApplicationUser>
 {

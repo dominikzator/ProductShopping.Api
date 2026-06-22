@@ -4,7 +4,7 @@ using ProductShopping.Application.Features.CartItem.Commands.AddCartItem;
 using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages.Cart;
 

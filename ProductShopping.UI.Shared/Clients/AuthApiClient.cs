@@ -1,8 +1,9 @@
 ﻿using ProductShopping.Application.DTOs.Auth;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
+using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace ProductShopping.UI.RazorPagesUI.Clients;
+namespace ProductShopping.UI.Shared.Clients;
 
 public class AuthApiClient : IAuthApiClient
 {

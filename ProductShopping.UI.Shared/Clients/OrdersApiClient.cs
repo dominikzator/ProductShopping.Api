@@ -5,9 +5,9 @@ using ProductShopping.Application.Features.Order.Commands.CreateOrder;
 using ProductShopping.Application.Features.Order.Commands.UpdateOrder;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.Application.Models.Paging;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 
-namespace ProductShopping.UI.RazorPagesUI.Clients;
+namespace ProductShopping.UI.Shared.Clients;
 
 public class OrdersApiClient(HttpClient httpClient) : IOrdersApiClient
 {

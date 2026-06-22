@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.UI.Blazor.DTOs.Products;
+﻿namespace ProductShopping.UI.Shared.DTOs.Products;
 
 public sealed class ProductListItemDto
 {

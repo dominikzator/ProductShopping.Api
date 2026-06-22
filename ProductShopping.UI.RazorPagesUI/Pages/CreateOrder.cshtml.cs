@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProductShopping.Application.Features.Order.Commands.CreateOrder;
 using ProductShopping.Application.Models.Paging;
 using ProductShopping.Domain.Models;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages;

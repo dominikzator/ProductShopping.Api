@@ -1,8 +1,9 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@using ProductShopping.UI.Blazor.Contracts
-@using ProductShopping.UI.Blazor.DTOs.Products
-@using ProductShopping.UI.Blazor.Services.Api
+@using ProductShopping.UI.Shared.Contracts
+@using ProductShopping.UI.Shared.DTOs.Products
+@using ProductShopping.UI.Shared.Clients
+@using ProductShopping.UI.Shared.Pagination
 @inject IProductsApiClient ProductsApiClient
 @inject ILogger<Products> Logger
 
@@ -99,7 +100,13 @@
             _isLoading = true;
             _errorMessage = null;
 
-            _products = await ProductsApiClient.GetProductsAsync(_currentPage, PageSize);
+            var query = new ProductsQueryDto
+            {
+                PageNumber = _currentPage,
+                PageSize = PageSize
+            };
+
+            _products = await ProductsApiClient.GetProductsAsync(query);
 
             if (_products.Metadata.CurrentPage > 0)
             {

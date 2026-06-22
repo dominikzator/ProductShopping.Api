@@ -4,7 +4,7 @@ using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItems;
 using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails;
 using ProductShopping.Application.Models.Paging;
 
-namespace ProductShopping.UI.RazorPagesUI.Contracts
+namespace ProductShopping.UI.Shared.Contracts
 {
     public interface ICartsApiClient
     {

@@ -1,9 +1,10 @@
 ﻿using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
-namespace ProductShopping.UI.RazorPagesUI.Clients;
+namespace ProductShopping.UI.Shared.Clients;
 
 public class PaymentsApiClient : IPaymentsApiClient
 {

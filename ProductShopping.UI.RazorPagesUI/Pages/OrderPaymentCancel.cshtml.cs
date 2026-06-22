@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
-using ProductShopping.UI.RazorPagesUI.Contracts;
+using ProductShopping.UI.Shared.Contracts;
 using SessionService = Stripe.Checkout.SessionService;
 
 namespace ProductShopping.UI.RazorPagesUI.Pages

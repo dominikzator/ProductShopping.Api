@@ -1,12 +1,12 @@
 using ProductShopping.UI.Blazor.Components;
-using ProductShopping.UI.Blazor.Contracts;
-using ProductShopping.UI.Blazor.Services.Api;
+using ProductShopping.UI.Shared.Contracts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProductShopping.Identity.DbContext;
 using ProductShopping.UI.Blazor.Components.Account;
 using ProductShopping.Identity.Models;
+using ProductShopping.UI.Shared.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ProductShoppingIdentityDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ProductShoppingIdentityDbContextConnection' not found.");;

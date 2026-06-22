@@ -1,6 +1,6 @@
 ﻿using ProductShopping.Application.DTOs.Auth;
 
-namespace ProductShopping.UI.RazorPagesUI.Contracts
+namespace ProductShopping.UI.Shared.Contracts
 {
     public interface IAuthApiClient
     {

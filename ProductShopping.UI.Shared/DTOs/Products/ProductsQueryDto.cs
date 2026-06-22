@@ -1,4 +1,4 @@
-﻿namespace ProductShopping.UI.RazorPagesUI.DTOs.Products;
+﻿namespace ProductShopping.UI.Shared.DTOs.Products;
 
 public class ProductsQueryDto
 {

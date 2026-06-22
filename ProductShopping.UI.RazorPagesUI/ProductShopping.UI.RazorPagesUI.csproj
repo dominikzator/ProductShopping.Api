@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProductShopping.Identity\ProductShopping.Identity.csproj" />
+    <ProjectReference Include="..\ProductShopping.UI.Shared\ProductShopping.UI.Shared.csproj" />
   </ItemGroup>
 
 </Project>
