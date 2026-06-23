@@ -1,5 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ProductShopping.UI.Blazor.Services.Auth
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -19,29 +22,17 @@
             <AuthorizeView>
                 <NotAuthorized>
                     <div class="d-flex gap-2">
-                        <NavLink href="/login" class="btn btn-outline-light">
-                            Login
-                        </NavLink>
-
-                        <NavLink href="/register" class="btn btn-light">
-                            Register
-                        </NavLink>
+                        <NavLink href="/login" class="btn btn-outline-light">Login</NavLink>
+                        <NavLink href="/register" class="btn btn-light">Register</NavLink>
                     </div>
                 </NotAuthorized>
 
                 <Authorized>
                     <div class="d-flex gap-2">
-                        <NavLink href="/cart" class="btn btn-light">
-                            Cart
-                        </NavLink>
-
-                        <form action="/Account/Logout" method="post" class="d-flex">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="returnUrl" value="" />
-                            <button type="submit" class="btn btn-outline-light">
-                                Logout
-                            </button>
-                        </form>
+                        <NavLink href="/cart" class="btn btn-light">Cart</NavLink>
+                        <button type="button" class="btn btn-outline-light" @onclick="LogoutAsync">
+                            Logout
+                        </button>
                     </div>
                 </Authorized>
             </AuthorizeView>
@@ -56,11 +47,12 @@
     {
         authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
     }
-}
 
-@if (authState is not null)
-{
-    <div class="text-info">
-        Direct provider IsAuthenticated: @authState.User.Identity?.IsAuthenticated
-    </div>
+    private async Task LogoutAsync()
+    {
+        var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+        await jwtAuthStateProvider.MarkUserAsLoggedOutAsync();
+
+        NavigationManager.NavigateTo("/");
+    }
 }

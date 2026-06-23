@@ -1,13 +1,11 @@
 ﻿@page "/login"
 @layout AuthLayout
 @attribute [AllowAnonymous]
-@rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using ProductShopping.Application.DTOs.Auth
-@using ProductShopping.UI.Blazor.Authentication
 @using ProductShopping.UI.Blazor.Services.Auth
 @using ProductShopping.UI.Shared.Contracts
 
@@ -15,69 +13,137 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<PageTitle>Login</PageTitle>
+<PageTitle>Log in</PageTitle>
 
-<h3>Login</h3>
+<div class="login-page">
+    <div class="container">
+        <div class="login-wrapper">
+            <h1>Log in</h1>
 
-<EditForm Model="@Model" OnValidSubmit="HandleLoginAsync">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+            <div class="row g-4 align-items-start">
+                <div class="col-md-5">
+                    <section class="login-panel">
+                        @if (!string.IsNullOrWhiteSpace(errorMessage))
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @errorMessage
+                            </div>
+                        }
 
-    @if (!string.IsNullOrWhiteSpace(errorMessage))
-    {
-        <div class="alert alert-danger" role="alert">
-            @errorMessage
+                        <EditForm Model="Input" OnValidSubmit="LoginUser">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" role="alert" />
+
+                            <h2>Use a local account to log in.</h2>
+                            <hr />
+
+                            <div class="form-floating mb-3">
+                                <InputText id="email"
+                                           @bind-Value="Input.Email"
+                                           class="form-control"
+                                           autocomplete="username"
+                                           aria-required="true"
+                                           placeholder="name@example.com" />
+                                <label for="email" class="form-label">Email</label>
+                                <ValidationMessage For="() => Input.Email" class="text-danger small d-block mt-1" />
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <InputText id="password"
+                                           type="password"
+                                           @bind-Value="Input.Password"
+                                           class="form-control"
+                                           autocomplete="current-password"
+                                           aria-required="true"
+                                           placeholder="password" />
+                                <label for="password" class="form-label">Password</label>
+                                <ValidationMessage For="() => Input.Password" class="text-danger small d-block mt-1" />
+                            </div>
+
+                            <div class="checkbox mb-3">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <InputCheckbox @bind-Value="Input.RememberMe"
+                                                   class="form-check-input mt-0" />
+                                    <span>Remember me</span>
+                                </label>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit"
+                                        class="w-100 btn btn-lg btn-primary"
+                                        disabled="@isSubmitting">
+                                    @(isSubmitting ? "Logging in..." : "Log in")
+                                </button>
+                            </div>
+
+                            <div class="login-links">
+                                <p>
+                                    <a href="/forgot-password">Forgot your password?</a>
+                                </p>
+                                <p>
+                                    <a href="/register">Register as a new user</a>
+                                </p>
+                                <p>
+                                    <a href="/resend-email-confirmation">Resend email confirmation</a>
+                                </p>
+                            </div>
+                        </EditForm>
+                    </section>
+                </div>
+
+                <div class="col-md-6 offset-md-1">
+                    <section class="login-panel login-panel--soft">
+                        <h3>Use another service to log in.</h3>
+                        <hr />
+                        <p class="text-muted mb-3">
+                            External login providers can be added here later without changing the layout of this page.
+                        </p>
+
+                        <div class="external-login-placeholder">
+                            <button type="button" class="btn btn-outline-secondary w-100 mb-2" disabled>
+                                Google
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary w-100" disabled>
+                                Microsoft
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </div>
-    }
-
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <InputText id="email"
-                   class="form-control"
-                   @bind-Value="Model.Email" />
-        <ValidationMessage For="() => Model.Email" />
     </div>
-
-    <div class="mb-3">
-        <label for="password" class="form-label">Hasło</label>
-        <InputText id="password"
-                   type="password"
-                   class="form-control"
-                   @bind-Value="Model.Password" />
-        <ValidationMessage For="() => Model.Password" />
-    </div>
-
-    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-        @(isSubmitting ? "Logowanie..." : "Zaloguj")
-    </button>
-</EditForm>
+</div>
 
 @code {
     private string? errorMessage;
     private bool isSubmitting;
-    private LoginViewModel Model { get; set; } = new();
 
-    private async Task HandleLoginAsync()
+    private InputModel Input { get; set; } = new();
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private async Task LoginUser()
     {
         errorMessage = null;
         isSubmitting = true;
 
         try
         {
-            var token = await AuthApiClient.LoginAsync(new LoginUserDto
+            var result = await AuthApiClient.LoginAsync(new LoginUserDto
             {
-                Email = Model.Email,
-                Password = Model.Password
+                Email = Input.Email,
+                Password = Input.Password
             });
 
             var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
-            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(token);
+            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(result);
 
-            NavigationManager.NavigateTo("/", forceLoad: false);
+            NavigationManager.NavigateTo(string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl);
         }
         catch (UnauthorizedAccessException)
         {
-            errorMessage = "Nieprawidłowy email lub hasło.";
+            errorMessage = "Error: Invalid login attempt.";
         }
         catch (Exception ex)
         {
@@ -89,13 +155,17 @@
         }
     }
 
-    public sealed class LoginViewModel
+    private sealed class InputModel
     {
-        [Required(ErrorMessage = "Email jest wymagany.")]
-        [EmailAddress(ErrorMessage = "Podaj poprawny adres email.")]
-        public string Email { get; set; } = string.Empty;
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "Hasło jest wymagane.")]
-        public string Password { get; set; } = string.Empty;
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
     }
 }
