@@ -4,7 +4,7 @@ namespace ProductShopping.UI.Shared.Contracts
 {
     public interface IAuthApiClient
     {
-        Task<string> Login(LoginUserDto loginUserDto, CancellationToken ct = default);
-        Task<RegisteredUserDto> Register(RegisterUserDto registerUserDto, CancellationToken ct = default);
+        Task LoginForBlazorAsync(LoginUserDto dto, CancellationToken cancellationToken);
+        Task LogoutForBlazorAsync(CancellationToken cancellationToken);
     }
 }

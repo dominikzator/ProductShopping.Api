@@ -8,6 +8,7 @@ using ProductShopping.Application.Contracts;
 using ProductShopping.Application.Contracts.Logging;
 using ProductShopping.Application.Contracts.Persistence;
 using ProductShopping.Application.DTOs.Auth;
+using ProductShopping.Application.Models.Identity;
 using ProductShopping.Application.Results;
 using ProductShopping.Domain.Models;
 using ProductShopping.Identity.Constants;
@@ -88,20 +89,15 @@ public class UsersService(ICartsRepository cartsRepository
     public async Task<Result<string>> LoginAsync(LoginUserDto dto)
     {
         Console.WriteLine("LoginAsync API");
-        var user = await userManager.FindByEmailAsync(dto.Email);
-        if (user is null)
+
+        var validationResult = await ValidateCredentialsAsync(dto);
+        if (!validationResult.IsSuccess)
         {
-            logger.LogWarning("Failed login attempt for email: {Email}", dto.Email);
-            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Invalid credentials."));
+            return Result<string>.Failure(validationResult.Errors);
         }
 
-        var valid = await userManager.CheckPasswordAsync(user, dto.Password);
-        if (!valid)
-        {
-            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Invalid credentials."));
-        }
+        var user = validationResult.Value;
 
-        //Issue a token
         var token = await jWTService.GenerateToken(new DTOs.UserDto
         {
             Id = user.Id,
@@ -109,46 +105,70 @@ public class UsersService(ICartsRepository cartsRepository
             FullName = user.FullName,
         });
 
-
         return Result<string>.Success(token);
     }
 
-/*    public async Task<Result<string>> LogoutAsync()
+    public async Task<Result<AuthenticatedUser>> ValidateCredentialsAsync(LoginUserDto dto)
     {
-        var httpContext = httpContextAccessor.HttpContext;
-
-        if (httpContext is null)
+        var user = await userManager.FindByEmailAsync(dto.Email);
+        if (user is null)
         {
-            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "HttpContext is not available."));
+            logger.LogWarning("Failed login attempt for email: {Email}", dto.Email);
+            return Result<AuthenticatedUser>.Failure(new Error(ErrorCodes.BadRequest, "Invalid credentials."));
         }
 
-        var user = httpContext.User;
-
-        var jti = user.FindFirst(JwtRegisteredClaimNames.Jti)?.Value
-                  ?? user.FindFirst("jti")?.Value;
-
-        if (string.IsNullOrWhiteSpace(jti))
+        var valid = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!valid)
         {
-            return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Token JTI not found."));
+            logger.LogWarning("Invalid password for email: {Email}", dto.Email);
+            return Result<AuthenticatedUser>.Failure(new Error(ErrorCodes.BadRequest, "Invalid credentials."));
         }
 
-        var expClaim = user.FindFirst(JwtRegisteredClaimNames.Exp)?.Value
-                       ?? user.FindFirst("exp")?.Value;
-
-        DateTime expiresAtUtc = DateTime.UtcNow.AddHours(1);
-
-        if (!string.IsNullOrWhiteSpace(expClaim) && long.TryParse(expClaim, out var expUnix))
+        return Result<AuthenticatedUser>.Success(new AuthenticatedUser
         {
-            expiresAtUtc = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
-        }
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            UserName = user.UserName
+        });
+    }
 
-        await revokedTokenStore.RevokeAsync(jti, expiresAtUtc);
+    /*    public async Task<Result<string>> LogoutAsync()
+        {
+            var httpContext = httpContextAccessor.HttpContext;
 
-        logger.LogInformation("Token revoked. JTI: {Jti}, UserId: {UserId}, Email: {Email}",
-            jti, GetUserId(), GetUserEmail());
+            if (httpContext is null)
+            {
+                return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "HttpContext is not available."));
+            }
 
-        return Result<string>.Success("Logged out successfully.");
-    }*/
+            var user = httpContext.User;
+
+            var jti = user.FindFirst(JwtRegisteredClaimNames.Jti)?.Value
+                      ?? user.FindFirst("jti")?.Value;
+
+            if (string.IsNullOrWhiteSpace(jti))
+            {
+                return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Token JTI not found."));
+            }
+
+            var expClaim = user.FindFirst(JwtRegisteredClaimNames.Exp)?.Value
+                           ?? user.FindFirst("exp")?.Value;
+
+            DateTime expiresAtUtc = DateTime.UtcNow.AddHours(1);
+
+            if (!string.IsNullOrWhiteSpace(expClaim) && long.TryParse(expClaim, out var expUnix))
+            {
+                expiresAtUtc = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
+            }
+
+            await revokedTokenStore.RevokeAsync(jti, expiresAtUtc);
+
+            logger.LogInformation("Token revoked. JTI: {Jti}, UserId: {UserId}, Email: {Email}",
+                jti, GetUserId(), GetUserEmail());
+
+            return Result<string>.Success("Logged out successfully.");
+        }*/
 
     public string GetUserId() => httpContextAccessor?
             .HttpContext?

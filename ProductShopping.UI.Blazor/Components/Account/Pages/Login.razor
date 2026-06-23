@@ -1,16 +1,12 @@
 ﻿@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-@using ProductShopping.Identity.DbContext
-@using ProductShopping.Identity.Models
+@using ProductShopping.Application.DTOs.Auth
+@using ProductShopping.UI.Shared.Contracts
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@inject IAuthApiClient AuthApiClient
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Log in</PageTitle>
 
@@ -19,7 +15,7 @@
     <div class="col-md-4">
         <section>
             <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <EditForm Model="Input" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
                 <h2>Use a local account to log in.</h2>
                 <hr />
@@ -69,62 +65,48 @@
 @code {
     private string? errorMessage;
 
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private async Task LoginUser()
     {
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        errorMessage = null;
+
+        var loginUserDto = new LoginUserDto
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            Email = Input.Email,
+            Password = Input.Password,
+        };
+
+        try
+        {
+            await AuthApiClient.LoginForBlazorAsync(loginUserDto, CancellationToken.None);
+
+            Logger.LogInformation("Cookie login succeeded for {Email}", Input.Email);
+
+            NavigationManager.NavigateTo("/", true);
         }
-    }
-
-    public async Task LoginUser()
-    {
-        var user = await UserManager.FindByEmailAsync(Input.Email);
-
-        if (user is null)
+        catch (InvalidOperationException ex)
         {
+            Logger.LogWarning(ex, "Invalid login attempt for {Email}", Input.Email);
             errorMessage = "Error: Invalid login attempt.";
+        }
+        catch (NavigationException)
+        {
             return;
         }
-
-        var result = await SignInManager.PasswordSignInAsync(
-            user.UserName!,
-            Input.Password,
-            Input.RememberMe,
-            lockoutOnFailure: false);
-
-        if (result.Succeeded)
+        catch (HttpRequestException ex)
         {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            Logger.LogError(ex, "Login service unavailable for {Email}", Input.Email);
+            errorMessage = "Error: Login service is currently unavailable.";
         }
-        else if (result.RequiresTwoFactor)
+        catch (Exception ex)
         {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else if (result.IsNotAllowed)
-        {
-            errorMessage = "Error: You must confirm your email before logging in.";
-        }
-        else
-        {
-            errorMessage = "Error: Invalid login attempt.";
+            Logger.LogError(ex, "Unexpected error during login for {Email}", Input.Email);
+            errorMessage = "Error: An unexpected error occurred during login.";
         }
     }
 

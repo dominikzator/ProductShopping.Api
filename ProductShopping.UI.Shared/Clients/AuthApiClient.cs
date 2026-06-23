@@ -7,56 +7,35 @@ namespace ProductShopping.UI.Shared.Clients;
 
 public class AuthApiClient : IAuthApiClient
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient httpClient;
 
     public AuthApiClient(HttpClient httpClient)
     {
-        _httpClient = httpClient;
+        this.httpClient = httpClient;
     }
 
-    public async Task<string> Login(LoginUserDto loginUserDto, CancellationToken ct)
+    public async Task LoginForBlazorAsync(LoginUserDto dto, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginUserDto);
+        var response = await httpClient.PostAsJsonAsync("api/blazor-auth/login", dto, cancellationToken);
 
-        var body = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException(
-                $"Login request failed with status {(int)response.StatusCode}. Body: {body}");
+            return;
         }
 
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<string>>(body, new JsonSerializerOptions
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            PropertyNameCaseInsensitive = true
-        });
-
-        if (apiResponse is null)
-        {
-            throw new InvalidOperationException("Login API returned empty response.");
+            throw new InvalidOperationException("Invalid credentials.");
         }
 
-        if (!apiResponse.IsSuccess || string.IsNullOrWhiteSpace(apiResponse.Value))
-        {
-            var errors = apiResponse.Errors is { Count: > 0 }
-                ? string.Join("; ", apiResponse.Errors)
-                : "Unknown login error.";
-
-            throw new InvalidOperationException($"Login API did not return a valid token. {errors}");
-        }
-
-        return apiResponse.Value;
+        var details = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new HttpRequestException($"Blazor login failed. Status={(int)response.StatusCode}, Details={details}");
     }
 
-    public async Task<RegisteredUserDto> Register(RegisterUserDto registerUserDto, CancellationToken ct = default)
+    public async Task LogoutForBlazorAsync(CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerUserDto, ct);
-
+        var response = await httpClient.PostAsync("api/blazor-auth/logout", null, cancellationToken);
         response.EnsureSuccessStatusCode();
-
-        var result = await response.Content.ReadFromJsonAsync<RegisteredUserDto>(cancellationToken: ct);
-
-        return result!;
     }
 }
 
