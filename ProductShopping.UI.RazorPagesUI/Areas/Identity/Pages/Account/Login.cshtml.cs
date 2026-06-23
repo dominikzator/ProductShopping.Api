@@ -12,6 +12,7 @@ using ProductShopping.UI.Shared.Contracts;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
 {
@@ -140,7 +141,47 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
 
             _logger.LogInformation("Raw login response: {RawResponse}", rawResponse);
 
-            var jwtToken = rawResponse.Trim();
+            ApiResponse<string>? loginResponse;
+
+            try
+            {
+                loginResponse = JsonSerializer.Deserialize<ApiResponse<string>>(rawResponse, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize login response for {Email}. Response: {RawResponse}", Input.Email, rawResponse);
+                ModelState.AddModelError(string.Empty, "Login failed. Invalid response format.");
+                return Page();
+            }
+
+            if (loginResponse is null)
+            {
+                _logger.LogWarning("Login response deserialized to null for {Email}", Input.Email);
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return Page();
+            }
+
+            if (!loginResponse.IsSuccess)
+            {
+                var errorMessage = loginResponse.Errors?.FirstOrDefault() ?? "Invalid login attempt.";
+
+                _logger.LogWarning("Login failed for {Email}. Errors: {Errors}", Input.Email, string.Join("; ", loginResponse.Errors ?? new List<string>()));
+
+                ModelState.AddModelError(string.Empty, errorMessage);
+                return Page();
+            }
+
+            var jwtToken = loginResponse.Value?.Trim();
+
+            if (string.IsNullOrWhiteSpace(jwtToken))
+            {
+                _logger.LogWarning("Login succeeded but token was empty for {Email}", Input.Email);
+                ModelState.AddModelError(string.Empty, "Login failed. API did not return a token.");
+                return Page();
+            }
 
             if (jwtToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
@@ -151,7 +192,7 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
 
             if (!handler.CanReadToken(jwtToken))
             {
-                _logger.LogWarning("Login returned non-JWT response for {Email}. Response: {RawResponse}", Input.Email, rawResponse);
+                _logger.LogWarning("Login returned non-JWT token for {Email}. Token: {Token}", Input.Email, jwtToken);
                 ModelState.AddModelError(string.Empty, "Login failed. API did not return a valid token.");
                 return Page();
             }
@@ -214,4 +255,13 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
             return LocalRedirect(returnUrl);
         }
     }
+}
+
+public sealed class ApiResponse<T>
+{
+    public bool IsSuccess { get; set; }
+
+    public T? Value { get; set; }
+
+    public List<string> Errors { get; set; } = new();
 }

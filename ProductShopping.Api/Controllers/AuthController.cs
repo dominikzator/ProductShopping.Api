@@ -48,7 +48,14 @@ namespace ProductShopping.Api.Controllers
             {
                 var result = await usersService.LoginAsync(loginUserDto);
                 logger.LogInformation("Login completed for {Email}", loginUserDto.Email);
-                return Ok(result);
+                if(result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest("Invalid data");
+                }
             }
             catch (Exception ex)
             {
