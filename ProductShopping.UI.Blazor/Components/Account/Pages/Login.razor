@@ -1,7 +1,10 @@
 ﻿@page "/login"
+@layout AuthLayout
+@attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using ProductShopping.Application.DTOs.Auth
 @using ProductShopping.UI.Blazor.Authentication
@@ -61,16 +64,16 @@
 
         try
         {
-            var result = await AuthApiClient.LoginAsync(new LoginUserDto
+            var token = await AuthApiClient.LoginAsync(new LoginUserDto
             {
                 Email = Model.Email,
                 Password = Model.Password
             });
 
             var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
-            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(result);
+            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(token);
 
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/", forceLoad: false);
         }
         catch (UnauthorizedAccessException)
         {

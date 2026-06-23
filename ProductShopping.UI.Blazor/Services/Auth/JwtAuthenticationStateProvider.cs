@@ -15,41 +15,9 @@ public sealed class JwtAuthenticationStateProvider : AuthenticationStateProvider
         this.tokenStore = tokenStore;
     }
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        try
-        {
-            if (currentUser.Identity?.IsAuthenticated == true)
-            {
-                return new AuthenticationState(currentUser);
-            }
-
-            var token = await tokenStore.GetAccessTokenAsync();
-
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-                return new AuthenticationState(currentUser);
-            }
-
-            token = NormalizeToken(token);
-
-            if (string.IsNullOrWhiteSpace(token) || token.Split('.').Length != 3)
-            {
-                currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-                return new AuthenticationState(currentUser);
-            }
-
-            var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
-            currentUser = new ClaimsPrincipal(identity);
-
-            return new AuthenticationState(currentUser);
-        }
-        catch
-        {
-            currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-            return new AuthenticationState(currentUser);
-        }
+        return Task.FromResult(new AuthenticationState(currentUser));
     }
 
     public async Task MarkUserAsAuthenticatedAsync(string token)
@@ -58,12 +26,31 @@ public sealed class JwtAuthenticationStateProvider : AuthenticationStateProvider
 
         await tokenStore.SetAccessTokenAsync(token);
 
-        var claims = ParseClaimsFromJwt(token);
-        var identity = new ClaimsIdentity(claims, "jwt");
+        var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
         currentUser = new ClaimsPrincipal(identity);
 
         NotifyAuthenticationStateChanged(
             Task.FromResult(new AuthenticationState(currentUser)));
+    }
+
+    public Task RestoreUserFromTokenAsync(string token)
+    {
+        token = NormalizeToken(token);
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+        }
+        else
+        {
+            var identity = new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt");
+            currentUser = new ClaimsPrincipal(identity);
+        }
+
+        NotifyAuthenticationStateChanged(
+            Task.FromResult(new AuthenticationState(currentUser)));
+
+        return Task.CompletedTask;
     }
 
     public async Task MarkUserAsLoggedOutAsync()
@@ -92,7 +79,13 @@ public sealed class JwtAuthenticationStateProvider : AuthenticationStateProvider
     {
         var claims = new List<Claim>();
 
-        var payload = jwt.Split('.')[1];
+        var parts = jwt.Split('.');
+        if (parts.Length != 3)
+        {
+            return claims;
+        }
+
+        var payload = parts[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
 
         var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)

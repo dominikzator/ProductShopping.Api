@@ -29,6 +29,16 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<ITokenStore, ProtectedSessionTokenStorage>();
+
+builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<JwtAuthenticationStateProvider>());
+
 builder.Services.AddHttpClient<IProductsApiClient, ProductsApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
@@ -38,15 +48,6 @@ builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
 });
-
-builder.Services.AddCascadingAuthenticationState();
-
-builder.Services.AddScoped<ProtectedSessionStorage>();
-builder.Services.AddScoped<ITokenStore, ProtectedSessionTokenStorage>();
-
-builder.Services.AddScoped<JwtAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-    sp.GetRequiredService<JwtAuthenticationStateProvider>());
 
 builder.Services.AddInfrastructureServices(builder);
 builder.Services.AddPersistenceServices(builder);
