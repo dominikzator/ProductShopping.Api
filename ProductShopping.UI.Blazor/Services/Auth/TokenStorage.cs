@@ -1,31 +1,44 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using ProductShopping.UI.Blazor.Contracts;
 
-namespace ProductShopping.UI.Blazor.Services.Auth;
+namespace ProductShopping.UI.Blazor.Authentication;
 
-public class ProtectedSessionTokenStorage : ITokenStorage
+public sealed class ProtectedSessionTokenStorage : ITokenStore
 {
-    private const string TokenKey = "auth_token";
-    private readonly ProtectedSessionStorage _storage;
+    private const string AccessTokenKey = "authToken";
+    private readonly ProtectedSessionStorage protectedSessionStorage;
 
-    public ProtectedSessionTokenStorage(ProtectedSessionStorage storage)
+    public ProtectedSessionTokenStorage(ProtectedSessionStorage protectedSessionStorage)
     {
-        _storage = storage;
+        this.protectedSessionStorage = protectedSessionStorage;
     }
 
-    public async Task<string?> GetTokenAsync()
+    public async ValueTask<string?> GetAccessTokenAsync()
     {
-        var result = await _storage.GetAsync<string>(TokenKey);
-        return result.Success ? result.Value : null;
+        try
+        {
+            var result = await protectedSessionStorage.GetAsync<string>(AccessTokenKey);
+
+            if (!result.Success || string.IsNullOrWhiteSpace(result.Value))
+            {
+                return null;
+            }
+
+            return result.Value;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
-    public async Task SetTokenAsync(string token)
+    public async ValueTask SetAccessTokenAsync(string token)
     {
-        await _storage.SetAsync(TokenKey, token);
+        await protectedSessionStorage.SetAsync(AccessTokenKey, token);
     }
 
-    public async Task RemoveTokenAsync()
+    public async ValueTask RemoveAccessTokenAsync()
     {
-        await _storage.DeleteAsync(TokenKey);
+        await protectedSessionStorage.DeleteAsync(AccessTokenKey);
     }
 }

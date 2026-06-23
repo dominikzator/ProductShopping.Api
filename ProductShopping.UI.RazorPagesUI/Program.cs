@@ -4,6 +4,7 @@ using ProductShopping.Identity.DbContext;
 using ProductShopping.Identity.Models;
 using ProductShopping.UI.Shared.Clients;
 using ProductShopping.UI.Shared.Contracts;
+using ProductShopping.UI.Shared.Services;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);

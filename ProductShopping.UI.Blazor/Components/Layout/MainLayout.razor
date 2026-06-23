@@ -1,7 +1,33 @@
-﻿@inherits LayoutComponentBase
+﻿@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Blazor.Services.Auth
+
+@inherits LayoutComponentBase
+@inject ITokenStore TokenStore
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <NavMenu />
 
 <main class="container py-4">
     @Body
 </main>
+
+@code {
+    private bool initialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || initialized)
+            return;
+
+        initialized = true;
+
+        var token = await TokenStore.GetAccessTokenAsync();
+
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(token);
+            StateHasChanged();
+        }
+    }
+}

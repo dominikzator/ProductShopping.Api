@@ -78,7 +78,7 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
 
             try
             {
-                var registeredUser = await _authApiClient.Register(registerUserDto);
+                var registeredUser = await _authApiClient.RegisterAsync(registerUserDto);
 
                 if (registeredUser is null)
                 {

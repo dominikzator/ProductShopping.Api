@@ -116,7 +116,7 @@ namespace ProductShopping.UI.RazorPagesUI.Areas.Identity.Pages.Account
 
             try
             {
-                rawResponse = await _authApiClient.Login(loginUserDto);
+                rawResponse = await _authApiClient.LoginAsync(loginUserDto);
             }
             catch (HttpRequestException ex)
             {

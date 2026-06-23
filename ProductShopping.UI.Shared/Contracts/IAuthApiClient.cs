@@ -1,10 +1,10 @@
 ﻿using ProductShopping.Application.DTOs.Auth;
 
-namespace ProductShopping.UI.Shared.Contracts
+namespace ProductShopping.UI.Shared.Contracts;
+
+public interface IAuthApiClient
 {
-    public interface IAuthApiClient
-    {
-        Task LoginForBlazorAsync(LoginUserDto dto, CancellationToken cancellationToken);
-        Task LogoutForBlazorAsync(CancellationToken cancellationToken);
-    }
+    Task<string> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default);
+    Task LogoutAsync(CancellationToken cancellationToken = default);
+    Task<RegisteredUserDto> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken = default);
 }

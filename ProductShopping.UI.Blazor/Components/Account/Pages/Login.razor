@@ -1,126 +1,98 @@
-﻿@page "/Account/Login"
+﻿@page "/login"
+@rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
 @using ProductShopping.Application.DTOs.Auth
+@using ProductShopping.UI.Blazor.Authentication
+@using ProductShopping.UI.Blazor.Services.Auth
 @using ProductShopping.UI.Shared.Contracts
 
 @inject IAuthApiClient AuthApiClient
-@inject ILogger<Login> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Login</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
+<h3>Login</h3>
+
+<EditForm Model="@Model" OnValidSubmit="HandleLoginAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email"
+                   class="form-control"
+                   @bind-Value="Model.Email" />
+        <ValidationMessage For="() => Model.Email" />
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Hasło</label>
+        <InputText id="password"
+                   type="password"
+                   class="form-control"
+                   @bind-Value="Model.Password" />
+        <ValidationMessage For="() => Model.Password" />
     </div>
-</div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+        @(isSubmitting ? "Logowanie..." : "Zaloguj")
+    </button>
+</EditForm>
 
 @code {
     private string? errorMessage;
+    private bool isSubmitting;
+    private LoginViewModel Model { get; set; } = new();
 
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-
-    private async Task LoginUser()
+    private async Task HandleLoginAsync()
     {
         errorMessage = null;
-
-        var loginUserDto = new LoginUserDto
-        {
-            Email = Input.Email,
-            Password = Input.Password,
-        };
+        isSubmitting = true;
 
         try
         {
-            await AuthApiClient.LoginForBlazorAsync(loginUserDto, CancellationToken.None);
+            var result = await AuthApiClient.LoginAsync(new LoginUserDto
+            {
+                Email = Model.Email,
+                Password = Model.Password
+            });
 
-            Logger.LogInformation("Cookie login succeeded for {Email}", Input.Email);
+            var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+            await jwtAuthStateProvider.MarkUserAsAuthenticatedAsync(result);
 
-            NavigationManager.NavigateTo("/", true);
+            NavigationManager.NavigateTo("/");
         }
-        catch (InvalidOperationException ex)
+        catch (UnauthorizedAccessException)
         {
-            Logger.LogWarning(ex, "Invalid login attempt for {Email}", Input.Email);
-            errorMessage = "Error: Invalid login attempt.";
-        }
-        catch (NavigationException)
-        {
-            return;
-        }
-        catch (HttpRequestException ex)
-        {
-            Logger.LogError(ex, "Login service unavailable for {Email}", Input.Email);
-            errorMessage = "Error: Login service is currently unavailable.";
+            errorMessage = "Nieprawidłowy email lub hasło.";
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Unexpected error during login for {Email}", Input.Email);
-            errorMessage = "Error: An unexpected error occurred during login.";
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
         }
     }
 
-    private sealed class InputModel
+    public sealed class LoginViewModel
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
+        [Required(ErrorMessage = "Email jest wymagany.")]
+        [EmailAddress(ErrorMessage = "Podaj poprawny adres email.")]
+        public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
-
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
+        [Required(ErrorMessage = "Hasło jest wymagane.")]
+        public string Password { get; set; } = string.Empty;
     }
 }
