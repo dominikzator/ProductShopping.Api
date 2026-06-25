@@ -4,38 +4,40 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <NavLink href="/" Match="NavLinkMatch.All" class="navbar-brand">
-            ProductShopping
-        </NavLink>
+<nav class="shop-topbar">
+    <div class="shop-topbar__inner">
+        <div class="shop-brand">
+            <div class="shop-brand__mark">PS</div>
+            <div class="shop-brand__text">
+                <span class="shop-brand__eyebrow">Storefront</span>
+                <strong>ProductShopping</strong>
+            </div>
+        </div>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="shop-nav-wrap">
+            <div class="shop-nav">
+                <NavLink href="/cart" class="shop-nav__link" ActiveClass="is-active">
+                    Cart
+                </NavLink>
 
-        <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            </ul>
+                <NavLink href="/orders" class="shop-nav__link" ActiveClass="is-active">
+                    Orders
+                </NavLink>
+            </div>
+        </div>
 
-            <AuthorizeView>
-                <NotAuthorized>
-                    <div class="d-flex gap-2">
-                        <NavLink href="/login" class="btn btn-outline-light">Login</NavLink>
-                        <NavLink href="/register" class="btn btn-light">Register</NavLink>
-                    </div>
-                </NotAuthorized>
-
-                <Authorized>
-                    <div class="d-flex gap-2">
-                        <NavLink href="/cart" class="btn btn-light">Cart</NavLink>
-                        <button type="button" class="btn btn-outline-light" @onclick="LogoutAsync">
-                            Logout
-                        </button>
-                    </div>
-                </Authorized>
-            </AuthorizeView>
+        <div class="shop-actions">
+            <button type="button" class="cart-indicator" aria-label="Shopping cart">
+                <span class="cart-indicator__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="20" r="1.6"></circle>
+                        <circle cx="18" cy="20" r="1.6"></circle>
+                        <path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.7L21 8H7"></path>
+                    </svg>
+                </span>
+                <span class="cart-indicator__label">Cart</span>
+                <span class="cart-indicator__badge">3</span>
+            </button>
         </div>
     </div>
 </nav>

@@ -1,0 +1,7 @@
+﻿html,
+body {
+    min-height: 100%;
+    background: radial-gradient(circle at top left, rgba(180, 168, 146, 0.08), transparent 24%), radial-gradient(circle at top right, rgba(125, 148, 120, 0.08), transparent 20%), linear-gradient(180deg, #171614 0%, #1d1b18 45%, #25221e 100%);
+    background-attachment: fixed;
+    color: #ece7df;
+}

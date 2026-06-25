@@ -1,155 +1,324 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components
 @using ProductShopping.UI.Shared.Contracts
 @using ProductShopping.UI.Shared.DTOs.Products
-@using ProductShopping.UI.Shared.Clients
 @using ProductShopping.UI.Shared.Pagination
+
 @inject IProductsApiClient ProductsApiClient
-@inject ILogger<Products> Logger
+@inject NavigationManager NavigationManager
 
 <PageTitle>Products</PageTitle>
 
-<div class="products-page">
-    <div class="products-header">
-        <h1>Products</h1>
-        <p>Browse available products in the store.</p>
-    </div>
+<section class="products-page">
+    <header class="products-header">
+        <div>
+            <p class="products-eyebrow">Catalog</p>
+            <h1 class="products-title">Products</h1>
+            <p class="products-subtitle">
+                Search, filter and sort products just like in the Razor Pages version.
+            </p>
+        </div>
+    </header>
 
-    @if (_isLoading && _products is null)
-    {
-        <div class="products-state">
-            <p>Loading products...</p>
+    <section class="filters-toolbar">
+        <div class="search-box">
+            <input class="search-input"
+                   placeholder="Search by product name..."
+                   @bind="filterState.Search" />
+            <button type="button" class="search-button" @onclick="ApplyFiltersAsync">Search</button>
         </div>
+
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>Category</label>
+                <select class="filter-input" @bind="filterState.CategoryName">
+                    <option value="">All categories</option>
+                    @foreach (var category in categoryNames)
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Min price</label>
+                <input class="filter-input" type="number" step="50" min="0" @bind="filterState.MinPrice" />
+            </div>
+
+            <div class="filter-group">
+                <label>Max price</label>
+                <input class="filter-input" type="number" step="50" min="0" @bind="filterState.MaxPrice" />
+            </div>
+
+            <div class="filter-group">
+                <label>Min rating</label>
+                <input class="filter-input" type="number" step="0.1" min="1" max="5" @bind="filterState.MinRating" />
+            </div>
+
+            <div class="filter-group">
+                <label>Max rating</label>
+                <input class="filter-input" type="number" step="0.1" min="1" max="5" @bind="filterState.MaxRating" />
+            </div>
+
+            <div class="filter-group">
+                <label>Sort by</label>
+                <select class="filter-input" @bind="filterState.SortBy">
+                    <option value="">Default</option>
+                    <option value="name">Name</option>
+                    <option value="price">Price</option>
+                    <option value="rating">Rating</option>
+                    <option value="category">Category</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Page size</label>
+                <select class="filter-input" @bind="filterState.PageSize">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+
+            <div class="filter-group filter-group--checkbox">
+                <label>Descending</label>
+                <InputCheckbox @bind-Value="filterState.SortDescending" class="form-check-input" />
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="button" class="btn btn-primary" @onclick="ApplyFiltersAsync">Apply filters</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="ClearFiltersAsync">Clear</button>
+        </div>
+    </section>
+
+    @if (isLoading)
+    {
+        <div class="products-state">Loading products...</div>
     }
-    else if (!string.IsNullOrWhiteSpace(_errorMessage))
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
     {
-        <div class="products-state products-state--error">
-            <p>@_errorMessage</p>
-        </div>
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
     }
-    else if (_products is null || !_products.Data.Any())
+    else if (products?.Data is null || !products.Data.Any())
     {
-        <div class="products-state">
-            <p>No products found.</p>
-        </div>
+        <div class="products-state">No products found for the selected filters.</div>
     }
     else
     {
+        <div class="products-summary">
+            <span>@products.Data.Count() products found</span>
+            <span>Page @products.Metadata.CurrentPage of @products.Metadata.TotalPages </span>
+        </div>
+
         <div class="products-grid">
-            @foreach (var product in _products.Data)
+            @foreach (var product in products.Data)
             {
-                <article class="product-card" @key="product.Id">
-                    <div class="product-card__image-wrapper">
-                        <img class="product-card__image"
-                             src="@product.ImageUrl"
-                             alt="@product.Name" />
+                <article class="product-card">
+                    <div class="product-media">
+                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.Name" />
+                        }
+                        else
+                        {
+                            <span>@product.Name[..1]</span>
+                        }
                     </div>
 
-                    <div class="product-card__content">
-                        <span class="product-card__category">@product.CategoryName</span>
-                        <h2 class="product-card__title">@product.Name</h2>
+                    <div class="product-body">
+                        <div class="product-meta">
+                            <span class="product-category">@product.CategoryName</span>
+                            <span class="product-rating">★ @product.Rating.ToString("0.0")</span>
+                        </div>
 
-                        <div class="product-card__details">
-                            <span class="product-card__price">@product.Price.ToString("0.00") zł</span>
-                            <span class="product-card__rating">★ @product.Rating.ToString("0.0")</span>
+                        <h2 class="product-name">@product.Name</h2>
+
+                        <div class="product-bottom">
+                            <strong class="product-price">@product.Price.ToString("0.00") zł</strong>
+                            <button type="button" class="add-to-cart-btn">Add to cart</button>
                         </div>
                     </div>
                 </article>
             }
         </div>
 
-        <div class="products-pagination">
-            <button class="products-pagination__button"
-                    @onclick="LoadPreviousPageAsync"
-                    disabled="@(_isLoading || !_products.Metadata.HasPrevious)">
+        <nav class="pagination" aria-label="Products pagination">
+            <button type="button"
+                    class="pagination-link"
+                    disabled="@(products.Metadata.CurrentPage <= 1)"
+                    @onclick="() => ChangePageAsync(products.Metadata.CurrentPage - 1)">
                 Previous
             </button>
 
-            <div class="products-pagination__info">
-                <span>Page @_products.Metadata.CurrentPage of @_products.Metadata.TotalPages</span>
-                <span>Page size: @_products.Metadata.PageSize</span>
-                <span>Total products: @_products.Metadata.TotalCount</span>
-            </div>
+            <span class="pagination-status">
+                Page @products.Metadata.CurrentPage / @products.Metadata.TotalPages
+            </span>
 
-            <button class="products-pagination__button"
-                    @onclick="LoadNextPageAsync"
-                    disabled="@(_isLoading || !_products.Metadata.HasNext)">
+            <button type="button"
+                    class="pagination-link"
+                    disabled="@(products.Metadata.CurrentPage >= products.Metadata.TotalPages)"
+                    @onclick="() => ChangePageAsync(products.Metadata.CurrentPage + 1)">
                 Next
             </button>
-        </div>
+        </nav>
     }
-</div>
+</section>
 
 @code {
-    private const int PageSize = 12;
+    private bool isLoading;
+    private string? errorMessage;
 
-    private PagedResultDto<ProductListItemDto>? _products;
-    private bool _isLoading;
-    private string? _errorMessage;
-    private int _currentPage = 1;
+    private ProductsPageState filterState = new();
+
+    private PagedResultDto<ProductListItemDto>? products;
+
+    private IReadOnlyList<string> categoryNames = Array.Empty<string>();
+
+    [SupplyParameterFromQuery] public string? Search { get; set; }
+    [SupplyParameterFromQuery] public string? CategoryName { get; set; }
+    [SupplyParameterFromQuery] public decimal? MinPrice { get; set; }
+    [SupplyParameterFromQuery] public decimal? MaxPrice { get; set; }
+    [SupplyParameterFromQuery] public decimal? MinRating { get; set; }
+    [SupplyParameterFromQuery] public decimal? MaxRating { get; set; }
+    [SupplyParameterFromQuery] public string? SortBy { get; set; }
+    [SupplyParameterFromQuery] public bool? SortDescending { get; set; }
+    [SupplyParameterFromQuery] public int? PageNumber { get; set; }
+    [SupplyParameterFromQuery] public int? PageSize { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        categoryNames = await ProductsApiClient.GetCategoryNamesAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        filterState = new ProductsPageState
+        {
+            Search = Search,
+            CategoryName = CategoryName,
+            MinPrice = MinPrice,
+            MaxPrice = MaxPrice,
+            MinRating = MinRating,
+            MaxRating = MaxRating,
+            SortBy = SortBy,
+            SortDescending = SortDescending ?? false,
+            PageNumber = PageNumber ?? 1,
+            PageSize = PageSize ?? 10
+        };
+
+        if (filterState.MinRating.HasValue)
+            filterState.MinRating = Math.Clamp(filterState.MinRating.Value, 1m, 5m);
+
+        if (filterState.MaxRating.HasValue)
+            filterState.MaxRating = Math.Clamp(filterState.MaxRating.Value, 1m, 5m);
+
         await LoadProductsAsync();
     }
 
     private async Task LoadProductsAsync()
     {
+        isLoading = true;
+        errorMessage = null;
+
         try
         {
-            _isLoading = true;
-            _errorMessage = null;
-
             var query = new ProductsQueryDto
             {
-                PageNumber = _currentPage,
-                PageSize = PageSize
+                Search = filterState.Search,
+                CategoryName = filterState.CategoryName,
+                MinPrice = filterState.MinPrice,
+                MaxPrice = filterState.MaxPrice,
+                MinRating = filterState.MinRating,
+                MaxRating = filterState.MaxRating,
+                SortBy = filterState.SortBy,
+                SortDescending = filterState.SortDescending,
+                PageNumber = filterState.PageNumber,
+                PageSize = filterState.PageSize
             };
 
-            _products = await ProductsApiClient.GetProductsAsync(query);
-
-            if (_products.Metadata.CurrentPage > 0)
-            {
-                _currentPage = _products.Metadata.CurrentPage;
-            }
-
-            Logger.LogInformation(
-                "Loaded page {CurrentPage}. Requested page size: {RequestedPageSize}. API page size: {ApiPageSize}. Count: {Count}",
-                _currentPage,
-                PageSize,
-                _products.Metadata.PageSize,
-                _products.Data.Count());
+            products = await ProductsApiClient.GetProductsAsync(query);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Błąd podczas pobierania produktów dla strony {PageNumber}", _currentPage);
-            _errorMessage = "Something went wrong while loading products.";
+            errorMessage = $"Failed to load products: {ex.Message}";
         }
         finally
         {
-            _isLoading = false;
+            isLoading = false;
         }
     }
 
-    private async Task LoadPreviousPageAsync()
+    private Task ApplyFiltersAsync()
     {
-        if (_products is null || !_products.Metadata.HasPrevious || _isLoading)
-        {
-            return;
-        }
-
-        _currentPage--;
-        await LoadProductsAsync();
+        filterState.PageNumber = 1;
+        NavigateWithFilters();
+        return Task.CompletedTask;
     }
 
-    private async Task LoadNextPageAsync()
+    private Task ChangePageAsync(int page)
     {
-        if (_products is null || !_products.Metadata.HasNext || _isLoading)
-        {
-            return;
-        }
+        filterState.PageNumber = page;
+        NavigateWithFilters();
+        return Task.CompletedTask;
+    }
 
-        _currentPage++;
-        await LoadProductsAsync();
+    private Task ClearFiltersAsync()
+    {
+        filterState = new ProductsPageState();
+        NavigateWithFilters();
+        return Task.CompletedTask;
+    }
+
+    private void NavigateWithFilters()
+    {
+        var query = new Dictionary<string, object?>();
+
+        if (!string.IsNullOrWhiteSpace(filterState.Search))
+            query["search"] = filterState.Search;
+
+        if (!string.IsNullOrWhiteSpace(filterState.CategoryName))
+            query["categoryName"] = filterState.CategoryName;
+
+        if (filterState.MinPrice.HasValue)
+            query["minPrice"] = filterState.MinPrice;
+
+        if (filterState.MaxPrice.HasValue)
+            query["maxPrice"] = filterState.MaxPrice;
+
+        if (filterState.MinRating.HasValue)
+            query["minRating"] = filterState.MinRating;
+
+        if (filterState.MaxRating.HasValue)
+            query["maxRating"] = filterState.MaxRating;
+
+        if (!string.IsNullOrWhiteSpace(filterState.SortBy))
+            query["sortBy"] = filterState.SortBy;
+
+        if (filterState.SortDescending)
+            query["sortDescending"] = filterState.SortDescending;
+
+        query["pageNumber"] = filterState.PageNumber;
+        query["pageSize"] = filterState.PageSize;
+
+        var uri = NavigationManager.GetUriWithQueryParameters("/", query);
+        NavigationManager.NavigateTo(uri);
+    }
+
+    private sealed class ProductsPageState
+    {
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? Search { get; set; }
+        public string? CategoryName { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public decimal? MinRating { get; set; }
+        public decimal? MaxRating { get; set; }
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; }
     }
 }
