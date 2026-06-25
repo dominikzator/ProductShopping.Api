@@ -1,0 +1,104 @@
+﻿.register-page {
+    min-height: 100vh;
+    padding: 3rem 0;
+    background: #f8f3ea;
+    color: #362217;
+}
+
+.register-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+    .register-wrapper h1 {
+        margin-bottom: 2rem;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2f1d12;
+    }
+
+.register-panel {
+    padding: 2rem;
+    background: #fffdf9;
+    border: 1px solid rgba(88, 61, 37, 0.08);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(54, 34, 23, 0.05);
+}
+
+.register-panel--soft {
+    background: #fcf7ef;
+}
+
+.register-panel h2,
+.register-panel h3 {
+    margin-bottom: 0.75rem;
+    color: #2f1d12;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.register-panel hr {
+    margin: 1rem 0 1.5rem;
+    border-color: rgba(88, 61, 37, 0.10);
+}
+
+.form-control {
+    min-height: 3.5rem;
+    border-radius: 0.9rem;
+    border-color: #ddd2c2;
+    background-color: #fffdfa;
+}
+
+    .form-control:focus {
+        border-color: #c97a28;
+        box-shadow: 0 0 0 0.2rem rgba(201, 122, 40, 0.15);
+    }
+
+.form-floating > label {
+    color: #7a6252;
+}
+
+.btn-primary {
+    border: none;
+    border-radius: 0.9rem;
+    background: #b86717;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background: #9f5612;
+    }
+
+.register-links p {
+    margin-bottom: 0.55rem;
+}
+
+.register-links a {
+    color: #9c5a17;
+    text-decoration: none;
+}
+
+    .register-links a:hover {
+        color: #7d4310;
+        text-decoration: underline;
+    }
+
+.external-register-placeholder .btn {
+    border-radius: 0.9rem;
+    min-height: 3rem;
+}
+
+@media (max-width: 767.98px) {
+    .register-page {
+        padding: 1.5rem 0;
+    }
+
+    .register-wrapper h1 {
+        margin-bottom: 1.25rem;
+        font-size: 1.9rem;
+    }
+
+    .register-panel {
+        padding: 1.25rem;
+    }
+}
