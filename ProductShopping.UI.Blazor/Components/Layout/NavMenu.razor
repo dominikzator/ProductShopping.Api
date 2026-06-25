@@ -4,30 +4,19 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
+@using System.Security.Claims
+
 <nav class="shop-topbar">
     <div class="shop-topbar__inner">
-        <div class="shop-brand">
-            <div class="shop-brand__mark">PS</div>
-            <div class="shop-brand__text">
-                <span class="shop-brand__eyebrow">Storefront</span>
-                <strong>ProductShopping</strong>
-            </div>
-        </div>
-
-        <div class="shop-nav-wrap">
-            <div class="shop-nav">
-                <NavLink href="/cart" class="shop-nav__link" ActiveClass="is-active">
-                    Cart
-                </NavLink>
-
-                <NavLink href="/orders" class="shop-nav__link" ActiveClass="is-active">
-                    Orders
-                </NavLink>
-            </div>
-        </div>
+        <NavLink href="/" class="shop-brand-link" Match="NavLinkMatch.All">
+            <span class="shop-brand-link__eyebrow">Store</span>
+            <span class="shop-brand-link__wordmark">
+                <span class="shop-brand-link__primary">Product</span><span class="shop-brand-link__accent">Shopping</span>
+            </span>
+        </NavLink>
 
         <div class="shop-actions">
-            <button type="button" class="cart-indicator" aria-label="Shopping cart">
+            <NavLink href="/cart" class="cart-indicator cart-indicator--link" ActiveClass="is-active">
                 <span class="cart-indicator__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="20" r="1.6"></circle>
@@ -37,7 +26,46 @@
                 </span>
                 <span class="cart-indicator__label">Cart</span>
                 <span class="cart-indicator__badge">3</span>
-            </button>
+            </NavLink>
+
+            <NavLink href="/orders" class="header-action-link" ActiveClass="is-active">
+                Orders
+            </NavLink>
+
+            <AuthorizeView>
+                <Authorized Context="authState">
+                    @{
+                        var user = authState.User;
+                        var email =
+                        user.FindFirst(ClaimTypes.Email)?.Value
+                        ?? user.FindFirst("email")?.Value
+                        ?? user.Identity?.Name
+                        ?? "user";
+                    }
+
+                    <div class="account-indicator">
+                        <div class="account-indicator__avatar" aria-hidden="true">
+                            @email[..1].ToUpper()
+                        </div>
+
+                        <div class="account-indicator__meta">
+                            <span class="account-indicator__label">Signed in as</span>
+                            <strong class="account-indicator__email">@email</strong>
+                        </div>
+                    </div>
+
+                    <button type="button" class="logout-btn" @onclick="LogoutAsync">
+                        Logout
+                    </button>
+                </Authorized>
+
+                <NotAuthorized>
+                    <div class="guest-actions">
+                        <a href="/login" class="login-btn">Login</a>
+                        <a href="/register" class="register-btn">Register</a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
     </div>
 </nav>

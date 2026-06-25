@@ -8,6 +8,7 @@
 
 @inject IProductsApiClient ProductsApiClient
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <PageTitle>Products</PageTitle>
 
@@ -196,6 +197,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("OnParametersSetAsync fired");
+
         filterState = new ProductsPageState
         {
             Search = Search,
@@ -221,6 +224,7 @@
 
     private async Task LoadProductsAsync()
     {
+        Console.WriteLine("LoadProductsAsync start");
         isLoading = true;
         errorMessage = null;
 
@@ -252,28 +256,28 @@
         }
     }
 
-    private Task ApplyFiltersAsync()
+    private async Task ChangePageAsync(int page)
     {
-        filterState.PageNumber = 1;
-        NavigateWithFilters();
-        return Task.CompletedTask;
-    }
-
-    private Task ChangePageAsync(int page)
-    {
+        await JS.InvokeVoidAsync("uiHelpers.blurActiveElement");
         filterState.PageNumber = page;
-        NavigateWithFilters();
-        return Task.CompletedTask;
+        await LoadProductsAsync();
     }
 
-    private Task ClearFiltersAsync()
+    private async Task ApplyFiltersAsync()
     {
-        filterState = new ProductsPageState();
-        NavigateWithFilters();
-        return Task.CompletedTask;
+        await JS.InvokeVoidAsync("uiHelpers.blurActiveElement");
+        filterState.PageNumber = 1;
+        await LoadProductsAsync();
     }
 
-    private void NavigateWithFilters()
+    private async Task ClearFiltersAsync()
+    {
+        await JS.InvokeVoidAsync("uiHelpers.blurActiveElement");
+        filterState = new ProductsPageState();
+        await LoadProductsAsync();
+    }
+
+    private async Task UpdateUrlAsync()
     {
         var query = new Dictionary<string, object?>();
 
@@ -305,7 +309,8 @@
         query["pageSize"] = filterState.PageSize;
 
         var uri = NavigationManager.GetUriWithQueryParameters("/", query);
-        NavigationManager.NavigateTo(uri);
+
+        await JS.InvokeVoidAsync("window.history.replaceState", null, "", uri);
     }
 
     private sealed class ProductsPageState
