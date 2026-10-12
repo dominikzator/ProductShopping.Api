@@ -17,7 +17,7 @@
 
 <div class="orders-page">
     <header class="orders-header">
-        <div>
+        <div class="orders-header__text">
             <p class="orders-eyebrow">Account</p>
             <h1>Your orders</h1>
             <p class="orders-subtitle">Track your orders and complete pending payments.</p>
@@ -25,36 +25,65 @@
 
         @if (Metadata is not null && Metadata.TotalCount > 0)
         {
-            <span class="orders-count">@Metadata.TotalCount order(s)</span>
+            <div class="orders-header__meta">
+                <span class="orders-count">
+                    <strong>@Metadata.TotalCount</strong>
+                    <span>@(Metadata.TotalCount == 1 ? "order" : "orders")</span>
+                </span>
+                <a href="/" class="orders-header__link">Continue shopping</a>
+            </div>
         }
     </header>
 
     @if (!string.IsNullOrEmpty(ErrorMessage))
     {
         <div class="orders-alert" role="alert">
-            <span>@ErrorMessage</span>
+            <span class="orders-alert__icon" aria-hidden="true">!</span>
+            <span class="orders-alert__text">@ErrorMessage</span>
             <button type="button" class="orders-alert__close" aria-label="Close" @onclick="() => ErrorMessage = null">×</button>
         </div>
     }
 
     @if (IsLoading)
     {
-        <div class="orders-state">Loading your orders…</div>
+        <div class="orders-list" aria-busy="true" aria-label="Loading orders">
+            @for (var i = 0; i < 3; i++)
+            {
+                <div class="order-skeleton">
+                    <div class="order-skeleton__row">
+                        <span class="skeleton skeleton--tile"></span>
+                        <span class="order-skeleton__lines">
+                            <span class="skeleton skeleton--title"></span>
+                            <span class="skeleton skeleton--text"></span>
+                        </span>
+                        <span class="skeleton skeleton--pill"></span>
+                    </div>
+                    <span class="skeleton skeleton--line"></span>
+                    <span class="skeleton skeleton--line skeleton--short"></span>
+                </div>
+            }
+        </div>
     }
     else if (!IsAuthenticated)
     {
         <div class="orders-state">
+            <span class="orders-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            </span>
             <h3>You are not signed in</h3>
-            <p>Log in to see your orders.</p>
-            <a href="/login" class="orders-state__link">Go to login</a>
+            <p>Log in to see your orders and payment status.</p>
+            <a href="/login" class="orders-btn orders-btn--primary">Go to login</a>
         </div>
     }
     else if (OrderList.Count == 0)
     {
         <div class="orders-state">
+            <span class="orders-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
+            </span>
             <h3>No orders yet</h3>
             <p>When you place an order, it will appear here.</p>
-            <a href="/" class="orders-state__link">Browse products</a>
+            <a href="/" class="orders-btn orders-btn--primary">Browse products</a>
         </div>
     }
     else
@@ -64,41 +93,77 @@
             {
                 var status = GetStatus(order.OrderStatus);
                 var items = order.OrderItems ?? new List<OrderItemDto>();
+                var isExpanded = ExpandedOrders.Contains(order.Id);
+                var visibleItems = isExpanded ? items : items.Take(VisibleItemsCount).ToList();
+                var hiddenCount = items.Count - VisibleItemsCount;
+                var totalQuantity = items.Sum(x => x.Quantity);
                 var isPaying = PayingOrderId == order.Id;
 
-                <article class="order-card" @key="order.Id">
-                    <div class="order-card__header">
+                <article class="order-card order-card--@status.CssModifier" @key="order.Id">
+                    <header class="order-card__header">
+                        <span class="order-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
+                        </span>
+
                         <div class="order-card__title">
+                            <span class="order-card__label">Order</span>
                             <h2>@order.OrderNumber</h2>
-                            <span class="order-card__date">@order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")</span>
+                            <span class="order-card__meta">
+                                Placed @order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")
+                                <span class="order-card__meta-sep" aria-hidden="true">•</span>
+                                @totalQuantity @(totalQuantity == 1 ? "item" : "items")
+                            </span>
                         </div>
 
                         <span class="order-status order-status--@status.CssModifier">
                             <span class="order-status__dot" aria-hidden="true"></span>
                             @status.Label
                         </span>
-                    </div>
+                    </header>
 
                     <ul class="order-items">
-                        @foreach (var item in items)
+                        @foreach (var item in visibleItems)
                         {
+                            var name = item.ProductName ?? $"Product #{item.ProductId}";
+
                             <li class="order-item" @key="item.Id">
-                                <span class="order-item__name">@(item.ProductName ?? $"Product #{item.ProductId}")</span>
-                                <span class="order-item__qty">@item.Quantity × @item.UnitPrice.ToString("0.00") zł</span>
+                                <span class="order-item__thumb" aria-hidden="true">@GetInitial(name)</span>
+                                <span class="order-item__name" title="@name">@name</span>
+                                <span class="order-item__qty">
+                                    <span class="order-item__qty-badge">× @item.Quantity</span>
+                                    <span class="order-item__unit">@item.UnitPrice.ToString("0.00") zł each</span>
+                                </span>
                                 <strong class="order-item__total">@item.TotalPrice.ToString("0.00") zł</strong>
                             </li>
                         }
                     </ul>
 
-                    <div class="order-card__footer">
-                        <div class="order-card__address">
-                            <span class="order-card__label">Delivery address</span>
-                            <span>@FormatAddress(order)</span>
+                    @if (hiddenCount > 0)
+                    {
+                        <button type="button" class="order-items__toggle" @onclick="() => ToggleExpanded(order.Id)">
+                            @(isExpanded ? "Show less" : $"Show {hiddenCount} more {(hiddenCount == 1 ? "product" : "products")}")
+                            <span class="order-items__chevron @(isExpanded ? "is-open" : null)" aria-hidden="true"></span>
+                        </button>
+                    }
+
+                    <footer class="order-card__footer">
+                        <div class="order-card__delivery">
+                            <span class="order-card__delivery-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+                            </span>
+                            <div class="order-card__delivery-text">
+                                <span class="order-card__label">Delivery address</span>
+                                <span class="order-card__address">@FormatAddress(order)</span>
+                                @if (!string.IsNullOrWhiteSpace(order.PhoneNumber))
+                                {
+                                    <span class="order-card__phone">@order.PhoneNumber</span>
+                                }
+                            </div>
                         </div>
 
                         <div class="order-card__summary">
                             <div class="order-card__total">
-                                <span class="order-card__label">Total</span>
+                                <span class="order-card__label">Order total</span>
                                 <strong>@items.Sum(x => x.TotalPrice).ToString("0.00") zł</strong>
                             </div>
 
@@ -106,50 +171,59 @@
                             {
                                 <div class="order-paid" title="Payment received">
                                     <span class="order-paid__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12.5l4.5 4.5L19 7.5" />
-                                        </svg>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                                     </span>
-                                    <span>Paid</span>
+                                    <span class="order-paid__text">
+                                        <strong>Paid</strong>
+                                        <span>Payment received</span>
+                                    </span>
                                 </div>
                             }
                             else if (status.CanRetryPayment)
                             {
-                                <button type="button"
-                                        class="order-pay-btn"
-                                        disabled="@(PayingOrderId is not null)"
-                                        @onclick="() => RetryPaymentAsync(order)">
-                                    @if (isPaying)
-                                    {
-                                        <span class="order-spinner" aria-hidden="true"></span>
-                                        <span>Redirecting…</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Pay now</span>
-                                    }
-                                </button>
+                                <div class="order-pay">
+                                    <span class="order-pay__hint">Payment not completed</span>
+                                    <button type="button"
+                                            class="orders-btn orders-btn--primary order-pay__btn"
+                                            disabled="@(PayingOrderId is not null)"
+                                            @onclick="() => RetryPaymentAsync(order)">
+                                        @if (isPaying)
+                                        {
+                                            <span class="order-spinner" aria-hidden="true"></span>
+                                            <span>Redirecting…</span>
+                                        }
+                                        else
+                                        {
+                                            <svg class="order-pay__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /><path d="M6.5 15h3" /></svg>
+                                            <span>Pay now</span>
+                                        }
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="order-cancelled">This order was cancelled</div>
                             }
                         </div>
-                    </div>
+                    </footer>
                 </article>
             }
         </div>
 
         @if (Metadata is not null && Metadata.TotalPages > 1)
         {
-            <nav class="orders-pagination" aria-label="Orders pagination">
+            <nav class="pagination" aria-label="Orders pagination">
                 <button type="button"
-                        class="orders-pagination__btn"
+                        class="pagination-link"
                         disabled="@(!Metadata.HasPrevious)"
                         @onclick="() => ChangePageAsync(PageNumber - 1)">
                     Previous
                 </button>
 
-                <span class="orders-pagination__status">Page @Metadata.CurrentPage / @Metadata.TotalPages</span>
+                <span class="pagination-status">Page @Metadata.CurrentPage of @Metadata.TotalPages</span>
 
                 <button type="button"
-                        class="orders-pagination__btn"
+                        class="pagination-link"
                         disabled="@(!Metadata.HasNext)"
                         @onclick="() => ChangePageAsync(PageNumber + 1)">
                     Next
@@ -161,6 +235,7 @@
 
 @code {
     private const int PageSize = 5;
+    private const int VisibleItemsCount = 3;
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
@@ -173,6 +248,7 @@
     private bool IsAuthenticated;
     private int? PayingOrderId;
     private string? ErrorMessage;
+    private readonly HashSet<int> ExpandedOrders = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -213,12 +289,22 @@
         }
     }
 
+    private void ToggleExpanded(int orderId)
+    {
+        if (!ExpandedOrders.Remove(orderId))
+            ExpandedOrders.Add(orderId);
+    }
+
+    private static string GetInitial(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpperInvariant();
+
     private async Task ChangePageAsync(int page)
     {
         if (page < 1 || (Metadata is not null && page > Metadata.TotalPages))
             return;
 
         PageNumber = page;
+        ExpandedOrders.Clear();
         IsLoading = true;
         await LoadOrdersAsync();
         IsLoading = false;
