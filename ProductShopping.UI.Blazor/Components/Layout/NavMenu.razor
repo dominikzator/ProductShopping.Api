@@ -1,19 +1,28 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
-@using ProductShopping.UI.Blazor.Services.Auth
-
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
-
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using ProductShopping.Application.Models.Paging
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Blazor.Handlers
+@using ProductShopping.UI.Blazor.Services
 @using System.Security.Claims
+@using ProductShopping.UI.Shared.Contracts
+@using System.Text.Json
+
+@inject NavigationManager NavigationManager
+@inject ICartsApiClient CartsApiClient
+@inject JwtAuthenticationStateProvider JwtAuthenticationStateProvider
+@inject ITokenStore TokenStore
+@inject CartState CartState
+@implements IDisposable
 
 <nav class="shop-topbar">
     <div class="shop-topbar__inner">
-        <NavLink href="/" class="shop-brand-link" Match="NavLinkMatch.All">
-            <span class="shop-brand-link__eyebrow">Store</span>
-            <span class="shop-brand-link__wordmark">
-                <span class="shop-brand-link__primary">Product</span><span class="shop-brand-link__accent">Shopping</span>
-            </span>
-        </NavLink>
+<NavLink href="/" class="shop-brand-link" Match="NavLinkMatch.All">
+    <span class="shop-brand-link__eyebrow">Store</span>
+    <span class="shop-brand-link__wordmark">
+        <span class="shop-brand-link__primary">Product</span><span class="shop-brand-link__accent">Shopping</span>
+    </span>
+</NavLink>
 
         <div class="shop-actions">
             <NavLink href="/cart" class="cart-indicator cart-indicator--link" ActiveClass="is-active">
@@ -25,7 +34,11 @@
                     </svg>
                 </span>
                 <span class="cart-indicator__label">Cart</span>
-                <span class="cart-indicator__badge">3</span>
+
+                @if (CartState.ItemsCount > 0)
+                {
+                    <span class="cart-indicator__badge">@CartState.ItemsCount</span>
+                }
             </NavLink>
 
             <NavLink href="/orders" class="header-action-link" ActiveClass="is-active">
@@ -75,14 +88,81 @@
 
     protected override async Task OnInitializedAsync()
     {
-        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        CartState.Changed += OnCartStateChanged;
+        JwtAuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+        authState = await JwtAuthenticationStateProvider.GetAuthenticationStateAsync();
+        await LoadCartItemsCountAsync();
+    }
+
+    private async Task LoadCartItemsCountAsync()
+    {
+        if (authState?.User.Identity?.IsAuthenticated != true)
+        {
+            CartState.Clear();
+            return;
+        }
+
+        try
+        {
+            var rawTokenResponse = await TokenStore.GetAccessTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(rawTokenResponse))
+            {
+                CartState.Clear();
+                return;
+            }
+
+            var tokenResult = JsonSerializer.Deserialize<AccessTokenResponse>(rawTokenResponse);
+
+            if (tokenResult is null || !tokenResult.isSuccess || string.IsNullOrWhiteSpace(tokenResult.value))
+            {
+                CartState.Clear();
+                return;
+            }
+
+            var result = await CartsApiClient.GetCartItemsAsync(
+                tokenResult.value,
+                new PaginationParameters
+                {
+                    PageNumber = 1,
+                    PageSize = 1000
+                });
+
+            CartState.SetItemsCount(result?.Data?.Sum(x => x.Quantity) ?? 0);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not load cart items count: {ex.Message}");
+        }
+    }
+
+    // Wywoływane przez Products/Cart (CartState.Changed) — odśwież licznik w pasku.
+    private void OnCartStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    // Po zalogowaniu / wylogowaniu pobierz licznik ponownie.
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            authState = await task;
+            await LoadCartItemsCountAsync();
+            StateHasChanged();
+        });
     }
 
     private async Task LogoutAsync()
     {
-        var jwtAuthStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+        var jwtAuthStateProvider = (JwtAuthenticationStateProvider)JwtAuthenticationStateProvider;
         await jwtAuthStateProvider.MarkUserAsLoggedOutAsync();
 
+        CartState.Clear();
         NavigationManager.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        CartState.Changed -= OnCartStateChanged;
+        JwtAuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
 }

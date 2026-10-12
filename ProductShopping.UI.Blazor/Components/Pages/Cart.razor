@@ -1,0 +1,310 @@
+﻿@page "/cart"
+
+@using ProductShopping.Application.Features.CartItem.Commands.AddCartItem
+@using ProductShopping.Application.Features.CartItem.Commands.RemoveCartItem
+@using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails
+@using ProductShopping.Application.Models.Paging
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Blazor.Services
+@using ProductShopping.UI.Shared.Contracts
+@using System.Text.Json
+
+@inject ICartsApiClient CartsApiClient
+@inject ITokenStore TokenStore
+@inject CartState CartState
+@inject NavigationManager NavigationManager
+
+<PageTitle>Cart</PageTitle>
+
+<div class="cart-page">
+    <div class="cart-page__content">
+        <section class="cart-list-panel">
+            <div class="cart-list-panel__header">
+                <h1>Your cart</h1>
+                <span>@TotalItems item(s)</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="cart-alert" role="alert">
+                    <span>@ErrorMessage</span>
+                    <button type="button" class="cart-alert__close" @onclick="() => ErrorMessage = null">×</button>
+                </div>
+            }
+
+            @if (IsLoading)
+            {
+                <div class="cart-empty">
+                    <p>Loading your cart…</p>
+                </div>
+            }
+            else if (Items.Count == 0)
+            {
+                <div class="cart-empty">
+                    <h3>Your cart is empty</h3>
+                    <p>Add a few products and they will appear here.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in Items)
+                {
+                    var isBusy = BusyItemIds.Contains(item.Id);
+
+                    <article class="cart-item @(isBusy ? "cart-item--busy" : null)" @key="item.Id">
+                        <div class="cart-item__image-wrap">
+                            <img src="@item.ImageUrl" alt="@item.Name" class="cart-item__image" />
+                        </div>
+
+                        <div class="cart-item__body">
+                            <div class="cart-item__top">
+                                <div class="cart-item__title-panel">
+                                    <div class="cart-item__category">@item.CategoryName</div>
+                                    <h3 class="cart-item__title">@item.Name</h3>
+                                </div>
+
+                                <button type="button"
+                                        class="cart-item__remove"
+                                        disabled="@isBusy"
+                                        @onclick="() => RemoveItemAsync(item)">
+                                    Remove
+                                </button>
+                            </div>
+
+                            <div class="cart-item__bottom">
+                                <div class="cart-qty">
+                                    <button type="button"
+                                            class="cart-qty__btn"
+                                            disabled="@isBusy"
+                                            aria-label="Decrease quantity"
+                                            @onclick="() => DecreaseQuantityAsync(item)">
+                                        -
+                                    </button>
+
+                                    <span class="cart-qty__value">@item.Quantity</span>
+
+                                    <button type="button"
+                                            class="cart-qty__btn"
+                                            disabled="@(isBusy || item.Quantity >= MaxQuantity)"
+                                            aria-label="Increase quantity"
+                                            @onclick="() => IncreaseQuantityAsync(item)">
+                                        +
+                                    </button>
+                                </div>
+
+                                <div class="cart-item__prices">
+                                    <span class="cart-item__unit">@item.UnitPrice.ToString("0.00") zł / szt.</span>
+                                    <strong class="cart-item__line-total">@item.OverallPrice.ToString("0.00") zł</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                }
+            }
+        </section>
+
+        <aside class="cart-summary">
+            <div class="cart-summary__panel">
+                <h2>Summary</h2>
+
+                <div class="cart-summary__row">
+                    <span>Items</span>
+                    <span>@TotalItems</span>
+                </div>
+
+                <div class="cart-summary__row">
+                    <span>Products total</span>
+                    <span>@GrandTotal.ToString("0.00") zł</span>
+                </div>
+
+                <div class="cart-summary__row cart-summary__row--total">
+                    <span>To pay</span>
+                    <strong>@GrandTotal.ToString("0.00") zł</strong>
+                </div>
+
+                <button type="button"
+                        class="cart-summary__checkout"
+                        disabled="@(Items.Count == 0 || BusyItemIds.Count > 0)"
+                        @onclick="GoToCreateOrder">
+                    Place order
+                </button>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@code {
+    // Limit z AddCartItemCommandValidator (1–1000).
+    private const int MaxQuantity = 1000;
+
+    private List<CartItemDto> Items = new();
+    private readonly HashSet<int> BusyItemIds = new();
+    private bool IsLoading = true;
+    private string? ErrorMessage;
+
+    private int TotalItems => Items.Sum(x => x.Quantity);
+    private decimal GrandTotal => Items.Sum(x => x.OverallPrice);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCartAsync();
+        IsLoading = false;
+    }
+
+    private async Task<string?> GetTokenAsync()
+    {
+        var rawTokenResponse = await TokenStore.GetAccessTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(rawTokenResponse))
+            return null;
+
+        var tokenResult = JsonSerializer.Deserialize<AccessTokenResponse>(rawTokenResponse);
+
+        if (tokenResult is null || !tokenResult.isSuccess || string.IsNullOrWhiteSpace(tokenResult.value))
+            return null;
+
+        return tokenResult.value;
+    }
+
+    private async Task LoadCartAsync()
+    {
+        try
+        {
+            var token = await GetTokenAsync();
+
+            if (token is null)
+            {
+                Items = new List<CartItemDto>();
+                CartState.Clear();
+                return;
+            }
+
+            var paginationParameters = new PaginationParameters
+            {
+                PageNumber = 1,
+                PageSize = 100
+            };
+
+            var result = await CartsApiClient.GetCartItemsAsync(token, paginationParameters);
+
+            Items = result?.Data?.ToList() ?? new List<CartItemDto>();
+            CartState.SetItemsCount(TotalItems);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not load your cart. {ex.Message}";
+        }
+    }
+
+    private Task IncreaseQuantityAsync(CartItemDto item) =>
+        RunCartOperationAsync(item, async token =>
+        {
+            // AddCartItemCommandHandler dodaje Quantity do istniejącej pozycji
+            // i zwraca zaktualizowany CartItemDto prosto z bazy.
+            var updated = await CartsApiClient.AddCartItemAsync(token, new AddCartItemCommand
+            {
+                ProductId = item.ProductId,
+                Quantity = 1
+            });
+
+            if (updated is not null)
+            {
+                item.Quantity = updated.Quantity;
+                item.OverallPrice = updated.OverallPrice;
+                item.UnitPrice = updated.UnitPrice;
+            }
+            else
+            {
+                await LoadCartAsync();
+            }
+        });
+
+    private Task DecreaseQuantityAsync(CartItemDto item) =>
+        RunCartOperationAsync(item, async token =>
+        {
+            // RemoveCartItemCommandHandler zmniejsza ilość,
+            // a gdy Quantity == ilość w koszyku — usuwa pozycję z bazy.
+            await CartsApiClient.RemoveCartItemAsync(token, new RemoveCartItemCommand
+            {
+                CartItemId = item.Id,
+                Quantity = 1
+            });
+
+            if (item.Quantity <= 1)
+            {
+                Items.Remove(item);
+            }
+            else
+            {
+                item.Quantity--;
+                item.OverallPrice = item.UnitPrice * item.Quantity;
+            }
+        });
+
+    private Task RemoveItemAsync(CartItemDto item) =>
+        RunCartOperationAsync(item, async token =>
+        {
+            await CartsApiClient.RemoveCartItemAsync(token, new RemoveCartItemCommand
+            {
+                CartItemId = item.Id,
+                Quantity = item.Quantity
+            });
+
+            Items.Remove(item);
+        });
+
+    private void GoToCreateOrder() => NavigationManager.NavigateTo("/create-order");
+
+    /// <summary>
+    /// Wspólna obsługa: token, blokada przycisków danej pozycji (brak podwójnych kliknięć),
+    /// obsługa błędów i ponowne pobranie koszyka z API, gdy coś pójdzie nie tak.
+    /// </summary>
+    private async Task RunCartOperationAsync(CartItemDto item, Func<string, Task> operation)
+    {
+        if (!BusyItemIds.Add(item.Id))
+            return;
+
+        ErrorMessage = null;
+
+        try
+        {
+            var token = await GetTokenAsync();
+
+            if (token is null)
+            {
+                ErrorMessage = "Your session has expired. Please log in again.";
+                return;
+            }
+
+            await operation(token);
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = ex.StatusCode switch
+            {
+                System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden
+                    => "Your session has expired. Please log in again.",
+                System.Net.HttpStatusCode.NotFound
+                    => "This item is no longer in your cart.",
+                System.Net.HttpStatusCode.BadRequest
+                    => "The cart could not be updated. Please try again.",
+                _ => $"The cart could not be updated ({ex.Message})."
+            };
+
+            // Lokalny stan mógł się rozjechać z bazą — pobierz koszyk ponownie.
+            await LoadCartAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"The cart could not be updated ({ex.Message}).";
+            await LoadCartAsync();
+        }
+        finally
+        {
+            BusyItemIds.Remove(item.Id);
+
+            // Licznik w górnym pasku = suma ilości w koszyku po operacji.
+            CartState.SetItemsCount(TotalItems);
+        }
+    }
+}

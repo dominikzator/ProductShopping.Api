@@ -11,7 +11,7 @@ using ProductShopping.UI.Blazor.Authentication;
 using ProductShopping.UI.Blazor.Components;
 using ProductShopping.UI.Blazor.Components.Account;
 using ProductShopping.UI.Blazor.Contracts;
-using ProductShopping.UI.Blazor.Services.Auth;
+using ProductShopping.UI.Blazor.Services;
 using ProductShopping.UI.Shared.Clients;
 using ProductShopping.UI.Shared.Contracts;
 using ProductShopping.UI.Shared.Services;
@@ -35,6 +35,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<ITokenStore, ProtectedSessionTokenStorage>();
 
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<JwtAuthenticationStateProvider>());
@@ -45,6 +47,12 @@ builder.Services.AddHttpClient<IProductsApiClient, ProductsApiClient>(client =>
 });
 
 builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
+});
+
+builder.Services.AddScoped<ICartsApiClient, CartsApiClient>();
+builder.Services.AddHttpClient<ICartsApiClient, CartsApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
 });
@@ -67,6 +75,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<CartState>();
 
 var app = builder.Build();
 

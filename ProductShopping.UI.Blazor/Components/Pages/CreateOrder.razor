@@ -1,0 +1,277 @@
+﻿@page "/create-order"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using ProductShopping.Application.Features.CartItem.Queries.GetCartItemDetails
+@using ProductShopping.Application.Models.Paging
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Shared.Contracts
+
+@inject ICartsApiClient CartsApiClient
+@inject ITokenStore TokenStore
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create order</PageTitle>
+
+<div class="checkout-page">
+    <header class="checkout-header">
+        <a href="/cart" class="checkout-back">← Back to cart</a>
+        <h1>Create order</h1>
+        <p>Fill in the delivery details and review your order before placing it.</p>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="checkout-state">Loading your cart…</div>
+    }
+    else if (!IsAuthenticated)
+    {
+        <div class="checkout-state">
+            <h3>You are not signed in</h3>
+            <p>Log in to place an order.</p>
+            <a href="/login" class="checkout-state__link">Go to login</a>
+        </div>
+    }
+    else if (Items.Count == 0)
+    {
+        <div class="checkout-state">
+            <h3>Your cart is empty</h3>
+            <p>Add a few products before creating an order.</p>
+            <a href="/" class="checkout-state__link">Browse products</a>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="Form" OnValidSubmit="PlaceOrderAsync" class="checkout-layout">
+            <DataAnnotationsValidator />
+
+            <section class="checkout-panel">
+                <div class="checkout-panel__header">
+                    <span class="checkout-step">1</span>
+                    <div>
+                        <h2>Delivery address</h2>
+                        <p>Where should we send your order?</p>
+                    </div>
+                </div>
+
+                <div class="checkout-grid">
+                    <div class="checkout-field checkout-field--wide">
+                        <label for="street">Street <span class="checkout-required">*</span></label>
+                        <InputText id="street" class="checkout-input" @bind-Value="Form.Street" placeholder="e.g. Milkyway street" />
+                        <ValidationMessage For="() => Form.Street" />
+                    </div>
+
+                    <div class="checkout-field">
+                        <label for="buildingNumber">Building no.</label>
+                        <InputText id="buildingNumber" class="checkout-input" @bind-Value="Form.BuildingNumber" placeholder="19" />
+                        <ValidationMessage For="() => Form.BuildingNumber" />
+                    </div>
+
+                    <div class="checkout-field">
+                        <label for="apartmentNumber">Apartment no.</label>
+                        <InputText id="apartmentNumber" class="checkout-input" @bind-Value="Form.ApartmentNumber" placeholder="3" />
+                        <ValidationMessage For="() => Form.ApartmentNumber" />
+                    </div>
+
+                    <div class="checkout-field checkout-field--span2">
+                        <label for="postalCode">Postal code <span class="checkout-required">*</span></label>
+                        <InputText id="postalCode" class="checkout-input" @bind-Value="Form.PostalCode" placeholder="12-345" />
+                        <ValidationMessage For="() => Form.PostalCode" />
+                    </div>
+
+                    <div class="checkout-field checkout-field--span2">
+                        <label for="city">City <span class="checkout-required">*</span></label>
+                        <InputText id="city" class="checkout-input" @bind-Value="Form.City" placeholder="e.g. Wrocław" />
+                        <ValidationMessage For="() => Form.City" />
+                    </div>
+
+                    <div class="checkout-field checkout-field--span2">
+                        <label for="country">Country <span class="checkout-required">*</span></label>
+                        <InputText id="country" class="checkout-input" @bind-Value="Form.Country" placeholder="e.g. Poland" />
+                        <ValidationMessage For="() => Form.Country" />
+                    </div>
+
+                    <div class="checkout-field checkout-field--span2">
+                        <label for="phoneNumber">Phone number</label>
+                        <InputText id="phoneNumber" type="tel" class="checkout-input" @bind-Value="Form.PhoneNumber" placeholder="123-456-789" />
+                        <ValidationMessage For="() => Form.PhoneNumber" />
+                    </div>
+                </div>
+
+                <p class="checkout-hint"><span class="checkout-required">*</span> Required fields</p>
+            </section>
+
+            <aside class="checkout-summary">
+                <div class="checkout-panel">
+                    <div class="checkout-panel__header">
+                        <span class="checkout-step">2</span>
+                        <div>
+                            <h2>Order summary</h2>
+                            <p>@TotalItems item(s)</p>
+                        </div>
+                    </div>
+
+                    <ul class="checkout-items">
+                        @foreach (var item in Items)
+                        {
+                            <li class="checkout-item" @key="item.Id">
+                                <img src="@item.ImageUrl" alt="@item.Name" class="checkout-item__image" />
+                                <div class="checkout-item__info">
+                                    <span class="checkout-item__name">@item.Name</span>
+                                    <span class="checkout-item__qty">@item.Quantity × @item.UnitPrice.ToString("0.00") zł</span>
+                                </div>
+                                <strong class="checkout-item__total">@item.OverallPrice.ToString("0.00") zł</strong>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="checkout-totals">
+                        <div class="checkout-totals__row">
+                            <span>Products total</span>
+                            <span>@GrandTotal.ToString("0.00") zł</span>
+                        </div>
+                        <div class="checkout-totals__row">
+                            <span>Delivery</span>
+                            <span>0.00 zł</span>
+                        </div>
+                        <div class="checkout-totals__row checkout-totals__row--grand">
+                            <span>To pay</span>
+                            <strong>@GrandTotal.ToString("0.00") zł</strong>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(InfoMessage))
+                    {
+                        <div class="checkout-info" role="status">@InfoMessage</div>
+                    }
+
+                    <button type="submit" class="checkout-submit">
+                        Place order
+                    </button>
+
+                    <a href="/cart" class="checkout-secondary">Edit cart</a>
+                </div>
+            </aside>
+        </EditForm>
+    }
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="checkout-error" role="alert">@ErrorMessage</div>
+    }
+</div>
+
+@code {
+    private readonly OrderFormModel Form = new();
+
+    private List<CartItemDto> Items = new();
+    private bool IsLoading = true;
+    private bool IsAuthenticated;
+    private string? ErrorMessage;
+    private string? InfoMessage;
+
+    private int TotalItems => Items.Sum(x => x.Quantity);
+    private decimal GrandTotal => Items.Sum(x => x.OverallPrice);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var token = await GetTokenAsync();
+            IsAuthenticated = token is not null;
+
+            if (token is null)
+                return;
+
+            var result = await CartsApiClient.GetCartItemsAsync(token, new PaginationParameters
+            {
+                PageNumber = 1,
+                PageSize = 100
+            });
+
+            Items = result?.Data?.ToList() ?? new List<CartItemDto>();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not load your cart. {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task<string?> GetTokenAsync()
+    {
+        var rawTokenResponse = await TokenStore.GetAccessTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(rawTokenResponse))
+            return null;
+
+        var tokenResult = JsonSerializer.Deserialize<AccessTokenResponse>(rawTokenResponse);
+
+        if (tokenResult is null || !tokenResult.isSuccess || string.IsNullOrWhiteSpace(tokenResult.value))
+            return null;
+
+        return tokenResult.value;
+    }
+
+    private Task PlaceOrderAsync()
+    {
+        // TODO: podpiąć IOrdersApiClient.CreateOrderAsync, np.:
+        //
+        // var order = await OrdersApiClient.CreateOrderAsync(token, new CreateOrderCommand
+        // {
+        //     Address = Form.ToAddress(),
+        //     DomainName = NavigationManager.BaseUri.TrimEnd('/')
+        // }, CancellationToken.None);
+        //
+        // Na razie przycisk tylko waliduje formularz.
+        InfoMessage = "The form is valid. Placing orders is not connected yet.";
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Model formularza — te same pola i limity co ProductShopping.Domain.Models.Address,
+    /// ale bez wartości domyślnych (żeby formularz startował pusty).
+    /// </summary>
+    private sealed class OrderFormModel
+    {
+        [Required(ErrorMessage = "Street is required.")]
+        [MaxLength(100, ErrorMessage = "Street can have at most 100 characters.")]
+        public string Street { get; set; } = string.Empty;
+
+        [MaxLength(4, ErrorMessage = "Building number can have at most 4 characters.")]
+        public string? BuildingNumber { get; set; }
+
+        [MaxLength(3, ErrorMessage = "Apartment number can have at most 3 characters.")]
+        public string? ApartmentNumber { get; set; }
+
+        [Required(ErrorMessage = "City is required.")]
+        [MaxLength(50, ErrorMessage = "City can have at most 50 characters.")]
+        public string City { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Postal code is required.")]
+        [MaxLength(20, ErrorMessage = "Postal code can have at most 20 characters.")]
+        public string PostalCode { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Country is required.")]
+        [MaxLength(50, ErrorMessage = "Country can have at most 50 characters.")]
+        public string Country { get; set; } = string.Empty;
+
+        [MaxLength(20, ErrorMessage = "Phone number can have at most 20 characters.")]
+        [RegularExpression(@"^[0-9+\-\s()]*$", ErrorMessage = "Phone number can contain only digits, spaces and + - ( ).")]
+        public string? PhoneNumber { get; set; }
+
+        public ProductShopping.Domain.Models.Address ToAddress() => new()
+        {
+            Street = Street.Trim(),
+            BuildingNumber = string.IsNullOrWhiteSpace(BuildingNumber) ? null : BuildingNumber.Trim(),
+            ApartmentNumber = string.IsNullOrWhiteSpace(ApartmentNumber) ? null : ApartmentNumber.Trim(),
+            City = City.Trim(),
+            PostalCode = PostalCode.Trim(),
+            Country = Country.Trim(),
+            PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber) ? null : PhoneNumber.Trim()
+        };
+    }
+}

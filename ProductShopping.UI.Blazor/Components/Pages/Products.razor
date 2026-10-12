@@ -2,13 +2,21 @@
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Components
+@using ProductShopping.Application.Features.CartItem.Commands.AddCartItem
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Blazor.Services
+@using ProductShopping.UI.Shared.Clients
 @using ProductShopping.UI.Shared.Contracts
 @using ProductShopping.UI.Shared.DTOs.Products
 @using ProductShopping.UI.Shared.Pagination
+@using System.Text.Json
 
 @inject IProductsApiClient ProductsApiClient
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject ITokenStore TokenStore
+@inject ICartsApiClient CartsApiClient
+@inject CartState CartState
 
 <PageTitle>Products</PageTitle>
 
@@ -119,28 +127,30 @@
             @foreach (var product in products.Data)
             {
                 <article class="product-card">
-                    <div class="product-media">
-                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
-                        {
-                            <img src="@product.ImageUrl" alt="@product.Name" />
-                        }
-                        else
-                        {
-                            <span>@product.Name[..1]</span>
-                        }
+                    <div class="product-card__image-wrap">
+                        <img src="@product.ImageUrl" alt="@product.Name" class="product-card__image" />
                     </div>
 
-                    <div class="product-body">
-                        <div class="product-meta">
-                            <span class="product-category">@product.CategoryName</span>
-                            <span class="product-rating">★ @product.Rating.ToString("0.0")</span>
+                    <div class="product-card__body">
+                        <div class="product-card__meta">
+                            <span class="product-card__category">Home</span>
+                            <span class="product-card__rating">★ 3.2</span>
                         </div>
 
-                        <h2 class="product-name">@product.Name</h2>
+                        <div class="product-card__title-panel">
+                            <h3 class="product-card__title">@product.Name</h3>
+                        </div>
 
-                        <div class="product-bottom">
-                            <strong class="product-price">@product.Price.ToString("0.00") zł</strong>
-                            <button type="button" class="add-to-cart-btn">Add to cart</button>
+                        <div class="product-card__actions">
+                            <div class="quantity-selector">
+                                <button type="button" class="quantity-btn" @onclick="() => DecreaseQuantity(product.Id)">-</button>
+                                <span class="quantity-value">@GetQuantity(product.Id)</span>
+                                <button type="button" class="quantity-btn" @onclick="() => IncreaseQuantity(product.Id)">+</button>
+                            </div>
+
+                            <button type="button" class="add-cart-btn" @onclick="() => AddToCartAsync(product.Id)">
+                                Add to cart
+                            </button>
                         </div>
                     </div>
                 </article>
@@ -189,6 +199,68 @@
     [SupplyParameterFromQuery] public bool? SortDescending { get; set; }
     [SupplyParameterFromQuery] public int? PageNumber { get; set; }
     [SupplyParameterFromQuery] public int? PageSize { get; set; }
+
+    private readonly Dictionary<int, int> productQuantities = new();
+
+    private int GetQuantity(int productId)
+    {
+        if (!productQuantities.TryGetValue(productId, out var quantity))
+        {
+            quantity = 1;
+            productQuantities[productId] = quantity;
+        }
+
+        return quantity;
+    }
+
+    private void IncreaseQuantity(int productId)
+    {
+        productQuantities[productId] = GetQuantity(productId) + 1;
+    }
+
+    private void DecreaseQuantity(int productId)
+    {
+        var current = GetQuantity(productId);
+
+        if (current > 1)
+        {
+            productQuantities[productId] = current - 1;
+        }
+    }
+
+    private async Task AddToCartAsync(int productId)
+    {
+        var rawTokenResponse = await TokenStore.GetAccessTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(rawTokenResponse))
+            return;
+
+        var tokenResult = JsonSerializer.Deserialize<AccessTokenResponse>(rawTokenResponse);
+
+        if (tokenResult is null || !tokenResult.isSuccess || string.IsNullOrWhiteSpace(tokenResult.value))
+            return;
+
+        var quantity = GetQuantity(productId);
+
+        try
+        {
+            await CartsApiClient.AddCartItemAsync(
+                tokenResult.value,
+                new AddCartItemCommand
+                {
+                    ProductId = productId,
+                    Quantity = quantity
+                });
+
+            // API dodało dokładnie "quantity" sztuk — zaktualizuj licznik w górnym pasku.
+            CartState.ChangeItemsCount(quantity);
+            productQuantities[productId] = 1;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Add to cart failed: {ex.StatusCode} {ex.Message}");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
