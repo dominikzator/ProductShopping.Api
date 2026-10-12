@@ -274,7 +274,34 @@
     transition: background-color .15s ease;
 }
 
-.checkout-submit:hover { background: var(--ps-accent-hover, #1d4ed8); }
+.checkout-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.checkout-submit:hover:not(:disabled) { background: var(--ps-accent-hover, #1d4ed8); }
+
+.checkout-submit:disabled {
+    opacity: 0.75;
+    cursor: progress;
+}
+
+.checkout-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: checkout-spin 0.7s linear infinite;
+}
+
+@keyframes checkout-spin {
+    to { transform: rotate(360deg); }
+}
+
+.checkout-error--inline { margin-top: 1rem; }
 
 .checkout-secondary {
     display: block;
