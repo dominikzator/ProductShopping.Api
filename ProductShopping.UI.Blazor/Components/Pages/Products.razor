@@ -106,7 +106,34 @@
 
     @if (isLoading)
     {
-        <div class="products-state">Loading products...</div>
+        <div class="products-summary products-summary--loading" aria-hidden="true">
+            <span class="skeleton skeleton--text"></span>
+            <span class="skeleton skeleton--text skeleton--short"></span>
+        </div>
+
+        <div class="products-grid" aria-busy="true" aria-label="Loading products">
+            @for (var i = 0; i < SkeletonCount; i++)
+            {
+                <div class="product-card product-card--skeleton" aria-hidden="true">
+                    <div class="product-card__image-wrap">
+                        <span class="product-card__image-placeholder"></span>
+                    </div>
+                    <div class="product-card__body">
+                        <div class="product-card__meta">
+                            <span class="skeleton skeleton--chip"></span>
+                            <span class="skeleton skeleton--chip skeleton--tiny"></span>
+                        </div>
+                        <span class="skeleton skeleton--title"></span>
+                        <span class="skeleton skeleton--title skeleton--short"></span>
+                        <div class="product-card__price-row">
+                            <span class="skeleton skeleton--chip"></span>
+                            <span class="skeleton skeleton--price"></span>
+                        </div>
+                        <span class="skeleton skeleton--button"></span>
+                    </div>
+                </div>
+            }
+        </div>
     }
     else if (!string.IsNullOrWhiteSpace(errorMessage))
     {
@@ -126,9 +153,18 @@
         <div class="products-grid">
             @foreach (var product in products.Data)
             {
-                <article class="product-card">
+                <article class="product-card" @key="product.Id">
                     <div class="product-card__image-wrap">
-                        <img src="@product.ImageUrl" alt="@product.Name" class="product-card__image" />
+                        @* Placeholder z animacją widoczny, dopóki obrazek się nie wczyta.
+                           Klasę is-loaded dodaje przeglądarka (onload/onerror), bez round-tripu do serwera;
+                           @key wymusza nowy <img> dla każdego produktu, więc animacja startuje od nowa po zmianie strony. *@
+                        <span class="product-card__image-placeholder" aria-hidden="true"></span>
+                        <img src="@product.ImageUrl"
+                             alt="@product.Name"
+                             class="product-card__image"
+                             decoding="async"
+                             onload="this.parentElement.classList.add('is-loaded')"
+                             onerror="this.parentElement.classList.add('is-loaded', 'is-error')" />
                     </div>
 
                     <div class="product-card__body">
@@ -186,6 +222,9 @@
 
 @code {
     private bool isLoading;
+
+    // Liczba szkieletów kart podczas ładowania (maks. 10, żeby nie rysować 50 naraz).
+    private int SkeletonCount => Math.Clamp(filterState.PageSize, 1, 10);
     private string? errorMessage;
 
     private ProductsPageState filterState = new();
