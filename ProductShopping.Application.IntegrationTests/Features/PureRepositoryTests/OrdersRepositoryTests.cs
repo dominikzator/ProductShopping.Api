@@ -8,6 +8,45 @@ namespace ProductShopping.Application.IntegrationTests.Features.PureRepositoryTe
 public class OrdersRepositoryTests
 {
     [Fact]
+    public async Task OrdersRepository_OrderListIncludesProductImages()
+    {
+        var setup = await OrdersDbMocks.CreateInMemoryContextSetup();
+        using var context = setup.Item1;
+        var product = await context.Products.FindAsync(1);
+        product!.ImageUrl = "https://example.com/products/1.png";
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var repository = new OrdersRepository(context,
+            ProductShopping.Application.IntegrationTests.Helpers.AutoMapperHelper.Create());
+        var orders = await repository.GetUserOrdersDtosAsync("1");
+
+        var items = orders.SelectMany(order => order.OrderItems)
+            .Where(item => item.ProductId == 1).ToList();
+        items.ShouldNotBeEmpty();
+        items.ShouldAllBe(item => item.ImageUrl == "https://example.com/products/1.png");
+    }
+
+    [Fact]
+    public async Task OrdersRepository_OrderByNumberIncludesProductImages()
+    {
+        var setup = await OrdersDbMocks.CreateInMemoryContextSetup();
+        using var context = setup.Item1;
+        var product = await context.Products.FindAsync(1);
+        product!.ImageUrl = "https://example.com/products/1.png";
+        await context.SaveChangesAsync();
+        var orderNumber = context.Orders.First(order => order.OrderItems.Any(item => item.ProductId == 1)).OrderNumber;
+        context.ChangeTracker.Clear();
+
+        var repository = new OrdersRepository(context,
+            ProductShopping.Application.IntegrationTests.Helpers.AutoMapperHelper.Create());
+        var result = await repository.GetUserOrderDtoByOrderNumberAsync("1", orderNumber);
+
+        result.Value!.OrderItems.Where(item => item.ProductId == 1)
+            .ShouldAllBe(item => item.ImageUrl == "https://example.com/products/1.png");
+    }
+
+    [Fact]
     public async Task OrdersRepository_GetOrders()
     {
         var setup = await OrdersDbMocks.CreateInMemoryContextSetup();

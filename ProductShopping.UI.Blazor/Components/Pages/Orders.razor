@@ -130,7 +130,18 @@
                             var name = item.ProductName ?? $"Product #{item.ProductId}";
 
                             <li class="order-item" @key="item.Id">
-                                <span class="order-item__thumb" aria-hidden="true">@GetInitial(name)</span>
+                                <span class="order-item__thumb">
+                                    @if (!string.IsNullOrWhiteSpace(item.ImageUrl) && !FailedImageUrls.Contains(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@name" width="36" height="36"
+                                             loading="lazy" decoding="async"
+                                             @onerror="() => FailedImageUrls.Add(item.ImageUrl!)" />
+                                    }
+                                    else
+                                    {
+                                        <span class="order-item__image-placeholder" role="img" aria-label="Product image unavailable">▧</span>
+                                    }
+                                </span>
                                 <span class="order-item__name" title="@name">@name</span>
                                 <span class="order-item__qty">
                                     <span class="order-item__qty-badge">× @item.Quantity</span>
@@ -252,6 +263,7 @@
     private int? PayingOrderId;
     private string? ErrorMessage;
     private readonly HashSet<int> ExpandedOrders = new();
+    private readonly HashSet<string> FailedImageUrls = new(StringComparer.Ordinal);
 
     protected override async Task OnInitializedAsync()
     {
@@ -297,9 +309,6 @@
         if (!ExpandedOrders.Remove(orderId))
             ExpandedOrders.Add(orderId);
     }
-
-    private static string GetInitial(string name) =>
-        string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpperInvariant();
 
     private async Task ChangePageAsync(int page)
     {

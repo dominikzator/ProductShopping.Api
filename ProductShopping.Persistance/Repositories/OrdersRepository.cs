@@ -23,7 +23,9 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
 
     public async Task<List<OrderDto>> GetUserOrdersDtosAsync(string userId)
     {
-        var orders = await _context.Orders.Where(o => o.CustomerId == userId).Include(o => o.OrderItems).AsNoTracking().ToListAsync();
+        var orders = await _context.Orders.Where(o => o.CustomerId == userId)
+            .Include(o => o.OrderItems).ThenInclude(item => item.Product)
+            .AsNoTracking().ToListAsync();
         var ordersDtos = _mapper.Map<List<OrderDto>>(orders);
 
         return ordersDtos;
@@ -44,7 +46,8 @@ public class OrdersRepository : GenericRepository<Order>, IOrdersRepository
 
     public async Task<Result<OrderDto>> GetUserOrderDtoByOrderNumberAsync(string userId, string orderNumber)
     {
-        var order = await _context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.CustomerId == userId && o.OrderNumber == orderNumber);
+        var order = await _context.Orders.Include(o => o.OrderItems).ThenInclude(item => item.Product)
+            .FirstOrDefaultAsync(o => o.CustomerId == userId && o.OrderNumber == orderNumber);
 
         if (order == null)
         {

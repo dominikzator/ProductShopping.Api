@@ -337,6 +337,21 @@
     color: var(--ps-text-muted, #6b7280);
     font-size: 0.85rem;
     font-weight: 700;
+    overflow: hidden;
+}
+
+.order-item__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 36px;
+    max-height: 36px;
+    object-fit: contain;
+    background: var(--ps-surface, #fff);
+}
+
+.order-item__image-placeholder {
+    font-size: 1.25rem;
 }
 
 .order-item__name {

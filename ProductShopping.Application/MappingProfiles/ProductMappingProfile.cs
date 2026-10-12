@@ -50,6 +50,10 @@ public class ProductMappingProfile : Profile
         CreateMap<ProductCategory, ProductCategoryDto>().ReverseMap();
         CreateMap<Order, UpdateOrderCommand>().ReverseMap();
 
-        CreateMap<OrderItem, OrderItemDto>().ReverseMap();
+        CreateMap<OrderItem, OrderItemDto>()
+            .ForMember(dest => dest.ImageUrl,
+                opt => opt.MapFrom(src => src.Product != null ? src.Product.ImageUrl : null))
+            .ReverseMap()
+            .ForPath(dest => dest.Product.ImageUrl, opt => opt.Ignore());
     }
 }

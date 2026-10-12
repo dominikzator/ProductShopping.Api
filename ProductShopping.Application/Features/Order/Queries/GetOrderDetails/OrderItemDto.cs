@@ -19,6 +19,7 @@ public class OrderItemDto
     public decimal TotalPrice { get; set; }
 
     public string? ProductName { get; set; }
+    public string? ImageUrl { get; set; }
 
     public string OrderStatus { get; set; } = "Pending";
 }
