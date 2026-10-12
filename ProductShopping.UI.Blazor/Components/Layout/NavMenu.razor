@@ -26,7 +26,8 @@
 
         <div class="shop-actions">
             <NavLink href="/cart" class="cart-indicator cart-indicator--link" ActiveClass="is-active">
-                <span class="cart-indicator__icon" aria-hidden="true">
+                @* @key z numerem animacji tworzy element od nowa, więc animacja CSS odpala się przy każdej zmianie. *@
+                <span class="cart-indicator__icon @AnimationClass" aria-hidden="true" @key="@($"icon-{animationId}")">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="20" r="1.6"></circle>
                         <circle cx="18" cy="20" r="1.6"></circle>
@@ -35,10 +36,21 @@
                 </span>
                 <span class="cart-indicator__label">Cart</span>
 
-                @if (CartState.ItemsCount > 0)
-                {
-                    <span class="cart-indicator__badge">@CartState.ItemsCount</span>
-                }
+                <span class="cart-indicator__badge-wrap">
+                    @if (CartState.ItemsCount > 0)
+                    {
+                        <span class="cart-indicator__badge @AnimationClass"
+                              @key="@($"badge-{animationId}")"
+                              aria-label="@($"{CartState.ItemsCount} items in cart")">@CartState.ItemsCount</span>
+                    }
+
+                    @if (lastDelta != 0)
+                    {
+                        <span class="cart-indicator__delta cart-indicator__delta--@(lastDelta > 0 ? "up" : "down")"
+                              @key="@($"delta-{animationId}")"
+                              aria-hidden="true">@(lastDelta > 0 ? $"+{lastDelta}" : $"−{-lastDelta}")</span>
+                    }
+                </span>
             </NavLink>
 
             <NavLink href="/orders" class="header-action-link" ActiveClass="is-active">
@@ -86,6 +98,19 @@
 @code {
     private AuthenticationState? authState;
 
+    // Animacja licznika koszyka
+    private int previousCount;
+    private int animationId;
+    private int lastDelta;
+    private bool isSyncing; // pobieranie licznika z API (start, logowanie, wylogowanie) — bez animacji
+
+    private string? AnimationClass => lastDelta switch
+    {
+        > 0 => "is-added",
+        < 0 => "is-removed",
+        _ => null
+    };
+
     protected override async Task OnInitializedAsync()
     {
         CartState.Changed += OnCartStateChanged;
@@ -96,6 +121,21 @@
     }
 
     private async Task LoadCartItemsCountAsync()
+    {
+        isSyncing = true;
+
+        try
+        {
+            await SyncCartItemsCountAsync();
+        }
+        finally
+        {
+            isSyncing = false;
+            previousCount = CartState.ItemsCount;
+        }
+    }
+
+    private async Task SyncCartItemsCountAsync()
     {
         if (authState?.User.Identity?.IsAuthenticated != true)
         {
@@ -138,7 +178,20 @@
     }
 
     // Wywoływane przez Products/Cart (CartState.Changed) — odśwież licznik w pasku.
-    private void OnCartStateChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnCartStateChanged()
+    {
+        var current = CartState.ItemsCount;
+        var delta = current - previousCount;
+        previousCount = current;
+
+        if (!isSyncing && delta != 0)
+        {
+            lastDelta = delta;
+            animationId++;
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
 
     // Po zalogowaniu / wylogowaniu pobierz licznik ponownie.
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
@@ -156,7 +209,10 @@
         var jwtAuthStateProvider = (JwtAuthenticationStateProvider)JwtAuthenticationStateProvider;
         await jwtAuthStateProvider.MarkUserAsLoggedOutAsync();
 
+        isSyncing = true;
         CartState.Clear();
+        isSyncing = false;
+        lastDelta = 0;
         NavigationManager.NavigateTo("/");
     }
 

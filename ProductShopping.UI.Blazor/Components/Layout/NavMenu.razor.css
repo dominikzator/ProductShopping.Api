@@ -261,3 +261,125 @@
         border-left: none;
     }
 }
+
+/* =========================================================
+   Animacja licznika koszyka (dodanie / usunięcie produktów)
+   ========================================================= */
+
+.cart-indicator__badge-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.cart-indicator__badge-wrap:empty { display: none; }
+
+/* Dodanie: koszyk podskakuje, licznik "pyka" z poświatą */
+.cart-indicator__icon.is-added {
+    animation: cart-icon-bump .55s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+
+.cart-indicator__badge.is-added {
+    animation: cart-badge-pop .5s cubic-bezier(.3, 1.6, .5, 1) both,
+               cart-badge-ring .7s ease-out both;
+}
+
+/* Usunięcie: koszyk lekko się trzęsie, licznik się kurczy */
+.cart-indicator__icon.is-removed {
+    animation: cart-icon-shake .45s ease-in-out both;
+}
+
+.cart-indicator__badge.is-removed {
+    animation: cart-badge-shrink .4s ease-out both;
+}
+
+/* Pływające "+N" / "−N" */
+.cart-indicator__delta {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    z-index: 2;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 2px 6px rgba(17, 24, 39, 0.12);
+}
+
+.cart-indicator__delta--up {
+    background: var(--ps-success, #16a34a);
+    color: #fff;
+    animation: cart-delta-up 1s ease-out both;
+}
+
+.cart-indicator__delta--down {
+    background: var(--ps-danger, #dc2626);
+    color: #fff;
+    animation: cart-delta-down 1s ease-out both;
+}
+
+@keyframes cart-icon-bump {
+    0%   { transform: translateY(0) rotate(0); }
+    30%  { transform: translateY(-4px) rotate(-10deg); }
+    60%  { transform: translateY(1px) rotate(6deg); }
+    100% { transform: translateY(0) rotate(0); }
+}
+
+@keyframes cart-icon-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-3px) rotate(-4deg); }
+    40% { transform: translateX(3px) rotate(4deg); }
+    60% { transform: translateX(-2px) rotate(-2deg); }
+    80% { transform: translateX(2px) rotate(1deg); }
+}
+
+@keyframes cart-badge-pop {
+    0%   { transform: scale(0.6); }
+    50%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+@keyframes cart-badge-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); }
+    100% { box-shadow: 0 0 0 9px rgba(37, 99, 235, 0); }
+}
+
+@keyframes cart-badge-shrink {
+    0%   { transform: scale(1); background: var(--ps-text-muted, #6b7280); }
+    40%  { transform: scale(0.72); background: var(--ps-text-muted, #6b7280); }
+    100% { transform: scale(1); }
+}
+
+@keyframes cart-delta-up {
+    0%   { opacity: 0; transform: translate(-50%, 2px) scale(.8); }
+    20%  { opacity: 1; transform: translate(-50%, -12px) scale(1); }
+    70%  { opacity: 1; transform: translate(-50%, -16px); }
+    100% { opacity: 0; transform: translate(-50%, -22px); }
+}
+
+@keyframes cart-delta-down {
+    0%   { opacity: 0; transform: translate(-50%, -26px) scale(.8); }
+    20%  { opacity: 1; transform: translate(-50%, -20px) scale(1); }
+    70%  { opacity: 1; transform: translate(-50%, -15px); }
+    100% { opacity: 0; transform: translate(-50%, -11px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cart-indicator__icon.is-added,
+    .cart-indicator__icon.is-removed,
+    .cart-indicator__badge.is-added,
+    .cart-indicator__badge.is-removed { animation: none; }
+
+    .cart-indicator__delta--up,
+    .cart-indicator__delta--down { animation: cart-delta-fade 1s ease-out both; }
+}
+
+@keyframes cart-delta-fade {
+    0%, 70% { opacity: 1; transform: translate(-50%, -14px); }
+    100% { opacity: 0; transform: translate(-50%, -14px); }
+}
