@@ -264,10 +264,30 @@ select.filter-input {
     min-height: 2.7em;
 }
 
+.product-card__price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid var(--ps-border, #e5e7eb);
+}
+
+.product-card__price-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ps-text-subtle, #9ca3af);
+}
+
 .product-card__price,
 .product-price {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
     color: var(--ps-text, #111827);
 }
 

@@ -57,13 +57,24 @@ public class ProductsRepository : GenericRepository<Product>, IProductsRepositor
             products = products.Where(h => EF.Functions.Like(h.Name, $"%{search}%"));
         }
 
+        var sortDescending = filters.SortDescending ?? false;
+
+        // Drugi klucz (Id) daje stabilną kolejność przy równych wartościach, np. tej samej cenie.
         products = filters.SortBy?.ToLower() switch
         {
-            "name" => (bool)filters.SortDescending ? products.OrderByDescending(p => p.Name) : products.OrderBy(p => p.Name),
-            "rating" => (bool)filters.SortDescending ? products.OrderByDescending(p => p.Rating) : products.OrderBy(p => p.Rating),
-            "category" => (bool)filters.SortDescending ? products.OrderByDescending(p => p.Category.Name) : products.OrderBy(p => p.Category.Name),
-            "price" => (bool)filters.SortDescending ? products.OrderByDescending(p => p.Price) : products.OrderBy(p => p.Price),
-            _ => products.OrderBy(p => p.Name)
+            "rating" => sortDescending
+                ? products.OrderByDescending(p => p.Rating).ThenByDescending(p => p.Id)
+                : products.OrderBy(p => p.Rating).ThenBy(p => p.Id),
+            "category" => sortDescending
+                ? products.OrderByDescending(p => p.Category.Name).ThenByDescending(p => p.Name)
+                : products.OrderBy(p => p.Category.Name).ThenBy(p => p.Name),
+            "price" => sortDescending
+                ? products.OrderByDescending(p => p.Price).ThenByDescending(p => p.Id)
+                : products.OrderBy(p => p.Price).ThenBy(p => p.Id),
+            // "name" i domyślne sortowanie — również respektują SortDescending.
+            _ => sortDescending
+                ? products.OrderByDescending(p => p.Name).ThenByDescending(p => p.Id)
+                : products.OrderBy(p => p.Name).ThenBy(p => p.Id)
         };
 
         if (filters.MinRating.HasValue)
