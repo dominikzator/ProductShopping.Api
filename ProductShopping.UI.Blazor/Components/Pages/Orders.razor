@@ -68,7 +68,7 @@
     {
         <div class="orders-state">
             <span class="orders-state__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
             </span>
             <h3>You are not signed in</h3>
             <p>Log in to see your orders and payment status.</p>
@@ -79,7 +79,7 @@
     {
         <div class="orders-state">
             <span class="orders-state__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
             </span>
             <h3>No orders yet</h3>
             <p>When you place an order, it will appear here.</p>
@@ -102,15 +102,18 @@
                 <article class="order-card order-card--@status.CssModifier" @key="order.Id">
                     <header class="order-card__header">
                         <span class="order-card__icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
                         </span>
 
                         <div class="order-card__title">
                             <span class="order-card__label">Order</span>
                             <h2>@order.OrderNumber</h2>
                             <span class="order-card__meta">
-                                Placed @order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")
-                                <span class="order-card__meta-sep" aria-hidden="true">•</span>
+                                @if (order.CreatedAt != default)
+                                {
+                                    <span>Placed @order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")</span>
+                                    <span class="order-card__meta-sep" aria-hidden="true">•</span>
+                                }
                                 @totalQuantity @(totalQuantity == 1 ? "item" : "items")
                             </span>
                         </div>
@@ -149,7 +152,7 @@
                     <footer class="order-card__footer">
                         <div class="order-card__delivery">
                             <span class="order-card__delivery-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
                             </span>
                             <div class="order-card__delivery-text">
                                 <span class="order-card__label">Delivery address</span>
@@ -171,7 +174,7 @@
                             {
                                 <div class="order-paid" title="Payment received">
                                     <span class="order-paid__icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                                     </span>
                                     <span class="order-paid__text">
                                         <strong>Paid</strong>
@@ -194,7 +197,7 @@
                                         }
                                         else
                                         {
-                                            <svg class="order-pay__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /><path d="M6.5 15h3" /></svg>
+                                            <svg width="17" height="17" class="order-pay__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /><path d="M6.5 15h3" /></svg>
                                             <span>Pay now</span>
                                         }
                                     </button>

@@ -102,7 +102,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // W trybie Development przeglądarka ma zawsze sprawdzać, czy plik się zmienił.
+        if (app.Environment.IsDevelopment())
+            ctx.Context.Response.Headers.CacheControl = "no-cache";
+    }
+});
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
