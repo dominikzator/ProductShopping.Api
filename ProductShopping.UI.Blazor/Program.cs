@@ -86,6 +86,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<CartState>();
+builder.Services.AddScoped<OrderPaymentService>();
 
 var app = builder.Build();
 

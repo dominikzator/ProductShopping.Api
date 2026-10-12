@@ -1,0 +1,120 @@
+﻿@using ProductShopping.Application.Features.Order.Queries.GetOrderDetails
+
+@* Wspólne szczegóły zamówienia dla stron OrderPayment/success i OrderPayment/cancel. *@
+
+<div class="payment-details">
+    <section class="payment-card payment-card--items">
+        <header class="payment-card__header">
+            <h2>Ordered items</h2>
+            <span>@TotalQuantity @(TotalQuantity == 1 ? "item" : "items")</span>
+        </header>
+
+        <ul class="payment-items">
+            @foreach (var item in Items)
+            {
+                var name = item.ProductName ?? $"Product #{item.ProductId}";
+
+                <li class="payment-item" @key="item.Id">
+                    <span class="payment-item__thumb" aria-hidden="true">@GetInitial(name)</span>
+                    <span class="payment-item__main">
+                        <span class="payment-item__name" title="@name">@name</span>
+                        <span class="payment-item__meta">@item.Quantity × @item.UnitPrice.ToString("0.00") zł</span>
+                    </span>
+                    <strong class="payment-item__total">@item.TotalPrice.ToString("0.00") zł</strong>
+                </li>
+            }
+        </ul>
+
+        <div class="payment-total">
+            <span>Order total</span>
+            <strong>@Total.ToString("0.00") zł</strong>
+        </div>
+    </section>
+
+    <aside class="payment-side">
+        <section class="payment-card">
+            <header class="payment-card__header">
+                <h2>Order summary</h2>
+            </header>
+
+            <dl class="payment-meta">
+                <div class="payment-meta__row">
+                    <dt>Order number</dt>
+                    <dd class="payment-meta__mono">@Order.OrderNumber</dd>
+                </div>
+
+                @if (Order.CreatedAt != default)
+                {
+                    <div class="payment-meta__row">
+                        <dt>Placed</dt>
+                        <dd>@Order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")</dd>
+                    </div>
+                }
+
+                <div class="payment-meta__row">
+                    <dt>Payment</dt>
+                    <dd>
+                        <span class="payment-badge payment-badge--@PaymentTone">
+                            <span class="payment-badge__dot" aria-hidden="true"></span>
+                            @PaymentLabel
+                        </span>
+                    </dd>
+                </div>
+
+                <div class="payment-meta__row">
+                    <dt>Total</dt>
+                    <dd class="payment-meta__strong">@Total.ToString("0.00") zł</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="payment-card">
+            <header class="payment-card__header">
+                <h2>Delivery address</h2>
+            </header>
+
+            <address class="payment-address">
+                <span>@StreetLine</span>
+                <span>@($"{Order.PostalCode} {Order.City}".Trim())</span>
+                <span>@Order.Country</span>
+                @if (!string.IsNullOrWhiteSpace(Order.PhoneNumber))
+                {
+                    <span class="payment-address__phone">@Order.PhoneNumber</span>
+                }
+            </address>
+        </section>
+    </aside>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public OrderDto Order { get; set; } = default!;
+
+    /// <summary>Tekst statusu płatności, np. "Paid" albo "Not paid".</summary>
+    [Parameter]
+    public string PaymentLabel { get; set; } = "Paid";
+
+    /// <summary>Kolor statusu: "paid", "pending" albo "failed".</summary>
+    [Parameter]
+    public string PaymentTone { get; set; } = "paid";
+
+    private List<OrderItemDto> Items => Order.OrderItems ?? new List<OrderItemDto>();
+    private int TotalQuantity => Items.Sum(x => x.Quantity);
+    private decimal Total => Items.Sum(x => x.TotalPrice);
+
+    private string StreetLine
+    {
+        get
+        {
+            var street = string.Join(" ", new[] { Order.Street, Order.BuildingNumber }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+            if (!string.IsNullOrWhiteSpace(Order.ApartmentNumber))
+                street += $"/{Order.ApartmentNumber}";
+
+            return street;
+        }
+    }
+
+    private static string GetInitial(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpperInvariant();
+}

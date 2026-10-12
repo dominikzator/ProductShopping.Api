@@ -1,0 +1,222 @@
+﻿/* Szczegóły zamówienia na stronach płatności — Clean Light */
+
+.payment-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.payment-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.payment-card {
+    padding: 1.25rem 1.5rem;
+    background: var(--ps-surface, #fff);
+    border: 1px solid var(--ps-border, #e5e7eb);
+    border-radius: var(--ps-radius, 12px);
+    box-shadow: var(--ps-shadow-sm);
+}
+
+.payment-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-bottom: 0.875rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--ps-border, #e5e7eb);
+}
+
+.payment-card__header h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.payment-card__header span {
+    font-size: 0.825rem;
+    color: var(--ps-text-muted, #6b7280);
+}
+
+/* Pozycje */
+.payment-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.payment-item {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 0.875rem;
+    align-items: center;
+    padding: 0.7rem 0;
+}
+
+.payment-item + .payment-item { border-top: 1px dashed var(--ps-border, #e5e7eb); }
+
+.payment-item__thumb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--ps-border, #e5e7eb);
+    background: var(--ps-bg, #f7f8fa);
+    color: var(--ps-text-muted, #6b7280);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.payment-item__main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.payment-item__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ps-text, #111827);
+}
+
+.payment-item__meta {
+    font-size: 0.8rem;
+    color: var(--ps-text-muted, #6b7280);
+    font-variant-numeric: tabular-nums;
+}
+
+.payment-item__total {
+    font-size: 0.925rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.payment-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 0.5rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--ps-border, #e5e7eb);
+}
+
+.payment-total span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ps-text-muted, #6b7280);
+}
+
+.payment-total strong {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Podsumowanie */
+.payment-meta {
+    margin: 0;
+}
+
+.payment-meta__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    font-size: 0.875rem;
+}
+
+.payment-meta__row dt {
+    font-weight: 400;
+    color: var(--ps-text-muted, #6b7280);
+}
+
+.payment-meta__row dd {
+    margin: 0;
+    text-align: right;
+    color: var(--ps-text, #111827);
+    font-weight: 500;
+}
+
+.payment-meta__mono {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+.payment-meta__strong {
+    font-size: 1rem;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 26px;
+    padding: 0 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.payment-badge__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.payment-badge--paid {
+    background: var(--ps-success-soft, #f0fdf4);
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+
+.payment-badge--pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #b45309;
+}
+
+.payment-badge--failed {
+    background: var(--ps-danger-soft, #fef2f2);
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+/* Adres */
+.payment-address {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    padding-top: 0.35rem;
+    font-style: normal;
+    font-size: 0.9rem;
+    color: var(--ps-text, #111827);
+}
+
+.payment-address__phone {
+    margin-top: 0.35rem;
+    font-size: 0.825rem;
+    color: var(--ps-text-muted, #6b7280);
+}
+
+@media (max-width: 860px) {
+    .payment-details { grid-template-columns: 1fr; }
+}

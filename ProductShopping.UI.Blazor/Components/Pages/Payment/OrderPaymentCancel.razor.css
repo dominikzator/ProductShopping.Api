@@ -1,0 +1,139 @@
+﻿/* Strona wyniku płatności — Clean Light (ten sam plik dla success i cancel) */
+
+.payment-page {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 1.5rem 0 4rem;
+}
+
+/* Przyciski (przekazywane do PaymentHero jako Actions) */
+.payment-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 44px;
+    padding: 0 1.25rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.payment-btn--primary {
+    background: var(--ps-accent, #2563eb);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+}
+
+.payment-btn--primary:hover:not(:disabled) {
+    background: var(--ps-accent-hover, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.payment-btn--primary:active:not(:disabled) { transform: translateY(1px); }
+
+.payment-btn--ghost {
+    border-color: var(--ps-border-strong, #d1d5db);
+    background: #fff;
+    color: var(--ps-text, #111827);
+}
+
+.payment-btn--ghost:hover {
+    background: var(--ps-surface-alt, #f2f4f7);
+    color: var(--ps-text, #111827);
+}
+
+.payment-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ps-accent-ring, rgba(37, 99, 235, .18));
+}
+
+.payment-btn:disabled {
+    opacity: 0.75;
+    cursor: progress;
+}
+
+.payment-btn__spinner,
+.payment-loading__spinner {
+    border-radius: 50%;
+    animation: payment-spin 0.7s linear infinite;
+}
+
+.payment-btn__spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: #fff;
+}
+
+/* Ładowanie */
+.payment-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 4rem 1.5rem;
+    color: var(--ps-text-muted, #6b7280);
+    font-size: 0.95rem;
+    background: var(--ps-surface, #fff);
+    border: 1px solid var(--ps-border, #e5e7eb);
+    border-radius: var(--ps-radius-lg, 16px);
+}
+
+.payment-loading__spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--ps-accent-soft, #eff4ff);
+    border-top-color: var(--ps-accent, #2563eb);
+}
+
+@keyframes payment-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Komunikaty */
+.payment-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: var(--ps-danger-soft, #fef2f2);
+    color: #991b1b;
+    font-size: 0.875rem;
+}
+
+.payment-alert__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--ps-danger, #dc2626);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.payment-note {
+    margin: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--ps-text-muted, #6b7280);
+}
+
+.payment-note a { font-weight: 600; }
+
+@media (max-width: 560px) {
+    .payment-btn { width: 100%; }
+}

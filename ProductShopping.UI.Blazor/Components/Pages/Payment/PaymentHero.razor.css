@@ -1,0 +1,99 @@
+﻿/* Nagłówek wyniku płatności — Clean Light */
+
+.payment-hero {
+    --hero-color: var(--ps-success, #16a34a);
+    --hero-soft: var(--ps-success-soft, #f0fdf4);
+    --hero-ring: rgba(22, 163, 74, 0.12);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.75rem 1.5rem 2.25rem;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    text-align: center;
+    background: var(--ps-surface, #fff);
+    border: 1px solid var(--ps-border, #e5e7eb);
+    border-radius: var(--ps-radius-lg, 16px);
+    box-shadow: var(--ps-shadow-sm);
+}
+
+.payment-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 120px;
+    background: linear-gradient(180deg, var(--hero-soft) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+}
+
+.payment-hero--warning {
+    --hero-color: #d97706;
+    --hero-soft: #fffbeb;
+    --hero-ring: rgba(217, 119, 6, 0.14);
+}
+
+.payment-hero--danger {
+    --hero-color: var(--ps-danger, #dc2626);
+    --hero-soft: var(--ps-danger-soft, #fef2f2);
+    --hero-ring: rgba(220, 38, 38, 0.12);
+}
+
+.payment-hero > * { position: relative; }
+
+.payment-hero__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 1.125rem;
+    border-radius: 50%;
+    background: var(--hero-color);
+    color: #fff;
+    box-shadow: 0 0 0 8px var(--hero-ring), 0 8px 20px var(--hero-ring);
+    animation: payment-hero-pop .45s cubic-bezier(.2, .9, .3, 1.3) both;
+}
+
+.payment-hero__eyebrow {
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hero-color);
+}
+
+.payment-hero__title {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.payment-hero__text {
+    max-width: 560px;
+    color: var(--ps-text-muted, #6b7280);
+    font-size: 0.95rem;
+}
+
+.payment-hero__text ::deep p { margin: 0; }
+.payment-hero__text ::deep strong { color: var(--ps-text, #111827); }
+
+.payment-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.625rem;
+    margin-top: 1.5rem;
+}
+
+@keyframes payment-hero-pop {
+    from { transform: scale(.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .payment-hero__icon { animation: none; }
+}

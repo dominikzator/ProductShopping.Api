@@ -1,0 +1,176 @@
+﻿@page "/OrderPayment/cancel"
+
+@using ProductShopping.Application.Features.Order.Queries.GetOrderDetails
+@using ProductShopping.UI.Blazor.Services
+@using ProductShopping.UI.Shared.Contracts
+@using ProductShopping.UI.Shared.DTOs.Payments
+
+@inject IPaymentsApiClient PaymentsApiClient
+@inject IOrdersApiClient OrdersApiClient
+@inject OrderPaymentService OrderPaymentService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Payment not completed</PageTitle>
+
+<div class="payment-page">
+    @if (IsLoading)
+    {
+        <div class="payment-loading" aria-busy="true">
+            <span class="payment-loading__spinner" aria-hidden="true"></span>
+            <span>Checking your payment…</span>
+        </div>
+    }
+    else if (IsAlreadyPaid)
+    {
+        <PaymentHero Tone="success" Title="This order is already paid">
+            <ChildContent>
+                <p>The payment for order <strong>@Order?.OrderNumber</strong> has already been completed. There is nothing more to pay.</p>
+            </ChildContent>
+            <Actions>
+                <a href="/orders" class="payment-btn payment-btn--primary">View my orders</a>
+                <a href="/" class="payment-btn payment-btn--ghost">Continue shopping</a>
+            </Actions>
+        </PaymentHero>
+    }
+    else
+    {
+        <PaymentHero Tone="danger" Title="Payment was not completed">
+            <ChildContent>
+                @if (Order is not null)
+                {
+                    <p>The payment for order <strong>@Order.OrderNumber</strong> was cancelled. Your order is saved — you can try again now or later from your orders page.</p>
+                }
+                else
+                {
+                    <p>Your payment was cancelled. Your order is saved — you can try again from your orders page.</p>
+                }
+            </ChildContent>
+            <Actions>
+                @if (Order is not null)
+                {
+                    <button type="button"
+                            class="payment-btn payment-btn--primary"
+                            disabled="@IsRedirecting"
+                            @onclick="RetryPaymentAsync">
+                        @if (IsRedirecting)
+                        {
+                            <span class="payment-btn__spinner" aria-hidden="true"></span>
+                            <span>Redirecting…</span>
+                        }
+                        else
+                        {
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /><path d="M6.5 15h3" /></svg>
+                            <span>Try payment again</span>
+                        }
+                    </button>
+                }
+                <a href="/orders" class="payment-btn @(Order is null ? "payment-btn--primary" : "payment-btn--ghost")">Go to my orders</a>
+                <a href="/" class="payment-btn payment-btn--ghost">Continue shopping</a>
+            </Actions>
+        </PaymentHero>
+    }
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="payment-alert" role="alert">
+            <span class="payment-alert__icon" aria-hidden="true">!</span>
+            <span>@ErrorMessage</span>
+        </div>
+    }
+
+    @if (!IsLoading && Order is not null)
+    {
+        <OrderPaymentDetails Order="Order"
+                             PaymentLabel="@(IsAlreadyPaid ? "Paid" : "Not paid")"
+                             PaymentTone="@(IsAlreadyPaid ? "paid" : "failed")" />
+    }
+    else if (!IsLoading && !IsAuthenticated)
+    {
+        <p class="payment-note">
+            <a href="/login">Log in</a> to see your order and try the payment again.
+        </p>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "session_id")]
+    private string? SessionId { get; set; }
+
+    private PaymentSessionStatusDto? Session;
+    private OrderDto? Order;
+    private bool IsLoading = true;
+    private bool IsAuthenticated;
+    private bool IsRedirecting;
+    private string? ErrorMessage;
+
+    private bool IsAlreadyPaid =>
+        Session?.IsPaid == true || (Order is not null && OrderPaymentService.IsPaid(Order.OrderStatus));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var token = await OrderPaymentService.GetAccessTokenAsync();
+            IsAuthenticated = token is not null;
+
+            if (string.IsNullOrWhiteSpace(SessionId))
+                return;
+
+            Session = await PaymentsApiClient.GetPaymentSessionStatusAsync(SessionId);
+
+            if (token is not null && Session?.OrderIdValue is int orderId)
+                Order = await OrdersApiClient.GetOrderAsync(token, orderId, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"OrderPaymentCancel: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task RetryPaymentAsync()
+    {
+        if (Order is null || IsRedirecting)
+            return;
+
+        IsRedirecting = true;
+        ErrorMessage = null;
+
+        string? paymentUrl = null;
+
+        try
+        {
+            var token = await OrderPaymentService.GetAccessTokenAsync();
+
+            if (token is null)
+            {
+                ErrorMessage = "Your session has expired. Please log in again.";
+                return;
+            }
+
+            paymentUrl = await OrderPaymentService.CreatePaymentUrlAsync(token, Order.Id);
+
+            if (paymentUrl is null)
+            {
+                // Zamówienie zostało w międzyczasie opłacone.
+                Order = await OrdersApiClient.GetOrderAsync(token, Order.Id, CancellationToken.None) ?? Order;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not start the payment. {ex.Message}";
+        }
+        finally
+        {
+            if (paymentUrl is null)
+                IsRedirecting = false;
+        }
+
+        // Przekierowanie poza aplikację (Stripe Checkout) — wymaga forceLoad.
+        if (paymentUrl is not null)
+            NavigationManager.NavigateTo(paymentUrl, forceLoad: true);
+    }
+}

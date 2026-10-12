@@ -1,0 +1,40 @@
+﻿@* Nagłówek wyniku płatności (success / cancel / processing). *@
+
+<section class="payment-hero payment-hero--@Tone">
+    <span class="payment-hero__icon" aria-hidden="true">
+        @if (Tone == "success")
+        {
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+        }
+        else if (Tone == "warning")
+        {
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5l3 2" /></svg>
+        }
+        else
+        {
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17" /></svg>
+        }
+    </span>
+
+    <p class="payment-hero__eyebrow">@Eyebrow</p>
+    <h1 class="payment-hero__title">@Title</h1>
+
+    @if (ChildContent is not null)
+    {
+        <div class="payment-hero__text">@ChildContent</div>
+    }
+
+    @if (Actions is not null)
+    {
+        <div class="payment-hero__actions">@Actions</div>
+    }
+</section>
+
+@code {
+    /// <summary>"success", "warning" albo "danger".</summary>
+    [Parameter] public string Tone { get; set; } = "success";
+    [Parameter] public string Eyebrow { get; set; } = "Payment";
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+}

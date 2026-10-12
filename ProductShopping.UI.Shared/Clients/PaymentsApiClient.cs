@@ -1,6 +1,7 @@
 ﻿using ProductShopping.Application.DTOs.Payment;
 using ProductShopping.Application.Features.Order.Queries.GetOrderDetails;
 using ProductShopping.UI.Shared.Contracts;
+using ProductShopping.UI.Shared.DTOs.Payments;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -44,5 +45,27 @@ public class PaymentsApiClient : IPaymentsApiClient
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Pobiera status sesji Stripe Checkout z API (endpoint anonimowy).
+    /// </summary>
+    public async Task<PaymentSessionStatusDto?> GetPaymentSessionStatusAsync(
+        string sessionId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync(
+            $"api/payments/success?session_id={Uri.EscapeDataString(sessionId)}", cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"Payments API failed. Status={(int)response.StatusCode} {response.StatusCode}. Body: {body}",
+                null,
+                response.StatusCode);
+        }
+
+        return await response.Content.ReadFromJsonAsync<PaymentSessionStatusDto>(cancellationToken: cancellationToken);
     }
 }
