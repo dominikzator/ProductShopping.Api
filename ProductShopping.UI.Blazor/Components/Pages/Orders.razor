@@ -1,0 +1,347 @@
+﻿@page "/orders"
+
+@using System.Security.Claims
+@using System.Text.Json
+@using ProductShopping.Application.DTOs.Payment
+@using ProductShopping.Application.Features.Order.Queries.GetOrderDetails
+@using ProductShopping.Application.Models.Paging
+@using ProductShopping.UI.Blazor.Contracts
+@using ProductShopping.UI.Shared.Contracts
+
+@inject IOrdersApiClient OrdersApiClient
+@inject IPaymentsApiClient PaymentsApiClient
+@inject ITokenStore TokenStore
+@inject NavigationManager NavigationManager
+
+<PageTitle>Orders</PageTitle>
+
+<div class="orders-page">
+    <header class="orders-header">
+        <div>
+            <p class="orders-eyebrow">Account</p>
+            <h1>Your orders</h1>
+            <p class="orders-subtitle">Track your orders and complete pending payments.</p>
+        </div>
+
+        @if (Metadata is not null && Metadata.TotalCount > 0)
+        {
+            <span class="orders-count">@Metadata.TotalCount order(s)</span>
+        }
+    </header>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="orders-alert" role="alert">
+            <span>@ErrorMessage</span>
+            <button type="button" class="orders-alert__close" aria-label="Close" @onclick="() => ErrorMessage = null">×</button>
+        </div>
+    }
+
+    @if (IsLoading)
+    {
+        <div class="orders-state">Loading your orders…</div>
+    }
+    else if (!IsAuthenticated)
+    {
+        <div class="orders-state">
+            <h3>You are not signed in</h3>
+            <p>Log in to see your orders.</p>
+            <a href="/login" class="orders-state__link">Go to login</a>
+        </div>
+    }
+    else if (OrderList.Count == 0)
+    {
+        <div class="orders-state">
+            <h3>No orders yet</h3>
+            <p>When you place an order, it will appear here.</p>
+            <a href="/" class="orders-state__link">Browse products</a>
+        </div>
+    }
+    else
+    {
+        <div class="orders-list">
+            @foreach (var order in OrderList)
+            {
+                var status = GetStatus(order.OrderStatus);
+                var items = order.OrderItems ?? new List<OrderItemDto>();
+                var isPaying = PayingOrderId == order.Id;
+
+                <article class="order-card" @key="order.Id">
+                    <div class="order-card__header">
+                        <div class="order-card__title">
+                            <h2>@order.OrderNumber</h2>
+                            <span class="order-card__date">@order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")</span>
+                        </div>
+
+                        <span class="order-status order-status--@status.CssModifier">
+                            <span class="order-status__dot" aria-hidden="true"></span>
+                            @status.Label
+                        </span>
+                    </div>
+
+                    <ul class="order-items">
+                        @foreach (var item in items)
+                        {
+                            <li class="order-item" @key="item.Id">
+                                <span class="order-item__name">@(item.ProductName ?? $"Product #{item.ProductId}")</span>
+                                <span class="order-item__qty">@item.Quantity × @item.UnitPrice.ToString("0.00") zł</span>
+                                <strong class="order-item__total">@item.TotalPrice.ToString("0.00") zł</strong>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="order-card__footer">
+                        <div class="order-card__address">
+                            <span class="order-card__label">Delivery address</span>
+                            <span>@FormatAddress(order)</span>
+                        </div>
+
+                        <div class="order-card__summary">
+                            <div class="order-card__total">
+                                <span class="order-card__label">Total</span>
+                                <strong>@items.Sum(x => x.TotalPrice).ToString("0.00") zł</strong>
+                            </div>
+
+                            @if (status.IsPaid)
+                            {
+                                <div class="order-paid" title="Payment received">
+                                    <span class="order-paid__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12.5l4.5 4.5L19 7.5" />
+                                        </svg>
+                                    </span>
+                                    <span>Paid</span>
+                                </div>
+                            }
+                            else if (status.CanRetryPayment)
+                            {
+                                <button type="button"
+                                        class="order-pay-btn"
+                                        disabled="@(PayingOrderId is not null)"
+                                        @onclick="() => RetryPaymentAsync(order)">
+                                    @if (isPaying)
+                                    {
+                                        <span class="order-spinner" aria-hidden="true"></span>
+                                        <span>Redirecting…</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Pay now</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+
+        @if (Metadata is not null && Metadata.TotalPages > 1)
+        {
+            <nav class="orders-pagination" aria-label="Orders pagination">
+                <button type="button"
+                        class="orders-pagination__btn"
+                        disabled="@(!Metadata.HasPrevious)"
+                        @onclick="() => ChangePageAsync(PageNumber - 1)">
+                    Previous
+                </button>
+
+                <span class="orders-pagination__status">Page @Metadata.CurrentPage / @Metadata.TotalPages</span>
+
+                <button type="button"
+                        class="orders-pagination__btn"
+                        disabled="@(!Metadata.HasNext)"
+                        @onclick="() => ChangePageAsync(PageNumber + 1)">
+                    Next
+                </button>
+            </nav>
+        }
+    }
+</div>
+
+@code {
+    private const int PageSize = 5;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private List<OrderDto> OrderList = new();
+    private PaginationMetadata? Metadata;
+    private int PageNumber = 1;
+
+    private bool IsLoading = true;
+    private bool IsAuthenticated;
+    private int? PayingOrderId;
+    private string? ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrdersAsync();
+        IsLoading = false;
+    }
+
+    private async Task LoadOrdersAsync()
+    {
+        try
+        {
+            var token = await GetTokenAsync();
+            IsAuthenticated = token is not null;
+
+            if (token is null)
+            {
+                OrderList = new List<OrderDto>();
+                Metadata = null;
+                return;
+            }
+
+            var result = await OrdersApiClient.GetOrdersAsync(token, new PaginationParameters
+            {
+                PageNumber = PageNumber,
+                PageSize = PageSize
+            }, CancellationToken.None);
+
+            OrderList = result.Data?.OrderByDescending(x => x.CreatedAt).ToList() ?? new List<OrderDto>();
+            Metadata = result.Metadata;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden)
+        {
+            IsAuthenticated = false;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not load your orders. {ex.Message}";
+        }
+    }
+
+    private async Task ChangePageAsync(int page)
+    {
+        if (page < 1 || (Metadata is not null && page > Metadata.TotalPages))
+            return;
+
+        PageNumber = page;
+        IsLoading = true;
+        await LoadOrdersAsync();
+        IsLoading = false;
+    }
+
+    private async Task RetryPaymentAsync(OrderDto order)
+    {
+        if (PayingOrderId is not null)
+            return;
+
+        PayingOrderId = order.Id;
+        ErrorMessage = null;
+
+        string? paymentUrl = null;
+
+        try
+        {
+            var token = await GetTokenAsync();
+
+            if (token is null)
+            {
+                ErrorMessage = "Your session has expired. Please log in again.";
+                return;
+            }
+
+            // Pobierz świeże dane zamówienia (pozycje i status) przed utworzeniem sesji płatności.
+            var freshOrder = await OrdersApiClient.GetOrderAsync(token, order.Id, CancellationToken.None) ?? order;
+
+            if (GetStatus(freshOrder.OrderStatus).IsPaid)
+            {
+                await LoadOrdersAsync();
+                return;
+            }
+
+            var items = freshOrder.OrderItems ?? new List<OrderItemDto>();
+
+            var result = await PaymentsApiClient.CreatePaymentSessionAsync(token, new PaymentRequestDto
+            {
+                OrderId = freshOrder.Id,
+                OrderNumber = freshOrder.OrderNumber,
+                UserEmail = await GetUserEmailAsync(),
+                // API buduje z tego adresu SuccessUrl/CancelUrl płatności Stripe.
+                Domain = NavigationManager.BaseUri.TrimEnd('/'),
+                Items = items,
+                TotalPrice = items.Sum(x => x.TotalPrice)
+            });
+
+            if (string.IsNullOrWhiteSpace(result.PaymentUrl))
+            {
+                ErrorMessage = "The payment session was created, but the payment link is missing.";
+                return;
+            }
+
+            paymentUrl = result.PaymentUrl;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not start the payment. {ex.Message}";
+        }
+        finally
+        {
+            if (paymentUrl is null)
+                PayingOrderId = null;
+        }
+
+        // Przekierowanie poza aplikację (Stripe Checkout) — wymaga forceLoad.
+        if (paymentUrl is not null)
+            NavigationManager.NavigateTo(paymentUrl, forceLoad: true);
+    }
+
+    private async Task<string?> GetTokenAsync()
+    {
+        var rawTokenResponse = await TokenStore.GetAccessTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(rawTokenResponse))
+            return null;
+
+        var tokenResult = JsonSerializer.Deserialize<AccessTokenResponse>(rawTokenResponse);
+
+        if (tokenResult is null || !tokenResult.isSuccess || string.IsNullOrWhiteSpace(tokenResult.value))
+            return null;
+
+        return tokenResult.value;
+    }
+
+    private async Task<string> GetUserEmailAsync()
+    {
+        if (AuthenticationStateTask is null)
+            return string.Empty;
+
+        var user = (await AuthenticationStateTask).User;
+
+        return user.FindFirst(ClaimTypes.Email)?.Value
+            ?? user.FindFirst("email")?.Value
+            ?? user.Identity?.Name
+            ?? string.Empty;
+    }
+
+    private static string FormatAddress(OrderDto order)
+    {
+        var street = string.Join(" ", new[] { order.Street, order.BuildingNumber }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+        if (!string.IsNullOrWhiteSpace(order.ApartmentNumber))
+            street += $"/{order.ApartmentNumber}";
+
+        var parts = new[] { street, $"{order.PostalCode} {order.City}".Trim(), order.Country }
+            .Where(x => !string.IsNullOrWhiteSpace(x));
+
+        return string.Join(", ", parts);
+    }
+
+    /// <summary>
+    /// OrderStatus z API (ProductShopping.Domain.Enums.OrderStatus jako tekst):
+    /// Pending, Payed, Shipped, Delivered, Cancelled.
+    /// </summary>
+    private static OrderStatusView GetStatus(string? status) => status?.Trim().ToLowerInvariant() switch
+    {
+        "payed" or "paid" => new("Paid", "paid", IsPaid: true, CanRetryPayment: false),
+        "shipped" => new("Shipped", "shipped", IsPaid: true, CanRetryPayment: false),
+        "delivered" => new("Delivered", "delivered", IsPaid: true, CanRetryPayment: false),
+        "cancelled" or "canceled" => new("Cancelled", "cancelled", IsPaid: false, CanRetryPayment: false),
+        _ => new("Awaiting payment", "pending", IsPaid: false, CanRetryPayment: true)
+    };
+
+    private sealed record OrderStatusView(string Label, string CssModifier, bool IsPaid, bool CanRetryPayment);
+}

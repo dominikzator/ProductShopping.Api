@@ -62,6 +62,11 @@ builder.Services.AddHttpClient<IOrdersApiClient, OrdersApiClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
 });
 
+builder.Services.AddHttpClient<IPaymentsApiClient, PaymentsApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"]!);
+});
+
 builder.Services.AddInfrastructureServices(builder);
 builder.Services.AddPersistenceServices(builder);
 builder.Services.AddApplicationServices();
