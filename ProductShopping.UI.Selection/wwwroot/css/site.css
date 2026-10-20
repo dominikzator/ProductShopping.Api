@@ -59,6 +59,7 @@ a { color: inherit; }
 }
 
 .brand {
+    min-width: 0;
     display: inline-flex;
     align-items: center;
     gap: 12px;
@@ -66,6 +67,7 @@ a { color: inherit; }
 }
 
 .brand__mark {
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
     border-radius: 12px;
@@ -76,7 +78,7 @@ a { color: inherit; }
     box-shadow: 0 6px 16px rgba(81, 43, 212, .25);
 }
 
-.brand__text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand__text { min-width: 0; display: flex; flex-direction: column; line-height: 1.15; overflow-wrap: anywhere; }
 
 .brand__name {
     font-size: 1.15rem;
@@ -93,6 +95,7 @@ a { color: inherit; }
 }
 
 .topbar__link {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -149,7 +152,9 @@ a { color: inherit; }
 }
 
 .intro__title span {
-    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     background: linear-gradient(90deg, var(--ps-razor-1), var(--ps-razor-2) 35%, var(--ps-blazor-1) 70%, var(--ps-blazor-2));
     -webkit-background-clip: text;
     background-clip: text;
@@ -266,9 +271,22 @@ a { color: inherit; }
     font-size: .98rem;
 }
 
+.panel__tech-group {
+    margin-top: 4px;
+}
+
+.panel__tech-heading {
+    margin: 0 0 10px;
+    color: var(--ps-muted);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
 .panel__chips {
     list-style: none;
-    margin: 4px 0 12px;
+    margin: 0 0 12px;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
@@ -276,6 +294,8 @@ a { color: inherit; }
 }
 
 .panel__chips li {
+    max-width: 100%;
+    overflow-wrap: anywhere;
     padding: 6px 11px;
     border-radius: 8px;
     border: 1px solid var(--ps-border);
